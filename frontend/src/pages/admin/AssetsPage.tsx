@@ -4,20 +4,27 @@ import { Plus, Search, Tag, Box, Trash2 } from 'lucide-react';
 import client from '../../api/client';
 import type { Asset } from '../../types';
 import toast from 'react-hot-toast';
+import { ConfirmationModal } from '../../components/ui/Modal';
+import PageHeader from '../../components/layout/PageHeader';
+import { SkeletonTable, ErrorState } from '../../components/ui/Skeleton';
+import EmptyState from '../../components/ui/EmptyState';
 
 export default function AssetsPage() {
   const [assets, setAssets] = useState<Asset[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [deleteId, setDeleteId] = useState<string | null>(null);
   const navigate = useNavigate();
 
   const fetchAssets = async () => {
     try {
       setLoading(true);
+      setError(null);
       const res = await client.get('/assets', { params: { search: searchTerm } });
       setAssets(res.data);
-    } catch (err) {
-      toast.error('Failed to load assets');
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Failed to synchronize asset inventory');
     } finally {
       setLoading(false);
     }
@@ -27,55 +34,66 @@ export default function AssetsPage() {
     fetchAssets();
   }, [searchTerm]);
 
-  const handleDelete = async (id: string) => {
-    if (window.confirm('Are you sure you want to delete this asset?')) {
-      try {
-        await client.delete(`/assets/${id}`);
-        toast.success('Asset deleted');
-        fetchAssets();
-      } catch (err) {
-        toast.error('Failed to delete asset');
-      }
+  const handleDelete = async () => {
+    if (!deleteId) return;
+    try {
+      await client.delete(`/assets/${deleteId}`);
+      toast.success('Asset deleted');
+      fetchAssets();
+    } catch (err) {
+      toast.error('Failed to delete asset');
+    } finally {
+      setDeleteId(null);
     }
   };
 
   return (
-    <div className="space-y-6 p-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900">Asset Management</h2>
-          <p className="text-gray-500">Manage and track company assets and equipment</p>
-        </div>
-        <Link
-          to="/assets/new"
-          className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary hover:bg-opacity-90"
-        >
-          <Plus className="h-4 w-4 mr-2" /> Add Asset
-        </Link>
-      </div>
+    <div className="max-w-7xl mx-auto space-y-8 pb-20 animate-in fade-in duration-700">
+      <PageHeader 
+        title="Asset Management"
+        subtitle="Manage and track company assets, equipment lifecycle, and department allocations."
+        breadcrumbs={[{ label: 'African Holding' }, { label: 'Admin' }, { label: 'Assets' }]}
+        actions={
+          <button
+            onClick={() => navigate('/assets/new')}
+            className="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-6 py-2.5 text-[10px] font-black uppercase tracking-widest text-white shadow-lg shadow-slate-900/30 hover:bg-slate-800 transition-all"
+          >
+            <Plus className="h-4 w-4" />
+            Add New Asset
+          </button>
+        }
+      />
 
-      <div className="bg-white shadow rounded-lg border border-gray-100 overflow-hidden">
-        <div className="p-4 border-b border-gray-100 bg-gray-50 flex items-center">
-          <div className="relative flex-1">
-            <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
-              <Search className="h-4 w-4" />
-            </span>
-            <input
-              type="text"
-              placeholder="Search assets by name or serial number..."
-              className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
+      <div className="bg-white rounded-[2rem] border border-slate-200 shadow-xl shadow-slate-900/5 overflow-hidden">
+        <div className="p-8 border-b border-slate-100 bg-slate-50/30 flex flex-col md:flex-row md:items-center justify-between gap-4">
+           <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest">Asset Inventory</h3>
+           <div className="relative w-full md:w-80">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+              <input 
+                type="text" 
+                placeholder="Search assets by name or serial..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-11 pr-4 py-3 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+              />
+           </div>
         </div>
 
         {loading ? (
-          <div className="p-12 text-center text-gray-500">Loading assets...</div>
+          <div className="p-8"><SkeletonTable rows={8} /></div>
+        ) : error ? (
+          <div className="p-8"><ErrorState message={error} onRetry={fetchAssets} /></div>
         ) : assets.length === 0 ? (
-          <div className="p-12 text-center text-gray-500">
-            <Box className="h-12 w-12 mx-auto text-gray-300 mb-4" />
-            <p>No assets found. Start by adding a new one.</p>
+          <div className="p-12">
+            <EmptyState 
+              icon={Box}
+              title="No assets found"
+              description="Your asset inventory is currently empty. Start tracking your equipment by registering your first asset."
+              action={{
+                label: "Register First Asset",
+                onClick: () => navigate('/assets/new')
+              }}
+            />
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -91,8 +109,12 @@ export default function AssetsPage() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {assets.map((asset) => (
-                  <tr key={asset.id} className="hover:bg-gray-50">
+                {assets.map((asset, index) => (
+                  <tr 
+                    key={asset.id} 
+                    className="hover:bg-gray-50 animate-fade-in"
+                    style={{ animationDelay: `${Math.min(index * 50, 250)}ms` }}
+                  >
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="h-10 w-10 flex-shrink-0 flex items-center justify-center rounded-full bg-gray-100 text-primary">
@@ -123,7 +145,7 @@ export default function AssetsPage() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <button
-                        onClick={() => handleDelete(asset.id)}
+                        onClick={() => setDeleteId(asset.id)}
                         className="text-red-600 hover:text-red-900 ml-4"
                       >
                         <Trash2 className="h-4 w-4" />
@@ -136,6 +158,16 @@ export default function AssetsPage() {
           </div>
         )}
       </div>
+
+      <ConfirmationModal 
+        isOpen={!!deleteId}
+        onClose={() => setDeleteId(null)}
+        onConfirm={handleDelete}
+        title="Permanently Delete Asset?"
+        message="This action cannot be undone. All historical data and tracking associated with this asset will be permanently removed from the system."
+        type="delete"
+        confirmText="Yes, Delete Asset"
+      />
     </div>
   );
 }

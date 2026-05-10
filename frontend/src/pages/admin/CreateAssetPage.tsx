@@ -4,6 +4,8 @@ import { useForm } from 'react-hook-form';
 import client from '../../api/client';
 import type { Asset } from '../../types';
 import toast from 'react-hot-toast';
+import { Loader2 } from 'lucide-react';
+import PageHeader from '../../components/layout/PageHeader';
 
 
 export default function CreateAssetPage() {
@@ -49,14 +51,12 @@ export default function CreateAssetPage() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto py-8 px-4">
-      <div className="md:flex md:items-center md:justify-between mb-8">
-        <div className="flex-1 min-w-0">
-          <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
-            Register New Asset
-          </h2>
-        </div>
-      </div>
+    <div className="max-w-4xl mx-auto space-y-8 pb-20 animate-in fade-in duration-700">
+      <PageHeader 
+        title="Register New Asset"
+        subtitle="Initialize a new physical asset record for tracking and lifecycle management."
+        breadcrumbs={[{ label: 'African Holding' }, { label: 'Admin' }, { label: 'Assets' }, { label: 'New' }]}
+      />
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 bg-white p-6 shadow rounded-lg border border-gray-100">
         <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
@@ -152,9 +152,14 @@ export default function CreateAssetPage() {
           <button
             type="submit"
             disabled={loading}
-            className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-opacity-90 focus:outline-none disabled:opacity-50"
+            className="px-6 py-2.5 bg-slate-900 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-800 transition-all shadow-lg shadow-slate-900/20 disabled:opacity-50 flex items-center gap-2"
           >
-            {loading ? 'Registering...' : 'Register Asset'}
+            {loading ? (
+              <>
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                Registering...
+              </>
+            ) : 'Register Asset'}
           </button>
         </div>
       </form>

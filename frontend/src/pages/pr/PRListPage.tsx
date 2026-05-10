@@ -1,103 +1,251 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import client from '../../api/client';
 import type { PurchaseRequisition } from '../../types';
-import { Plus, Search, Eye } from 'lucide-react';
+import { 
+  Plus, Search, Eye, FileSearch, File, 
+  ChevronUp, ChevronDown, Filter, X, 
+  Calendar, MoreHorizontal, FileText 
+} from 'lucide-react';
+import PageHeader from '../../components/layout/PageHeader';
+import StatusBadge from '../../components/ui/StatusBadge';
+import { SkeletonTable, ErrorState } from '../../components/ui/Skeleton';
+import EmptyState from '../../components/ui/EmptyState';
+import { Loader2 } from 'lucide-react';
 
 export default function PRListPage() {
+  const navigate = useNavigate();
   const [prs, setPrs] = useState<PurchaseRequisition[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [sortConfig, setSortConfig] = useState<{ key: string, direction: 'asc' | 'desc' } | null>(null);
 
   useEffect(() => {
-    const fetchPRs = async () => {
-      try {
-        const res = await client.get('/purchase-requisitions');
-        setPrs(res.data.data);
-      } catch (error) {
-        console.error(error);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchPRs();
   }, []);
 
-  const getStatusBadge = (status: string) => {
-    const styles: Record<string, string> = {
-      draft: 'bg-gray-100 text-gray-800',
-      submitted: 'bg-blue-100 text-blue-800',
-      'under review': 'bg-amber-100 text-amber-800',
-      approved: 'bg-green-100 text-green-800',
-      rejected: 'bg-red-100 text-red-800',
-      returned: 'bg-orange-100 text-orange-800'
-    };
-    return <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${styles[status] || styles.draft}`}>{status.toUpperCase()}</span>;
+  const fetchPRs = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const res = await client.get('/purchase-requisitions');
+      setPrs(res.data.data);
+    } catch (error: any) {
+      setError(error.response?.data?.message || 'Failed to synchronize requisition ledger');
+    } finally {
+      setLoading(false);
+    }
   };
 
+  const handleSort = (key: string) => {
+    let direction: 'asc' | 'desc' = 'asc';
+    if (sortConfig && sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    setSortConfig({ key, direction });
+  };
+
+  const filteredPrs = prs
+    .filter(pr => 
+      (pr.serial_no?.toLowerCase().includes(search.toLowerCase()) || 
+       pr.requester_name?.toLowerCase().includes(search.toLowerCase())) &&
+      (statusFilter === '' || pr.status === statusFilter)
+    )
+    .sort((a: any, b: any) => {
+      if (!sortConfig) return 0;
+      const { key, direction } = sortConfig;
+      if (a[key] < b[key]) return direction === 'asc' ? -1 : 1;
+      if (a[key] > b[key]) return direction === 'asc' ? 1 : -1;
+      return 0;
+    });
+
+  const getRelativeTime = (date: string) => {
+    const d = new Date(date);
+    const now = new Date();
+    const diff = now.getTime() - d.getTime();
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    if (days === 0) return 'Today';
+    if (days === 1) return 'Yesterday';
+    return `${days} days ago`;
+  };
+
+
   return (
-    <div className="space-y-6">
-      <div className="sm:flex sm:items-center sm:justify-between">
-        <div>
-          <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">Purchase Requisitions</h2>
-        </div>
-        <div className="mt-4 sm:mt-0 sm:flex-none">
-          <Link
-            to="/purchase-requisitions/new"
-            className="inline-flex items-center justify-center rounded-md border border-transparent bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-secondary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 sm:w-auto"
+    <div className="max-w-7xl mx-auto space-y-6 pb-20 animate-in fade-in duration-700">
+      <PageHeader 
+        title="Purchase Requisitions"
+        subtitle="Manage and track all purchase requests across the organization."
+        breadcrumbs={[{ label: 'African Holding' }, { label: 'Procurement' }, { label: 'Requisitions' }]}
+        actions={
+          <button
+            onClick={() => navigate('/purchase-requisitions/new')}
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-500 text-white rounded-xl text-sm font-semibold uppercase tracking-wide hover:bg-blue-600 transition-all shadow-md"
           >
-            <Plus className="-ml-1 mr-2 h-5 w-5" aria-hidden="true" />
-            New PR
-          </Link>
+            <Plus className="w-4 h-4" /> New Requisition
+          </button>
+        }
+      />
+
+      {/* FILTERS BAR */}
+      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 flex flex-wrap items-center justify-between gap-4">
+        <div className="flex flex-wrap items-center gap-3 flex-1">
+          <div className="relative">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <input 
+              type="text" 
+              placeholder="Search by ID or requester..." 
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-10 pr-4 py-2.5 w-64 bg-slate-50 border-transparent rounded-xl text-sm font-medium text-slate-900 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+            />
+          </div>
+          
+          <div className="flex items-center gap-2">
+            <select 
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="px-4 py-2.5 bg-slate-50 border-transparent rounded-xl text-sm font-semibold text-slate-500 uppercase tracking-wide focus:ring-2 focus:ring-blue-500/20 transition-all"
+            >
+              <option value="">All Statuses</option>
+              <option value="draft">Draft</option>
+              <option value="submitted">Submitted</option>
+              <option value="approved">Approved</option>
+              <option value="rejected">Rejected</option>
+            </select>
+
+            { (search || statusFilter) && (
+              <button 
+                onClick={() => { setSearch(''); setStatusFilter(''); }}
+                className="text-xs font-semibold text-blue-600 uppercase tracking-wide hover:text-blue-700 transition-colors flex items-center gap-1"
+              >
+                <X className="w-3 h-3" /> Clear Filters
+              </button>
+            )}
+          </div>
+        </div>
+
+        <div className="text-xs font-semibold text-slate-500 uppercase tracking-wide">
+           Showing {filteredPrs.length} of {prs.length} results
         </div>
       </div>
 
-      <div className="bg-white shadow overflow-hidden sm:rounded-lg">
-        <div className="px-4 py-5 sm:px-6 flex justify-between border-b border-gray-200">
-          <div className="relative rounded-md shadow-sm max-w-xs w-full">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Search className="h-5 w-5 text-gray-400" />
-            </div>
-            <input type="text" className="focus:ring-primary focus:border-primary block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-2 px-3 border" placeholder="Search PRs..." />
+      {loading ? <SkeletonTable /> : error ? <ErrorState message={error} onRetry={fetchPRs} /> : filteredPrs.length === 0 ? (
+        <EmptyState 
+          icon={FileText}
+          title="No purchase requisitions yet"
+          description="Create your first purchase request to get started and track your procurement workflow."
+          action={{
+            label: "New Purchase Request",
+            onClick: () => navigate('/purchase-requisitions/new')
+          }}
+        />
+      ) : (
+        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-slate-100">
+              <thead className="bg-slate-50/50">
+                <tr>
+                  <th 
+                    onClick={() => handleSort('serial_no')}
+                    className="px-8 py-5 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide cursor-pointer group"
+                  >
+                    <div className="flex items-center gap-2">
+                       PR Number
+                       {sortConfig?.key === 'serial_no' ? (
+                         sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3 text-blue-500" /> : <ChevronDown className="w-3 h-3 text-blue-500" />
+                       ) : <ChevronUp className="w-3 h-3 text-slate-300 opacity-0 group-hover:opacity-100 transition-all" />}
+                    </div>
+                  </th>
+                  <th className="px-8 py-5 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Requested By</th>
+                  <th className="px-8 py-5 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Department</th>
+                  <th 
+                    onClick={() => handleSort('total_requested')}
+                    className="px-8 py-5 text-right text-xs font-semibold text-slate-500 uppercase tracking-wide cursor-pointer group"
+                  >
+                    <div className="flex items-center justify-end gap-2">
+                       Amount
+                       {sortConfig?.key === 'total_requested' ? (
+                         sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3 text-blue-500" /> : <ChevronDown className="w-3 h-3 text-blue-500" />
+                       ) : <ChevronUp className="w-3 h-3 text-slate-300 opacity-0 group-hover:opacity-100 transition-all" />}
+                    </div>
+                  </th>
+                  <th className="px-8 py-5 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Date</th>
+                  <th className="px-8 py-5 text-center text-xs font-semibold text-slate-500 uppercase tracking-wide">Status</th>
+                  <th className="px-8 py-5"></th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-slate-50">
+                {filteredPrs.map((pr: any, index: number) => (
+                  <tr 
+                    key={pr.id} 
+                    onClick={() => navigate(`/purchase-requisitions/${pr.id}`)}
+                    className="hover:bg-blue-50/40 transition-all duration-150 cursor-pointer group animate-fade-in"
+                    style={{ animationDelay: `${Math.min(index * 50, 250)}ms` }}
+                  >
+                    <td className="px-8 py-5">
+                      <div className="flex items-center gap-3">
+                         <div className="h-9 w-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <File className="w-4 h-4" />
+                         </div>
+                         <span className="font-mono text-sm font-medium text-slate-900">{pr.serial_no}</span>
+                      </div>
+                    </td>
+                    <td className="px-8 py-5">
+                      <div className="flex items-center gap-3">
+                         <div className="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center text-xs font-semibold text-slate-500 border border-slate-200">
+                            {pr.requester_name?.split(' ').map((n: string) => n[0]).join('')}
+                         </div>
+                         <span className="text-sm text-slate-700">{pr.requester_name}</span>
+                      </div>
+                    </td>
+                    <td className="px-8 py-5 text-sm font-medium text-slate-500 uppercase tracking-tight">{pr.department_name}</td>
+                    <td className="px-8 py-5 text-right font-semibold tabular-nums text-slate-900 text-sm">
+                      <span className="text-xs text-slate-500 mr-1.5">ETB</span>
+                      {Number(pr.total_requested).toLocaleString()}
+                    </td>
+                    <td className="px-8 py-5">
+                      <div>
+                        <p className="text-sm text-slate-900">{new Date(pr.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
+                        <p className="text-xs text-slate-500 mt-0.5">{getRelativeTime(pr.created_at)}</p>
+                      </div>
+                    </td>
+                    <td className="px-8 py-5 text-center">
+                      <StatusBadge status={pr.status} />
+                    </td>
+                    <td className="px-8 py-5 text-right">
+                       <button className="p-2 text-slate-300 hover:text-blue-600 transition-colors group-hover:translate-x-1">
+                          <Eye className="h-5 w-5" />
+                       </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* PAGINATION UI */}
+          <div className="px-8 py-6 bg-slate-50/50 border-t border-slate-100 flex items-center justify-between">
+             <div className="text-xs font-semibold text-slate-500 uppercase tracking-wide">
+                Page 1 of 1
+             </div>
+             <div className="flex items-center gap-2">
+                <button disabled className="px-4 py-2 rounded-xl border border-slate-200 bg-white text-xs font-semibold uppercase tracking-wide text-slate-400 cursor-not-allowed">
+                  Previous
+                </button>
+                {[1].map(p => (
+                   <button key={p} className="h-9 w-9 rounded-xl bg-blue-500 text-white text-xs font-semibold">
+                    {p}
+                  </button>
+                ))}
+                <button disabled className="px-4 py-2 rounded-xl border border-slate-200 bg-white text-xs font-semibold uppercase tracking-wide text-slate-400 cursor-not-allowed">
+                  Next
+                </button>
+             </div>
           </div>
         </div>
-        
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">PR Number</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Requested By</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Department</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-              <th className="px-6 py-3 text-right"></th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {loading ? (
-              <tr><td colSpan={7} className="px-6 py-4 text-center">Loading...</td></tr>
-            ) : prs.length === 0 ? (
-              <tr><td colSpan={7} className="px-6 py-4 text-center">No PRs found.</td></tr>
-            ) : (
-              prs.map((pr: any) => (
-                <tr key={pr.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-primary">{pr.serial_no}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{pr.requester_name}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{pr.department_name}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">ETB {Number(pr.total_requested).toLocaleString()}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{new Date(pr.created_at).toLocaleDateString()}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">{getStatusBadge(pr.status)}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <Link to={`/purchase-requisitions/${pr.id}`} className="text-indigo-600 hover:text-indigo-900">
-                      <Eye className="h-5 w-5 inline" /> View
-                    </Link>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+      )}
     </div>
   );
 }

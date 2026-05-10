@@ -30,12 +30,25 @@ import approvalRoutes from './approvals';
 import notificationRoutes from './notifications';
 import reportRoutes from './reports';
 import dashboardRoutes from './dashboard';
+import settingsRoutes from './settings';
 
 router.use('/approvals', approvalRoutes);
 router.use('/notifications', notificationRoutes);
 router.use('/reports', reportRoutes);
 router.use('/dashboard', dashboardRoutes);
 router.use('/assets', assetRoutes);
+router.use('/settings', settingsRoutes);
+import themeRoutes from './theme';
+import { sseService } from '../services/sseService';
+
+router.use('/theme', themeRoutes);
+
+router.get('/events', (req, res) => {
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+  sseService.addClient(require('uuid').v4(), res);
+});
 
 // router.use('/audit-logs', auditLogRoutes);
 

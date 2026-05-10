@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { login, getMe, logout, changePassword } from '../controllers/authController';
+import { login, getMe, logout, changePassword, ping, updatePreferences } from '../controllers/authController';
 import { authenticate } from '../middleware/auth';
 import { auditLog } from '../middleware/audit';
 
@@ -9,5 +9,7 @@ router.post('/login', auditLog('login', 'user'), login);
 router.get('/me', authenticate, getMe);
 router.post('/logout', authenticate, auditLog('logout', 'user'), logout);
 router.post('/change-password', authenticate, auditLog('change_password', 'user'), changePassword);
+router.patch('/preferences', authenticate, updatePreferences);
+router.get('/ping', authenticate, ping);
 
 export default router;

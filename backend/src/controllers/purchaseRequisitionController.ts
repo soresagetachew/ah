@@ -3,6 +3,7 @@ import { pool } from '../config/database';
 import { AuthRequest } from '../middleware/auth';
 import { generateSerialNumber } from '../utils/serialNumber';
 import { v4 as uuidv4 } from 'uuid';
+import { settingsService } from '../services/settingsService';
 
 export const getPurchaseRequisitions = async (req: AuthRequest, res: Response) => {
   try {
@@ -61,6 +62,26 @@ export const createPurchaseRequisition = async (req: AuthRequest, res: Response)
 
     const serialNo = await generateSerialNumber('PR', 'purchase_requisitions');
     const total_requested = items.reduce((sum: number, item: any) => sum + (Number(item.quantity) * Number(item.unit_price)), 0);
+
+    // Budget Enforcement
+    const enforceBudget = await settingsService.isEnabled('enforce_budget_limits');
+    if (enforceBudget) {
+      const budgetResult = await pool.query('SELECT budget FROM departments WHERE id = ?', [req.user.department_id]);
+      const deptBudget = Number(budgetResult.rows[0]?.budget || 0);
+      
+      const spentResult = await pool.query(
+        "SELECT SUM(total_requested) as total_spent FROM purchase_requisitions WHERE department_id = ? AND status != 'rejected' AND id != ?", 
+        [req.user.department_id, uuidv4()] // using a new uuid just to avoid excluding nothing
+      );
+      const totalSpent = Number((spentResult.rows[0] as any).total_spent || 0);
+
+      if (totalSpent + total_requested > deptBudget) {
+        return res.status(400).json({ 
+          message: `Budget exceeded. Department budget: ETB ${deptBudget.toLocaleString()}, Current Spend: ETB ${totalSpent.toLocaleString()}, This PR: ETB ${total_requested.toLocaleString()}` 
+        });
+      }
+    }
+
     const prId = uuidv4();
 
     await pool.query(

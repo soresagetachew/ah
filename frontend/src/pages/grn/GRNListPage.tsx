@@ -1,8 +1,16 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import client from '../../api/client';
-import { Plus, Search, Package, Eye } from 'lucide-react';
+import { 
+  Plus, Search, Package, Eye, Truck, 
+  FileText, ChevronUp, ChevronDown, X, 
+  Calendar, Building2, Hash
+} from 'lucide-react';
+import PageHeader from '../../components/layout/PageHeader';
+import StatusBadge from '../../components/ui/StatusBadge';
 import toast from 'react-hot-toast';
+import { SkeletonTable, ErrorState } from '../../components/ui/Skeleton';
+import EmptyState from '../../components/ui/EmptyState';
 
 interface GRN {
   id: string;
@@ -16,126 +24,195 @@ interface GRN {
   created_at: string;
 }
 
-const statusStyles: Record<string, string> = {
-  draft: 'bg-gray-100 text-gray-700',
-  completed: 'bg-green-100 text-green-800',
-};
-
 export default function GRNListPage() {
+  const navigate = useNavigate();
   const [grns, setGrns] = useState<GRN[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [sortConfig, setSortConfig] = useState<{ key: string, direction: 'asc' | 'desc' } | null>(null);
 
   useEffect(() => {
-    client.get('/goods-receiving-notes')
-      .then(res => setGrns(res.data.data || res.data || []))
-      .catch(() => toast.error('Failed to load GRNs'))
-      .finally(() => setLoading(false));
+    fetchGRNs();
   }, []);
 
-  const filtered = grns.filter(g =>
-    (g.serial_no || '').toLowerCase().includes(search.toLowerCase()) ||
-    (g.supplier_name || '').toLowerCase().includes(search.toLowerCase()) ||
-    (g.invoice_no || '').toLowerCase().includes(search.toLowerCase())
-  );
+  const fetchGRNs = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const res = await client.get('/goods-receiving-notes');
+      setGrns(res.data.data || res.data || []);
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Failed to synchronize warehouse receipts');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSort = (key: string) => {
+    let direction: 'asc' | 'desc' = 'asc';
+    if (sortConfig && sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    setSortConfig({ key, direction });
+  };
+
+  const filtered = grns
+    .filter(g =>
+      ((g.serial_no || '').toLowerCase().includes(search.toLowerCase()) ||
+       (g.supplier_name || '').toLowerCase().includes(search.toLowerCase()) ||
+       (g.invoice_no || '').toLowerCase().includes(search.toLowerCase())) &&
+      (statusFilter === '' || g.status === statusFilter)
+    )
+    .sort((a: any, b: any) => {
+      if (!sortConfig) return 0;
+      const { key, direction } = sortConfig;
+      if (a[key] < b[key]) return direction === 'asc' ? -1 : 1;
+      if (a[key] > b[key]) return direction === 'asc' ? 1 : -1;
+      return 0;
+    });
+
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900">Goods Receiving Notes</h2>
-          <p className="mt-1 text-sm text-gray-500">Track all goods received from suppliers.</p>
+    <div className="max-w-7xl mx-auto space-y-6 pb-20 animate-in fade-in duration-700">
+      <PageHeader 
+        title="Goods Receiving Notes"
+        subtitle="Monitor and track all inventory deliveries and supplier fulfillments."
+        breadcrumbs={[{ label: 'African Holding' }, { label: 'Store' }, { label: 'Receipts' }]}
+        actions={
+          <button
+            onClick={() => navigate('/goods-receiving-notes/new')}
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-900 text-white rounded-xl text-sm font-black uppercase tracking-widest hover:bg-slate-800 transition-all shadow-lg shadow-slate-900/20"
+          >
+            <Plus className="h-4 w-4" /> Record New Receipt
+          </button>
+        }
+      />
+
+      {/* FILTERS BAR */}
+      <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm p-5 flex flex-wrap items-center justify-between gap-4">
+        <div className="flex flex-wrap items-center gap-3 flex-1">
+          <div className="relative">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+            <input 
+              type="text" 
+              placeholder="Search by GRN, supplier or invoice..." 
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-10 pr-4 py-2.5 w-80 bg-slate-50 border-transparent rounded-xl text-sm font-bold text-slate-900 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+            />
+          </div>
+          
+          <select 
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="px-4 py-2.5 bg-slate-50 border-transparent rounded-xl text-sm font-black text-slate-500 uppercase tracking-widest focus:ring-2 focus:ring-blue-500/20 transition-all"
+          >
+            <option value="">All Statuses</option>
+            <option value="draft">Draft</option>
+            <option value="completed">Completed</option>
+          </select>
+
+          { (search || statusFilter) && (
+            <button 
+              onClick={() => { setSearch(''); setStatusFilter(''); }}
+              className="text-[10px] font-black text-blue-600 uppercase tracking-widest hover:text-blue-700 transition-colors flex items-center gap-1"
+            >
+              <X className="h-3 w-3" /> Clear Filters
+            </button>
+          )}
         </div>
-        <Link
-          to="/goods-receiving-notes/new"
-          className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-secondary"
-        >
-          <Plus className="h-4 w-4" /> New GRN
-        </Link>
+
+        <div className="text-xs font-black text-slate-400 uppercase tracking-widest">
+           {filtered.length} Records Found
+        </div>
       </div>
 
-      {/* Search */}
-      <div className="relative max-w-sm">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-        <input
-          type="text"
-          className="block w-full rounded-md border border-gray-300 py-2 pl-9 pr-3 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-          placeholder="Search by GRN number, supplier..."
-          value={search}
-          onChange={e => setSearch(e.target.value)}
+      {loading ? <SkeletonTable /> : error ? <ErrorState message={error} onRetry={fetchGRNs} /> : filtered.length === 0 ? (
+        <EmptyState 
+          icon={Truck}
+          title="No goods receipts found"
+          description="Track your warehouse inflow by recording new goods receiving notes for approved purchase orders."
+          action={{
+            label: "Record First Receipt",
+            onClick: () => navigate('/goods-receiving-notes/new')
+          }}
         />
-      </div>
-
-      {/* Table */}
-      <div className="rounded-lg border border-gray-200 bg-white shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead>
-              <tr className="bg-gray-50">
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">GRN #</th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Linked PR</th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Supplier</th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Invoice No</th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Type</th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Status</th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Date</th>
-                <th className="px-6 py-3 text-right text-xs font-semibold text-gray-500 uppercase">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100 bg-white">
-              {loading ? (
-                <tr><td colSpan={8} className="px-6 py-12 text-center">
-                  <div className="flex items-center justify-center gap-2 text-gray-400">
-                    <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-                    Loading...
-                  </div>
-                </td></tr>
-              ) : filtered.length === 0 ? (
-                <tr><td colSpan={8} className="px-6 py-16 text-center">
-                  <Package className="mx-auto h-12 w-12 text-gray-300 mb-3" />
-                  <p className="text-gray-400 text-sm">No Goods Receiving Notes found.</p>
-                  <Link to="/goods-receiving-notes/new" className="mt-3 inline-flex items-center gap-1 text-sm text-primary font-medium hover:underline">
-                    <Plus className="h-4 w-4" /> Create first GRN
-                  </Link>
-                </td></tr>
-              ) : (
-                filtered.map(grn => (
-                  <tr key={grn.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="font-mono text-sm font-semibold text-primary">{grn.serial_no}</span>
+      ) : (
+        <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-slate-100">
+              <thead className="bg-slate-50/50">
+                <tr>
+                  <th onClick={() => handleSort('serial_no')} className="px-8 py-5 text-left text-[10px] font-black text-slate-500 uppercase tracking-widest cursor-pointer group">
+                    <div className="flex items-center gap-2">
+                       GRN #
+                       {sortConfig?.key === 'serial_no' ? (
+                         sortConfig.direction === 'asc' ? <ChevronUp className="h-3 w-3 text-blue-500" /> : <ChevronDown className="h-3 w-3 text-blue-500" />
+                       ) : <ChevronUp className="h-3 w-3 text-slate-300 opacity-0 group-hover:opacity-100 transition-all" />}
+                    </div>
+                  </th>
+                  <th className="px-8 py-5 text-left text-[10px] font-black text-slate-500 uppercase tracking-widest">Supplier</th>
+                  <th className="px-8 py-5 text-left text-[10px] font-black text-slate-500 uppercase tracking-widest">Invoice No</th>
+                  <th className="px-8 py-5 text-left text-[10px] font-black text-slate-500 uppercase tracking-widest">PR Reference</th>
+                  <th className="px-8 py-5 text-left text-[10px] font-black text-slate-500 uppercase tracking-widest">Date</th>
+                  <th className="px-8 py-5 text-center text-[10px] font-black text-slate-500 uppercase tracking-widest">Status</th>
+                  <th className="px-8 py-5"></th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-slate-50">
+                {filtered.map((grn, index) => (
+                  <tr 
+                    key={grn.id} 
+                    onClick={() => navigate(`/goods-receiving-notes/${grn.id}`)} 
+                    className="hover:bg-slate-50/50 transition-all duration-150 cursor-pointer group animate-fade-in"
+                    style={{ animationDelay: `${Math.min(index * 50, 250)}ms` }}
+                  >
+                    <td className="px-8 py-5">
+                      <div className="flex items-center gap-3">
+                         <div className="h-9 w-9 rounded-xl bg-slate-50 text-slate-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <Truck className="h-4 w-4" />
+                         </div>
+                         <span className="font-mono font-bold text-sm text-slate-900">{grn.serial_no}</span>
+                      </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{grn.pr_serial_no || '—'}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800 font-medium">{grn.supplier_name || '—'}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{grn.invoice_no || '—'}</td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded-full capitalize">{grn.type_classification?.replace('_', ' ')}</span>
+                    <td className="px-8 py-5">
+                       <div className="flex items-center gap-2">
+                          <Building2 className="h-3.5 w-3.5 text-slate-300" />
+                          <span className="text-sm font-bold text-slate-700">{grn.supplier_name || '—'}</span>
+                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold capitalize ${statusStyles[grn.status] || 'bg-gray-100 text-gray-600'}`}>
-                        {grn.status}
-                      </span>
+                    <td className="px-8 py-5">
+                       <div className="flex items-center gap-2">
+                          <Hash className="h-3.5 w-3.5 text-slate-300" />
+                          <span className="text-xs font-black text-slate-500 uppercase tracking-widest">{grn.invoice_no || '—'}</span>
+                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {new Date(grn.created_at).toLocaleDateString('en-ET')}
+                    <td className="px-8 py-5">
+                       <div className="flex items-center gap-2">
+                          <FileText className="h-3.5 w-3.5 text-blue-400" />
+                          <span className="text-xs font-bold text-blue-600 uppercase tracking-widest">{grn.pr_serial_no || 'Manual'}</span>
+                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right">
-                      <Link to={`/goods-receiving-notes/${grn.id}`} className="inline-flex items-center gap-1 text-xs text-primary font-medium hover:underline">
-                        <Eye className="h-3.5 w-3.5" /> View
-                      </Link>
+                    <td className="px-8 py-5 text-sm font-bold text-slate-500">
+                       {new Date(grn.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                    </td>
+                    <td className="px-8 py-5 text-center">
+                       <StatusBadge status={grn.status === 'completed' ? 'approved' : grn.status} />
+                    </td>
+                    <td className="px-8 py-5 text-right">
+                       <button className="p-2 text-slate-300 hover:text-blue-600 transition-colors group-hover:translate-x-1">
+                          <Eye className="h-5 w-5" />
+                       </button>
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-        {!loading && filtered.length > 0 && (
-          <div className="border-t border-gray-200 bg-gray-50 px-6 py-3 text-xs text-gray-500">
-            Showing {filtered.length} of {grns.length} records
+                ))}
+              </tbody>
+            </table>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

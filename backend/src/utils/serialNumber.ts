@@ -1,25 +1,31 @@
 import { pool } from '../config/database';
 
-export const generateSerialNumber = async (prefix: string, tableName: string): Promise<string> => {
+export const generateSerialNumber = async (documentType: string, tableName: string): Promise<string> => {
   const year = new Date().getFullYear();
 
-  const result = await pool.query(`
-    SELECT serial_no 
-    FROM ${tableName} 
-    WHERE serial_no LIKE ?
-    ORDER BY serial_no DESC 
-    LIMIT 1
-  `, [`${prefix}-${year}-%`]);
+  // Atomically get and increment the next number
+  const { rows } = await pool.query(
+    'UPDATE document_sequences SET last_number = last_number + 1 WHERE document_type = ? RETURNING *',
+    [documentType]
+  );
 
-  let nextSequence = 1;
-  if (result.rows.length > 0) {
-    const lastSerial = (result.rows[0] as any).serial_no;
-    const parts = lastSerial.split('-');
-    if (parts.length === 3) {
-      nextSequence = parseInt(parts[2], 10) + 1;
-    }
+  if (rows.length === 0) {
+    // Fallback or initialization if type doesn't exist
+    await pool.query('INSERT INTO document_sequences (document_type, prefix, last_number) VALUES (?, ?, 1)', [documentType, documentType]);
+    return `${documentType}-${year}-0001`;
   }
 
-  const paddedSequence = nextSequence.toString().padStart(4, '0');
-  return `${prefix}-${year}-${paddedSequence}`;
+  const seq = rows[0];
+  const nextNum = seq.last_number;
+  const padding = seq.padding || 4;
+  const prefix = seq.prefix || documentType;
+  const includeYear = seq.include_year !== false;
+
+  const paddedSequence = nextNum.toString().padStart(padding, '0');
+  
+  if (includeYear) {
+    return `${prefix}-${year}-${paddedSequence}`;
+  } else {
+    return `${prefix}-${paddedSequence}`;
+  }
 };

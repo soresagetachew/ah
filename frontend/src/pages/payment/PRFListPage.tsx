@@ -1,8 +1,11 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import client from '../../api/client';
-import { Plus, Search, CreditCard, Eye } from 'lucide-react';
+import { Plus, Search, CreditCard, Eye, X, ChevronRight, FileText } from 'lucide-react';
 import toast from 'react-hot-toast';
+import PageHeader from '../../components/layout/PageHeader';
+import { SkeletonTable, ErrorState } from '../../components/ui/Skeleton';
+import EmptyState from '../../components/ui/EmptyState';
 
 interface PRF {
   id: string;
@@ -27,18 +30,30 @@ const statusStyles: Record<string, string> = {
 };
 
 export default function PRFListPage() {
+  const router = useNavigate();
   const [prfs, setPrfs] = useState<PRF[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
 
+  const fetchPRFs = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const params = new URLSearchParams();
+      if (statusFilter) params.set('status', statusFilter);
+      const res = await client.get(`/payment-requests?${params}`);
+      setPrfs(res.data.data || res.data || []);
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Failed to synchronize payment request ledger');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const params = new URLSearchParams();
-    if (statusFilter) params.set('status', statusFilter);
-    client.get(`/payment-requests?${params}`)
-      .then(res => setPrfs(res.data.data || res.data || []))
-      .catch(() => toast.error('Failed to load payment requests'))
-      .finally(() => setLoading(false));
+    fetchPRFs();
   }, [statusFilter]);
 
   const filtered = prfs.filter(p =>
@@ -50,118 +65,142 @@ export default function PRFListPage() {
   const totalAmount = filtered.reduce((sum, p) => sum + Number(p.amount_figure || 0), 0);
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900">Payment Requests</h2>
-          <p className="mt-1 text-sm text-gray-500">Manage all payment request forms (PRF).</p>
-        </div>
-        <Link
-          to="/payment-requests/new"
-          className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-secondary"
-        >
-          <Plus className="h-4 w-4" /> New Payment Request
-        </Link>
-      </div>
+    <div className="max-w-7xl mx-auto space-y-8 pb-20 animate-in fade-in duration-700">
+      <PageHeader 
+        title="Payment Requests"
+        subtitle="Manage and track all payment request forms (PRF) organization-wide."
+        breadcrumbs={[{ label: 'African Holding' }, { label: 'Finance' }, { label: 'Payments' }]}
+        actions={
+          <button
+            onClick={() => router('/payment-requests/new')}
+            className="inline-flex items-center gap-2 rounded-xl bg-blue-500 px-6 py-2.5 text-sm font-semibold uppercase tracking-wide text-white shadow-md hover:bg-blue-600 transition-all"
+          >
+            <Plus className="w-4 h-4" />
+            New Payment Request
+          </button>
+        }
+      />
 
       {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-3">
-        <div className="relative max-w-sm flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-          <input
-            type="text"
-            className="block w-full rounded-md border border-gray-300 py-2 pl-9 pr-3 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-            placeholder="Search by number, purpose..."
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-          />
+      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 flex flex-wrap items-center justify-between gap-4">
+        <div className="flex flex-wrap items-center gap-3 flex-1">
+          <div className="relative">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <input 
+              type="text" 
+              placeholder="Search by number or purpose..." 
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-10 pr-4 py-2.5 w-80 bg-slate-50 border-transparent rounded-xl text-sm font-medium text-slate-900 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+            />
+          </div>
+          
+          <select 
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="px-4 py-2.5 bg-slate-50 border-transparent rounded-xl text-sm font-semibold text-slate-500 uppercase tracking-wide focus:ring-2 focus:ring-blue-500/20 transition-all"
+          >
+            <option value="">All Statuses</option>
+            <option value="draft">Draft</option>
+            <option value="submitted">Submitted</option>
+            <option value="checked">Checked</option>
+            <option value="authorized">Authorized</option>
+            <option value="disbursed">Disbursed</option>
+            <option value="rejected">Rejected</option>
+            <option value="returned">Returned</option>
+          </select>
+
+          { (search || statusFilter) && (
+            <button 
+              onClick={() => { setSearch(''); setStatusFilter(''); }}
+              className="text-xs font-semibold text-blue-500 uppercase tracking-wide hover:text-blue-600 transition-colors flex items-center gap-1"
+            >
+              <X className="w-3 h-3" /> Clear Filters
+            </button>
+          )}
         </div>
-        <select
-          value={statusFilter}
-          onChange={e => setStatusFilter(e.target.value)}
-          className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-primary focus:outline-none"
-        >
-          <option value="">All Statuses</option>
-          <option value="draft">Draft</option>
-          <option value="submitted">Submitted</option>
-          <option value="checked">Checked</option>
-          <option value="authorized">Authorized</option>
-          <option value="disbursed">Disbursed</option>
-          <option value="rejected">Rejected</option>
-          <option value="returned">Returned</option>
-        </select>
+
+        <div className="text-xs font-semibold text-slate-500 uppercase tracking-wide">
+           {filtered.length} Requests Found
+        </div>
       </div>
 
       {/* Summary card */}
       {filtered.length > 0 && (
-        <div className="bg-primary/5 border border-primary/20 rounded-lg p-4 flex items-center justify-between">
-          <span className="text-sm text-gray-600">{filtered.length} payment request{filtered.length !== 1 ? 's' : ''} shown</span>
-          <span className="text-sm font-bold text-gray-900">Total: ETB {totalAmount.toLocaleString('en-ET', { minimumFractionDigits: 2 })}</span>
+        <div className="bg-blue-50/50 border border-blue-100 rounded-2xl p-4 flex items-center justify-between">
+          <span className="text-sm text-slate-600">{filtered.length} payment request{filtered.length !== 1 ? 's' : ''} shown</span>
+          <span className="text-sm font-semibold text-slate-900 tabular-nums">Total: ETB {totalAmount.toLocaleString('en-ET', { minimumFractionDigits: 2 })}</span>
         </div>
       )}
 
       {/* Table */}
-      <div className="rounded-lg border border-gray-200 bg-white shadow-sm overflow-hidden">
+      <div className="rounded-2xl border border-slate-100 bg-white shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
+          <table className="min-w-full divide-y divide-slate-100">
             <thead>
-              <tr className="bg-gray-50">
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">PRF #</th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Requested By</th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Department</th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Purpose</th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Mode</th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Amount (ETB)</th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Status</th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Date</th>
-                <th className="px-6 py-3 text-right text-xs font-semibold text-gray-500 uppercase">Actions</th>
+              <tr className="bg-slate-50/50">
+                <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">PRF #</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Requested By</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Department</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Purpose</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Mode</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Amount (ETB)</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Status</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Date</th>
+                <th className="px-6 py-4 text-right text-xs font-semibold text-slate-500 uppercase tracking-wide"></th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100 bg-white">
+            <tbody className="divide-y divide-slate-100 bg-white">
               {loading ? (
-                <tr><td colSpan={9} className="px-6 py-12 text-center">
-                  <div className="flex items-center justify-center gap-2 text-gray-400">
-                    <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-                    Loading...
-                  </div>
-                </td></tr>
+                <tr><td colSpan={9} className="p-8"><SkeletonTable rows={8} /></td></tr>
+              ) : error ? (
+                <tr><td colSpan={9} className="py-20"><ErrorState message={error} onRetry={fetchPRFs} /></td></tr>
               ) : filtered.length === 0 ? (
-                <tr><td colSpan={9} className="px-6 py-16 text-center">
-                  <CreditCard className="mx-auto h-12 w-12 text-gray-300 mb-3" />
-                  <p className="text-gray-400 text-sm">No payment requests found.</p>
-                  <Link to="/payment-requests/new" className="mt-3 inline-flex items-center gap-1 text-sm text-primary font-medium hover:underline">
-                    <Plus className="h-4 w-4" /> Create first request
-                  </Link>
+                <tr><td colSpan={9} className="px-6 py-10">
+                   <EmptyState 
+                     icon={CreditCard}
+                     title="No payment requests found"
+                     description="Manage your financial obligations by creating your first payment request form (PRF)."
+                     action={{
+                       label: "Create First Request",
+                       onClick: () => router('/payment-requests/new')
+                     }}
+                   />
                 </td></tr>
               ) : (
-                filtered.map(prf => (
-                  <tr key={prf.id} className="hover:bg-gray-50 transition-colors">
+                filtered.map((prf, index) => (
+                  <tr 
+                    key={prf.id} 
+                    onClick={() => router(`/payment-requests/${prf.id}`)}
+                    className="hover:bg-slate-50/50 transition-colors animate-fade-in group cursor-pointer"
+                    style={{ animationDelay: `${Math.min(index * 50, 250)}ms` }}
+                  >
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="font-mono text-sm font-semibold text-primary">{prf.serial_no}</span>
+                      <span className="font-mono text-sm font-medium text-slate-900">{prf.serial_no}</span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{prf.requester_name || '—'}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{prf.department_name || '—'}</td>
-                    <td className="px-6 py-4 text-sm text-gray-700 max-w-xs truncate">{prf.purpose}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-700">{prf.requester_name || '—'}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">{prf.department_name || '—'}</td>
+                    <td className="px-6 py-4 text-sm text-slate-600 max-w-xs truncate">{prf.purpose}</td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded ${prf.mode === 'cash' ? 'bg-green-50 text-green-700' : 'bg-blue-50 text-blue-700'}`}>
-                        {prf.mode === 'cash' ? '💵' : '📝'} {prf.mode}
+                      <span className={`inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full ${prf.mode === 'cash' ? 'bg-emerald-50 text-emerald-700' : 'bg-blue-50 text-blue-700'}`}>
+                        {prf.mode}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-slate-900 tabular-nums">
                       {Number(prf.amount_figure).toLocaleString('en-ET', { minimumFractionDigits: 2 })}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold capitalize ${statusStyles[prf.status] || 'bg-gray-100 text-gray-600'}`}>
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wide ${statusStyles[prf.status] || 'bg-slate-100 text-slate-600'}`}>
                         {prf.status}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
                       {new Date(prf.created_at).toLocaleDateString('en-ET')}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right">
-                      <button className="inline-flex items-center gap-1 text-xs text-primary font-medium hover:underline">
-                        <Eye className="h-3.5 w-3.5" /> View
-                      </button>
+                       <button className="p-2 text-slate-400 group-hover:text-blue-600 transition-colors">
+                          <Eye className="w-4 h-4" />
+                       </button>
                     </td>
                   </tr>
                 ))
@@ -170,7 +209,7 @@ export default function PRFListPage() {
           </table>
         </div>
         {!loading && filtered.length > 0 && (
-          <div className="border-t border-gray-200 bg-gray-50 px-6 py-3 text-xs text-gray-500">
+          <div className="border-t border-slate-100 bg-slate-50/50 px-6 py-3 text-xs text-slate-500 font-medium">
             Showing {filtered.length} of {prfs.length} records
           </div>
         )}

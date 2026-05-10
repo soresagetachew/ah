@@ -7,6 +7,8 @@ export interface User {
   department_name?: string;
   business_unit: 'HO' | 'Directorate' | 'Construction' | 'Kodeko' | 'School' | 'Ocean' | 'Eucalyptus';
   is_active: boolean;
+  theme_mode?: 'light' | 'dark' | 'system';
+  theme_dark_mode_enabled?: boolean;
   created_at?: string;
 }
 

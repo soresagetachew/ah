@@ -1,0 +1,22 @@
+/* Dark mode overrides — applied when <html class="dark"> */
+.dark {
+  --color-page-bg:         #0F172A;
+  --color-card-bg:         #1E293B;
+  --color-border:          #334155;
+  --color-text-primary:    #F1F5F9;
+  --color-text-secondary:  #94A3B8;
+  --color-text-muted:      #64748B;
+  --card-shadow:           0 1px 3px 0 rgb(0 0 0 / 0.4);
+  --card-shadow-hover:     0 4px 6px -1px rgb(0 0 0 / 0.4);
+}
+
+/* Smooth transition for dark mode toggle */
+*, *::before, *::after {
+  transition: background-color 250ms ease, border-color 250ms ease,
+              color 100ms ease !important;
+}
+
+/* Disable transitions for elements that shouldn't have them */
+.no-transition, .no-transition * {
+  transition: none !important;
+}

@@ -1,15 +1,59 @@
 @import "tailwindcss";
+@import "./styles/dark-mode.css";
 
 @theme {
-  --color-primary: #1a1a2e;
-  --color-secondary: #16213e;
-  --color-accent: #e94560;
+  --color-primary: #0f172a;
+  --color-secondary: #1e293b;
+  --color-accent: #3b82f6;
   --color-success: #10b981;
   --color-danger: #ef4444;
   --color-warning: #f59e0b;
-  --color-info: #3b82f6;
+  --color-info: #0ea5e9;
+  --color-surface: #ffffff;
+  --color-background: #f8fafc;
+  --color-border: #e2e8f0;
 }
 
 body {
-  background-color: #f9fafb;
+  background-color: var(--color-background);
+  color: var(--color-primary);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  button {
+    @apply transition-all duration-150 hover:scale-[1.02] active:scale-[0.98];
+  }
+  
+  a {
+    @apply transition-all duration-150 hover:opacity-80;
+  }
+
+  input, select, textarea {
+    @apply transition-all duration-150 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none;
+  }
+
+  ::selection {
+    @apply bg-blue-500/20 text-blue-900;
+  }
+
+  .clickable-card {
+    @apply transition-all duration-200 cursor-pointer hover:shadow-md hover:-translate-y-0.5 active:scale-[0.99] active:shadow-sm;
+  }
+
+  /* Custom Scrollbar for premium feel */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-slate-300 rounded-full hover:bg-slate-400 transition-colors;
+  }
 }

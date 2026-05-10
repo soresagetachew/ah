@@ -1,5 +1,7 @@
 import { pool } from '../config/database';
 import { createNotification } from './notificationService';
+import { v4 as uuidv4 } from 'uuid';
+import crypto from 'crypto';
 
 export const submitForApproval = async (documentType: string, documentId: string, actorId: string, departmentId: string) => {
   const table = getTableName(documentType);
@@ -83,7 +85,7 @@ export const reject = async (documentType: string, documentId: string, actorId: 
 
   await pool.query(
     `INSERT INTO approval_actions (id, document_type, document_id, actor_id, action, comment) VALUES (?, ?, ?, ?, 'reject', ?)`,
-    [require('uuid').v4(), documentType, documentId, actorId, comment]
+    [uuidv4(), documentType, documentId, actorId, comment]
   );
 
   await pool.query(`UPDATE ${table} SET status = 'rejected' WHERE id = ?`, [documentId]);
@@ -100,7 +102,7 @@ export const returnForRevision = async (documentType: string, documentId: string
 
   await pool.query(
     `INSERT INTO approval_actions (id, document_type, document_id, actor_id, action, comment) VALUES (?, ?, ?, ?, 'return', ?)`,
-    [require('uuid').v4(), documentType, documentId, actorId, comment]
+    [uuidv4(), documentType, documentId, actorId, comment]
   );
 
   await pool.query(`UPDATE ${table} SET status = 'returned' WHERE id = ?`, [documentId]);

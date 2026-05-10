@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { X } from 'lucide-react';
+import { UserPlus, Shield, Mail, Building2, MapPin, CheckCircle } from 'lucide-react';
 import client from '../../api/client';
 import toast from 'react-hot-toast';
+import { Drawer } from '../ui/Modal';
 
 interface UserFormDrawerProps {
   isOpen: boolean;
@@ -25,9 +26,7 @@ export default function UserFormDrawer({ isOpen, onClose, onSuccess }: UserFormD
     if (isOpen) {
       client.get('/departments').then(res => {
         setDepartments(res.data || []);
-      }).catch(() => {
-        // If endpoint not available yet, skip
-      });
+      }).catch(() => {});
       setTempPassword(null);
     }
   }, [isOpen]);
@@ -36,7 +35,7 @@ export default function UserFormDrawer({ isOpen, onClose, onSuccess }: UserFormD
     try {
       setLoading(true);
       const res = await client.post('/users', data);
-      toast.success('User created! Temporary password generated.');
+      toast.success('User created successfully');
       setTempPassword(res.data.tempPassword);
       reset();
       onSuccess();
@@ -53,161 +52,146 @@ export default function UserFormDrawer({ isOpen, onClose, onSuccess }: UserFormD
     onClose();
   };
 
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 z-50 overflow-hidden">
-      {/* Overlay */}
-      <div className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm" onClick={handleClose} />
-
-      {/* Drawer */}
-      <div className="absolute inset-y-0 right-0 flex max-w-full pl-10">
-        <div className="w-screen max-w-md">
-          <div className="flex h-full flex-col bg-white shadow-2xl">
-            {/* Header */}
-            <div className="bg-primary px-6 py-5">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-lg font-semibold text-white">Add New User</h2>
-                  <p className="mt-0.5 text-sm text-blue-200">A temporary password will be generated.</p>
+    <Drawer 
+      isOpen={isOpen} 
+      onClose={handleClose} 
+      title="Create Organization Account"
+      subtitle="Provision access for new employees or contractors."
+      footer={
+        <div className="flex gap-3 w-full">
+           <button
+             type="button"
+             onClick={handleClose}
+             className="flex-1 px-6 py-3 border border-slate-200 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-500 hover:bg-slate-50 transition-all"
+           >
+             {tempPassword ? 'Close Panel' : 'Cancel'}
+           </button>
+           {!tempPassword && (
+             <button
+               type="submit"
+               form="user-form"
+               disabled={loading}
+               className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-700 transition-all shadow-lg shadow-blue-900/20 disabled:opacity-50"
+             >
+               {loading ? 'Processing...' : 'Create Account'}
+             </button>
+           )}
+        </div>
+      }
+    >
+      <div className="space-y-8">
+        {tempPassword && (
+          <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-6 text-center animate-in zoom-in-95 duration-500">
+             <div className="h-12 w-12 rounded-full bg-emerald-500 text-white flex items-center justify-center mx-auto mb-4 shadow-lg shadow-emerald-500/20">
+                <CheckCircle className="h-6 w-6" />
+             </div>
+             <h4 className="text-sm font-black text-emerald-900 uppercase tracking-tight">Access Provisioned</h4>
+             <p className="text-xs text-emerald-600 mt-1">Temporary password generated for user:</p>
+             <div className="mt-4 bg-white border border-emerald-200 rounded-xl px-4 py-3 relative group">
+                <code className="text-lg font-black text-slate-900 font-mono tracking-widest">{tempPassword}</code>
+                <div className="absolute inset-0 bg-emerald-500 text-white text-[10px] font-black uppercase flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-xl cursor-pointer" onClick={() => { navigator.clipboard.writeText(tempPassword); toast.success('Copied!'); }}>
+                   Click to Copy
                 </div>
-                <button
-                  onClick={handleClose}
-                  className="rounded-md p-1 text-blue-200 hover:text-white hover:bg-white/10 transition-colors"
-                >
-                  <X className="h-5 w-5" />
-                </button>
-              </div>
-            </div>
+             </div>
+          </div>
+        )}
 
-            {/* Body */}
-            <div className="flex-1 overflow-y-auto px-6 py-6">
-              {tempPassword && (
-                <div className="mb-6 rounded-lg border border-amber-200 bg-amber-50 p-4">
-                  <p className="text-sm font-semibold text-amber-800">✅ User Created!</p>
-                  <p className="mt-1 text-sm text-amber-700">Share this temporary password with the user:</p>
-                  <code className="mt-2 block rounded bg-amber-100 px-3 py-2 text-base font-mono font-bold text-amber-900 tracking-wider">
-                    {tempPassword}
-                  </code>
-                  <p className="mt-2 text-xs text-amber-600">The user should change this on first login.</p>
-                </div>
-              )}
+        <form id="user-form" onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <div className="space-y-1.5">
+             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Identity Details</label>
+             <div className="relative">
+                <UserPlus className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                <input
+                  type="text"
+                  {...register('full_name', { required: 'Full name is required' })}
+                  className="w-full pl-11 pr-4 py-3 bg-slate-50 border-transparent rounded-xl text-sm font-bold placeholder:text-slate-300 focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 transition-all"
+                  placeholder="Full Name (e.g. Abebe Kebede)"
+                />
+             </div>
+             {errors.full_name && <p className="text-[10px] text-red-500 font-bold ml-1">{errors.full_name.message as string}</p>}
+          </div>
 
-              <form id="user-form" onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-                {/* Full Name */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Full Name <span className="text-red-500">*</span></label>
-                  <input
-                    type="text"
-                    {...register('full_name', { required: 'Full name is required' })}
-                    className="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-                    placeholder="e.g. Abebe Kebede"
-                  />
-                  {errors.full_name && <p className="mt-1 text-xs text-red-500">{errors.full_name.message as string}</p>}
-                </div>
+          <div className="space-y-1.5">
+             <div className="relative">
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                <input
+                  type="email"
+                  {...register('email', { required: 'Email is required' })}
+                  className="w-full pl-11 pr-4 py-3 bg-slate-50 border-transparent rounded-xl text-sm font-bold placeholder:text-slate-300 focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 transition-all"
+                  placeholder="Corporate Email Address"
+                />
+             </div>
+             {errors.email && <p className="text-[10px] text-red-500 font-bold ml-1">{errors.email.message as string}</p>}
+          </div>
 
-                {/* Email */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Email Address <span className="text-red-500">*</span></label>
-                  <input
-                    type="email"
-                    {...register('email', { required: 'Email is required' })}
-                    className="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-                    placeholder="user@africanholding.com"
-                  />
-                  {errors.email && <p className="mt-1 text-xs text-red-500">{errors.email.message as string}</p>}
-                </div>
-
-                {/* Role */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">System Role <span className="text-red-500">*</span></label>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+               <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">System Privilege</label>
+               <div className="relative">
+                  <Shield className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
                   <select
                     {...register('role', { required: 'Role is required' })}
-                    className="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                    className="w-full pl-11 pr-4 py-3 bg-slate-50 border-transparent rounded-xl text-sm font-bold focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 transition-all appearance-none"
                   >
-                    <option value="">Select a role...</option>
+                    <option value="">Select Role</option>
                     <option value="System Admin">System Admin</option>
-                    <option value="GM">General Manager (GM)</option>
+                    <option value="GM">General Manager</option>
                     <option value="Finance">Finance</option>
                     <option value="Storekeeper">Storekeeper</option>
                     <option value="Checker">Checker</option>
                     <option value="Staff">Staff</option>
                   </select>
-                  {errors.role && <p className="mt-1 text-xs text-red-500">{errors.role.message as string}</p>}
-                </div>
+               </div>
+            </div>
 
-                {/* Business Unit */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Business Unit <span className="text-red-500">*</span></label>
+            <div className="space-y-1.5">
+               <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Business Unit</label>
+               <div className="relative">
+                  <Building2 className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
                   <select
                     {...register('business_unit', { required: 'Business Unit is required' })}
-                    className="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                    className="w-full pl-11 pr-4 py-3 bg-slate-50 border-transparent rounded-xl text-sm font-bold focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 transition-all appearance-none"
                   >
-                    <option value="">Select business unit...</option>
-                    <option value="HO">Head Office (HO)</option>
+                    <option value="">Select BU</option>
+                    <option value="HO">Head Office</option>
                     <option value="Directorate">Directorate</option>
-                    <option value="Construction">Construction / Real Estate</option>
+                    <option value="Construction">Construction</option>
                     <option value="Kodeko">Kodeko</option>
                     <option value="School">School</option>
                     <option value="Ocean">Ocean</option>
                     <option value="Eucalyptus">Eucalyptus</option>
                   </select>
-                  {errors.business_unit && <p className="mt-1 text-xs text-red-500">{errors.business_unit.message as string}</p>}
-                </div>
-
-                {/* Department */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Department</label>
-                  {departments.length > 0 ? (
-                    <select
-                      {...register('department_id')}
-                      className="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-                    >
-                      <option value="">Select department (optional)</option>
-                      {departments.map(d => (
-                        <option key={d.id} value={d.id}>{d.name}</option>
-                      ))}
-                    </select>
-                  ) : (
-                    <input
-                      type="text"
-                      {...register('department_name')}
-                      className="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-                      placeholder="Department name (optional)"
-                    />
-                  )}
-                </div>
-              </form>
-            </div>
-
-            {/* Footer */}
-            <div className="border-t border-gray-200 bg-gray-50 px-6 py-4 flex justify-end gap-3">
-              <button
-                type="button"
-                onClick={handleClose}
-                className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
-              >
-                {tempPassword ? 'Done' : 'Cancel'}
-              </button>
-              {!tempPassword && (
-                <button
-                  type="submit"
-                  form="user-form"
-                  disabled={loading}
-                  className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-secondary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {loading ? (
-                    <span className="flex items-center gap-2">
-                      <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                      Creating...
-                    </span>
-                  ) : 'Create User'}
-                </button>
-              )}
+               </div>
             </div>
           </div>
-        </div>
+
+          <div className="space-y-1.5">
+             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Department Mapping</label>
+             <div className="relative">
+                <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
+                {departments.length > 0 ? (
+                  <select
+                    {...register('department_id')}
+                    className="w-full pl-11 pr-4 py-3 bg-slate-50 border-transparent rounded-xl text-sm font-bold focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 transition-all appearance-none"
+                  >
+                    <option value="">Select Department (Optional)</option>
+                    {departments.map(d => (
+                      <option key={d.id} value={d.id}>{d.name}</option>
+                    ))}
+                  </select>
+                ) : (
+                  <input
+                    type="text"
+                    {...register('department_name')}
+                    className="w-full pl-11 pr-4 py-3 bg-slate-50 border-transparent rounded-xl text-sm font-bold placeholder:text-slate-300 focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 transition-all"
+                    placeholder="Department Name (Optional)"
+                  />
+                )}
+             </div>
+          </div>
+        </form>
       </div>
-    </div>
+    </Drawer>
   );
 }

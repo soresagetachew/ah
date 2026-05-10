@@ -2,6 +2,8 @@ import express, { Express, Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import routes from './routes';
+import { enforceSettings } from './middleware/settingsEnforcement';
+import { enforceSessionTimeout } from './middleware/sessionTimeout';
 
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
@@ -28,6 +30,8 @@ app.use(helmet({
 app.use(limiter);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(enforceSettings);
+app.use(enforceSessionTimeout);
 
 app.use('/api', routes);
 

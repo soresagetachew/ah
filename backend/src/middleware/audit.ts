@@ -10,15 +10,17 @@ export const auditLog = (action: string, entityType: string) => {
       res.send = originalSend;
       if (res.statusCode >= 200 && res.statusCode < 300) {
         pool.query(
-          `INSERT INTO audit_logs (id, user_id, entity_type, entity_id, action, ip_address)
-           VALUES (?, ?, ?, ?, ?, ?)`,
+          `INSERT INTO audit_logs (id, user_id, entity_type, entity_id, action, ip_address, old_values, new_values)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
           [
             uuidv4(),
             req.user?.id || null,
             entityType,
-            req.params.id || null,
+            req.params.id || req.body.id || null,
             action,
-            req.ip
+            req.ip,
+            req.body.oldValues ? JSON.stringify(req.body.oldValues) : null,
+            req.body.newValues ? JSON.stringify(req.body.newValues) : null
           ]
         ).catch(err => console.error('Audit log failed', err));
       }

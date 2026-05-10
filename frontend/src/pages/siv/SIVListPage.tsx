@@ -1,8 +1,11 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import client from '../../api/client';
-import { Plus, Search, Truck, Eye } from 'lucide-react';
+import { Plus, Search, Truck, Eye, X, ChevronRight, Box } from 'lucide-react';
 import toast from 'react-hot-toast';
+import PageHeader from '../../components/layout/PageHeader';
+import { SkeletonTable, ErrorState } from '../../components/ui/Skeleton';
+import EmptyState from '../../components/ui/EmptyState';
 
 interface SIV {
   id: string;
@@ -21,15 +24,27 @@ const statusStyles: Record<string, string> = {
 };
 
 export default function SIVListPage() {
+  const navigate = useNavigate();
   const [sivs, setSivs] = useState<SIV[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState('');
 
+  const fetchSIVs = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const res = await client.get('/store-issued-vouchers');
+      setSivs(res.data.data || res.data || []);
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Failed to synchronize store issuance records');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    client.get('/store-issued-vouchers')
-      .then(res => setSivs(res.data.data || res.data || []))
-      .catch(() => toast.error('Failed to load SIVs'))
-      .finally(() => setLoading(false));
+    fetchSIVs();
   }, []);
 
   const filtered = sivs.filter(s =>
@@ -39,29 +54,47 @@ export default function SIVListPage() {
   );
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900">Store Issued Vouchers</h2>
-          <p className="mt-1 text-sm text-gray-500">Track all items issued from the store to departments.</p>
-        </div>
-        <Link
-          to="/store-issued-vouchers/new"
-          className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-secondary"
-        >
-          <Plus className="h-4 w-4" /> New SIV
-        </Link>
-      </div>
+    <div className="max-w-7xl mx-auto space-y-8 pb-20 animate-in fade-in duration-700">
+      <PageHeader 
+        title="Store Issued Vouchers"
+        subtitle="Track and manage all warehouse disbursements and department issuances (SIV)."
+        breadcrumbs={[{ label: 'African Holding' }, { label: 'Store' }, { label: 'Issuance' }]}
+        actions={
+          <Link
+            to="/store-issued-vouchers/new"
+            className="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-6 py-2.5 text-[10px] font-black uppercase tracking-widest text-white shadow-lg shadow-slate-900/30 hover:bg-slate-800 transition-all"
+          >
+            <Plus className="h-4 w-4" /> New SIV
+          </Link>
+        }
+      />
 
-      <div className="relative max-w-sm">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-        <input
-          type="text"
-          className="block w-full rounded-md border border-gray-300 py-2 pl-9 pr-3 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-          placeholder="Search by SIV number, issued to..."
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-        />
+      <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm p-5 flex flex-wrap items-center justify-between gap-4">
+        <div className="flex flex-wrap items-center gap-3 flex-1">
+          <div className="relative">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+            <input 
+              type="text" 
+              placeholder="Search by SIV number or issued to..." 
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-10 pr-4 py-2.5 w-80 bg-slate-50 border-transparent rounded-xl text-sm font-bold text-slate-900 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+            />
+          </div>
+
+          { search && (
+            <button 
+              onClick={() => setSearch('')}
+              className="text-[10px] font-black text-blue-600 uppercase tracking-widest hover:text-blue-700 transition-colors flex items-center gap-1"
+            >
+              <X className="h-3 w-3" /> Clear Filters
+            </button>
+          )}
+        </div>
+
+        <div className="text-xs font-black text-slate-400 uppercase tracking-widest">
+           {filtered.length} Vouchers Found
+        </div>
       </div>
 
       <div className="rounded-lg border border-gray-200 bg-white shadow-sm overflow-hidden">
@@ -81,23 +114,29 @@ export default function SIVListPage() {
             </thead>
             <tbody className="divide-y divide-gray-100 bg-white">
               {loading ? (
-                <tr><td colSpan={8} className="px-6 py-12 text-center">
-                  <div className="flex items-center justify-center gap-2 text-gray-400">
-                    <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-                    Loading...
-                  </div>
-                </td></tr>
+                <tr><td colSpan={8} className="p-8"><SkeletonTable rows={6} /></td></tr>
+              ) : error ? (
+                <tr><td colSpan={8} className="py-20"><ErrorState message={error} onRetry={fetchSIVs} /></td></tr>
               ) : filtered.length === 0 ? (
-                <tr><td colSpan={8} className="px-6 py-16 text-center">
-                  <Truck className="mx-auto h-12 w-12 text-gray-300 mb-3" />
-                  <p className="text-gray-400 text-sm">No Store Issued Vouchers found.</p>
-                  <Link to="/store-issued-vouchers/new" className="mt-3 inline-flex items-center gap-1 text-sm text-primary font-medium hover:underline">
-                    <Plus className="h-4 w-4" /> Issue first voucher
-                  </Link>
+                <tr><td colSpan={8} className="px-6 py-10">
+                   <EmptyState 
+                     icon={Truck}
+                     title="No store vouchers found"
+                     description="Monitor your inventory disbursements by creating your first store issued voucher (SIV)."
+                     action={{
+                       label: "Issue First Voucher",
+                       onClick: () => navigate('/store-issued-vouchers/new')
+                     }}
+                   />
                 </td></tr>
               ) : (
-                filtered.map(siv => (
-                  <tr key={siv.id} className="hover:bg-gray-50 transition-colors">
+                filtered.map((siv, index) => (
+                  <tr 
+                    key={siv.id} 
+                    onClick={() => navigate(`/store-issued-vouchers/${siv.id}`)}
+                    className="hover:bg-gray-50 transition-colors animate-fade-in"
+                    style={{ animationDelay: `${Math.min(index * 50, 250)}ms` }}
+                  >
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className="font-mono text-sm font-semibold text-primary">{siv.serial_no}</span>
                     </td>
