@@ -1,0 +1,43 @@
+{
+  "app": {
+    "title": "አፍሪካን ሆልዲንግ ግዥ",
+    "dashboard": "ዳሽቦርድ",
+    "reports": "ሪፖርቶች",
+    "logout": "ውጣ",
+    "login": "ግባ"
+  },
+  "nav": {
+    "pr": "የግዢ ጥያቄ (PR)",
+    "grn": "የዕቃ ተቀባይ ማስታወሻ (GRN)",
+    "siv": "የመደብር ሰነድ (SIV)",
+    "prf": "የክፍያ ጥያቄ (PRF)",
+    "inventory": "የንብረት አስተዳደር",
+    "approvals": "የማፅደቂያ ሳጥን",
+    "admin": "የተጠቃሚ አስተዳደር",
+    "assets": "የንብረት ቁጥጥር"
+  },
+  "status": {
+    "approved": "ተፈቅዷል",
+    "pending": "በጥበቃ ላይ",
+    "rejected": "ተቀባይነት አላገኘም",
+    "draft": "ረቂቅ",
+    "submitted": "ቀርቧል",
+    "under_review": "በግምገማ ላይ"
+  },
+  "common": {
+    "submit": "ያቅርቡ",
+    "cancel": "ሰርዝ",
+    "save_draft": "እንደ ረቂቅ አስቀምጥ",
+    "department": "ክፍል",
+    "project": "ፕሮጀክት",
+    "amount": "መጠን",
+    "date": "ቀን",
+    "actions": "እርምጃዎች",
+    "new": "አዲስ",
+    "status": "ሁኔታ"
+  },
+  "pwa": {
+    "offline_banner": "የበይነመረብ ግንኙነት የለም — የእርስዎ ረቂቅ ቅጾች በስልክዎ ላይ ተቀምጠዋል",
+    "install": "አፕሊኬሽኑን ጫን"
+  }
+}

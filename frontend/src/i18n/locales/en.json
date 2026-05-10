@@ -1,0 +1,43 @@
+{
+  "app": {
+    "title": "African Holding Procurement",
+    "dashboard": "Dashboard",
+    "reports": "Reports",
+    "logout": "Logout",
+    "login": "Sign in"
+  },
+  "nav": {
+    "pr": "Purchase Requisitions",
+    "grn": "Goods Receiving Notes",
+    "siv": "Store Issued Vouchers",
+    "prf": "Payment Requests",
+    "inventory": "Inventory Management",
+    "approvals": "Approval Inbox",
+    "admin": "User Management",
+    "assets": "Asset Management"
+  },
+  "status": {
+    "approved": "Approved",
+    "pending": "Pending",
+    "rejected": "Rejected",
+    "draft": "Draft",
+    "submitted": "Submitted",
+    "under_review": "Under Review"
+  },
+  "common": {
+    "submit": "Submit",
+    "cancel": "Cancel",
+    "save_draft": "Save Draft",
+    "department": "Department",
+    "project": "Project",
+    "amount": "Amount",
+    "date": "Date",
+    "actions": "Actions",
+    "new": "New",
+    "status": "Status"
+  },
+  "pwa": {
+    "offline_banner": "No internet connection — your draft forms are saved locally",
+    "install": "Install App"
+  }
+}
