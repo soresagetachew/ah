@@ -4,13 +4,15 @@ import client from '../../api/client';
 import { 
   Plus, Search, Package, Eye, Truck, 
   FileText, ChevronUp, ChevronDown, X, 
-  Calendar, Building2, Hash
+  Calendar, Building2, Hash,
+  ChevronLeft, ChevronRight
 } from 'lucide-react';
 import PageHeader from '../../components/layout/PageHeader';
 import StatusBadge from '../../components/ui/StatusBadge';
 import toast from 'react-hot-toast';
 import { SkeletonTable, ErrorState } from '../../components/ui/Skeleton';
 import EmptyState from '../../components/ui/EmptyState';
+import { MobileGRNCard } from '../../components/mobile/MobileGRNCard';
 
 interface GRN {
   id: string;
@@ -91,41 +93,46 @@ export default function GRNListPage() {
       />
 
       {/* FILTERS BAR */}
-      <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm p-5 flex flex-wrap items-center justify-between gap-4">
-        <div className="flex flex-wrap items-center gap-3 flex-1">
-          <div className="relative">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-            <input 
-              type="text" 
-              placeholder="Search by GRN, supplier or invoice..." 
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pl-10 pr-4 py-2.5 w-80 bg-slate-50 border-transparent rounded-xl text-sm font-bold text-slate-900 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-            />
+      <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm p-5 flex flex-col lg:flex-row gap-4">
+        
+        {/* Search input — full width on mobile */}
+        <div className="relative w-full lg:w-96 flex-shrink-0">
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+          <input 
+            type="text" 
+            placeholder="Search by GRN, supplier or invoice..." 
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full pl-10 pr-4 py-3 lg:py-2.5 bg-slate-50 border-transparent rounded-xl text-sm font-bold text-slate-900 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all min-h-[44px]"
+          />
+        </div>
+        
+        {/* Filter dropdowns & Actions — scroll horizontally on mobile */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-2 lg:pb-0 w-full scrollbar-none justify-between lg:justify-start">
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <select 
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="px-4 py-3 lg:py-2.5 bg-slate-50 border-transparent rounded-xl text-xs font-black text-slate-500 uppercase tracking-widest focus:ring-2 focus:ring-blue-500/20 transition-all min-h-[44px] cursor-pointer"
+            >
+              <option value="">All Statuses</option>
+              <option value="draft">Draft</option>
+              <option value="completed">Completed</option>
+            </select>
+
+            { (search || statusFilter) && (
+              <button 
+                onClick={() => { setSearch(''); setStatusFilter(''); }}
+                className="px-3 py-3 lg:py-2.5 text-[10px] font-black text-blue-600 uppercase tracking-widest hover:bg-blue-50 transition-colors flex items-center gap-1.5 rounded-xl min-h-[44px]"
+              >
+                <X className="h-3.5 w-3.5" /> Clear
+              </button>
+            )}
           </div>
           
-          <select 
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-4 py-2.5 bg-slate-50 border-transparent rounded-xl text-sm font-black text-slate-500 uppercase tracking-widest focus:ring-2 focus:ring-blue-500/20 transition-all"
-          >
-            <option value="">All Statuses</option>
-            <option value="draft">Draft</option>
-            <option value="completed">Completed</option>
-          </select>
-
-          { (search || statusFilter) && (
-            <button 
-              onClick={() => { setSearch(''); setStatusFilter(''); }}
-              className="text-[10px] font-black text-blue-600 uppercase tracking-widest hover:text-blue-700 transition-colors flex items-center gap-1"
-            >
-              <X className="h-3 w-3" /> Clear Filters
-            </button>
-          )}
-        </div>
-
-        <div className="text-xs font-black text-slate-400 uppercase tracking-widest">
-           {filtered.length} Records Found
+          <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex-shrink-0 px-2">
+             {filtered.length} Records Found
+          </div>
         </div>
       </div>
 
@@ -141,7 +148,8 @@ export default function GRNListPage() {
         />
       ) : (
         <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden">
-          <div className="overflow-x-auto">
+          {/* Desktop View */}
+          <div className="hidden lg:block overflow-x-auto">
             <table className="min-w-full divide-y divide-slate-100">
               <thead className="bg-slate-50/50">
                 <tr>
@@ -210,6 +218,30 @@ export default function GRNListPage() {
                 ))}
               </tbody>
             </table>
+          </div>
+
+          {/* Mobile View */}
+          <div className="lg:hidden p-4 space-y-3 bg-slate-50/30">
+            {filtered.map((grn) => (
+              <MobileGRNCard 
+                key={grn.id} 
+                item={grn} 
+                onClick={() => navigate(`/goods-receiving-notes/${grn.id}`)} 
+              />
+            ))}
+          </div>
+
+          {/* Pagination */}
+          <div className="px-4 lg:px-8 py-4 bg-slate-50 border-t border-slate-100">
+             <div className="flex items-center justify-between">
+                <button disabled className="flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-200 bg-white text-[10px] font-black uppercase tracking-widest text-slate-400 disabled:opacity-50 min-h-[44px]">
+                   <ChevronLeft className="w-4 h-4" /> Prev
+                </button>
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Page 1 / 1</span>
+                <button disabled className="flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-200 bg-white text-[10px] font-black uppercase tracking-widest text-slate-400 disabled:opacity-50 min-h-[44px]">
+                   Next <ChevronRight className="w-4 h-4" />
+                </button>
+             </div>
           </div>
         </div>
       )}

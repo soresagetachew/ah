@@ -31,7 +31,18 @@ async function bootstrap() {
               </ThemeProvider>
             </SettingsProvider>
           </ErrorBoundary>
-          <Toaster position="top-right" />
+          <Toaster 
+            position="top-center" 
+            toastOptions={{
+              duration: 3000,
+              style: {
+                fontSize: '13px',
+                borderRadius: '12px',
+                maxWidth: '340px',
+                fontWeight: '600',
+              }
+            }}
+          />
         </BrowserRouter>
       </QueryClientProvider>
     </React.StrictMode>

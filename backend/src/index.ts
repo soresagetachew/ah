@@ -20,7 +20,7 @@ const limiter = rateLimit({
 });
 
 app.use(cors({
-  origin: 'http://localhost:3000',
+  origin: true, // Allow all origins for dev network access
   credentials: true,
   optionsSuccessStatus: 200
 }));
@@ -40,6 +40,6 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   res.status(500).json({ message: 'Internal Server Error' });
 });
 
-app.listen(port, () => {
-  console.log(`Server is running at http://localhost:${port}`);
+app.listen(Number(port), '0.0.0.0', () => {
+  console.log(`Server is running on all interfaces at port ${port}`);
 });

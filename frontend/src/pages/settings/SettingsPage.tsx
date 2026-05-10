@@ -84,27 +84,26 @@ export default function SettingsPage() {
     }
   ];
 
-  const activeLabel = useMemo(() => {
+  const { activeLabel, activeCategory } = useMemo(() => {
+    let label = 'Settings';
+    let category = null;
     for (const group of navGroups) {
       const item = group.items.find(i => i.id === activeSection);
-      if (item) return item.label;
+      if (item) {
+        label = item.label;
+        category = item.category;
+        break;
+      }
     }
-    return 'Settings';
-  }, [activeSection]);
-
-  const activeCategory = useMemo(() => {
-    for (const group of navGroups) {
-      const item = group.items.find(i => i.id === activeSection);
-      if (item) return item.category;
-    }
-    return null;
-  }, [activeSection]);
+    return { activeLabel: label, activeCategory: category };
+  }, [activeSection, navGroups]);
 
   return (
-    <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-8 pb-20 animate-in fade-in duration-700">
-      {/* LEFT NAVIGATION */}
+    <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-8 pb-20 animate-in fade-in duration-700 px-4 lg:px-0">
+      {/* NAVIGATION: Sidebar on Desktop, Dropdown on Mobile */}
       <aside className="w-full lg:w-[260px] shrink-0">
-        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm sticky top-6 self-start overflow-hidden">
+        {/* Desktop Sidebar */}
+        <div className="hidden lg:block bg-white rounded-2xl border border-slate-100 shadow-sm sticky top-6 self-start overflow-hidden">
           <div className="px-5 pt-6 pb-4">
             <h2 className="text-lg font-bold text-slate-900 tracking-tight">Settings</h2>
           </div>
@@ -149,21 +148,38 @@ export default function SettingsPage() {
             ))}
           </nav>
         </div>
+
+        {/* Mobile Dropdown Selector */}
+        <div className="lg:hidden">
+          <select
+            value={activeSection}
+            onChange={e => setActiveSection(e.target.value)}
+            className="w-full px-4 py-3.5 rounded-xl border border-slate-200 bg-white text-sm font-black text-slate-900 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none appearance-none shadow-sm min-h-[48px]"
+          >
+            {navGroups.map(group => (
+              <optgroup key={group.title} label={group.title}>
+                {group.items.map(item => (
+                  <option key={item.id} value={item.id}>{item.label}</option>
+                ))}
+              </optgroup>
+            ))}
+          </select>
+        </div>
       </aside>
 
       {/* RIGHT CONTENT AREA */}
       <main className="flex-1 min-w-0">
-        <div className="mb-6 flex items-center gap-2 text-xs font-bold text-slate-400 uppercase tracking-widest">
-           <span>Settings</span>
-           <ChevronRight className="h-3 w-3" />
-           <span className="text-slate-900">{activeLabel}</span>
+        <div className="mb-4 lg:mb-6 flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest">
+           <span className="hidden lg:inline">Settings</span>
+           <ChevronRight className="h-3 w-3 hidden lg:inline" />
+           <span className="text-slate-900 lg:text-slate-400">{activeLabel}</span>
         </div>
 
-        <div key={activeSection} className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm min-h-[600px] overflow-hidden animate-in fade-in slide-in-from-right-4 duration-500">
+        <div key={activeSection} className="bg-white rounded-2xl lg:rounded-[2.5rem] border border-slate-100 shadow-sm min-h-[500px] lg:min-h-[600px] overflow-hidden animate-in fade-in slide-in-from-right-4 duration-500">
            {isLoading ? (
-             <div className="flex flex-col items-center justify-center h-[600px] opacity-20">
+             <div className="flex flex-col items-center justify-center h-[500px] lg:h-[600px] opacity-20">
                 <Loader2 className="h-10 w-10 animate-spin mb-4" />
-                <p className="text-xs font-black uppercase tracking-widest">Synchronizing Configuration...</p>
+                <p className="text-[10px] font-black uppercase tracking-widest">Syncing Config...</p>
              </div>
            ) : (
              <SectionRenderer 

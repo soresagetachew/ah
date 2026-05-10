@@ -11,6 +11,7 @@ import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import client from '../../../api/client';
 import { Modal, Drawer, ConfirmationModal } from '../../../components/ui/Modal';
+import { MobileUserCard } from '../../../components/mobile/MobileUserCard';
 
 type Tab = 'users' | 'roles';
 
@@ -151,7 +152,7 @@ function UsersTab() {
 
       {/* TABLE */}
       <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
+        <div className="hidden lg:block overflow-x-auto">
           <table className="min-w-full divide-y divide-slate-100">
             <thead className="bg-slate-50/50">
               <tr>
@@ -229,6 +230,26 @@ function UsersTab() {
               ))}
             </tbody>
           </table>
+        </div>
+
+        {/* Mobile View */}
+        <div className="lg:hidden p-4 space-y-4">
+           {loading ? (
+             <div className="py-20 text-center"><Loader2 className="h-8 w-8 animate-spin mx-auto opacity-20" /></div>
+           ) : users.length === 0 ? (
+             <div className="py-20 text-center text-slate-400 text-sm font-bold">No users found.</div>
+           ) : users.map(u => (
+             <MobileUserCard 
+               key={u.id}
+               user={{
+                 ...u,
+                 status: u.is_active ? 1 : 0,
+                 department: u.department_name || 'HO'
+               }}
+               onEdit={() => { setSelectedUser(u); setTempPassword(null); setIsDrawerOpen(true); }}
+               onStatusToggle={() => {/* status toggle logic */}}
+             />
+           ))}
         </div>
       </div>
 
@@ -577,44 +598,65 @@ function RolesTab() {
        </div>
 
        {/* PERMISSIONS MATRIX */}
-       <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden p-10 lg:p-12 space-y-12">
+       <div className="bg-white rounded-2xl lg:rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden p-6 lg:p-12 space-y-8 lg:space-y-12">
           {loading ? (
              <div className="py-20 text-center"><Loader2 className="h-8 w-8 animate-spin mx-auto opacity-20" /></div>
           ) : (
             <>
               {permGroups.map(group => (
-                 <div key={group.title} className="space-y-6">
-                    <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-6 border-b border-slate-50 pb-2">{group.title}</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-4">
+                 <div key={group.title} className="space-y-4 lg:space-y-6">
+                    <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4 lg:mb-6 border-b border-slate-50 pb-2">{group.title}</h4>
+                    
+                    {/* Desktop: 2-column grid */}
+                    <div className="hidden lg:grid grid-cols-2 gap-x-12 gap-y-4">
                        {group.perms.map(p => (
                          <div key={p.key} className="flex items-center justify-between p-4 rounded-2xl border border-transparent hover:border-slate-50 hover:bg-slate-50/50 transition-all group">
                             <span className="text-sm font-bold text-slate-700 group-hover:text-slate-900">{p.label}</span>
                             <button 
                               onClick={() => handleToggle(selectedRole, p.key)}
-                              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${permissions[selectedRole]?.[p.key] ? 'bg-blue-600' : 'bg-slate-200'}`}
+                              className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors ${permissions[selectedRole]?.[p.key] ? 'bg-blue-600' : 'bg-slate-200'}`}
                             >
                                <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${permissions[selectedRole]?.[p.key] ? 'translate-x-6' : 'translate-x-1'}`} />
                             </button>
                          </div>
                        ))}
                     </div>
+
+                    {/* Mobile: Stacked list with dividers */}
+                    <div className="lg:hidden space-y-2">
+                       <div className="bg-slate-50/50 rounded-2xl border border-slate-100 overflow-hidden">
+                          {group.perms.map((p, i) => (
+                            <div key={p.key} className={`flex items-center justify-between p-4 ${i < group.perms.length - 1 ? 'border-b border-slate-100' : ''}`}>
+                               <span className="text-xs font-bold text-slate-700">{p.label}</span>
+                               <button 
+                                 onClick={() => handleToggle(selectedRole, p.key)}
+                                 className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors min-h-[44px] min-w-[44px] ${permissions[selectedRole]?.[p.key] ? 'bg-blue-600' : 'bg-slate-200'}`}
+                               >
+                                  <div className={`h-6 w-11 flex items-center px-1 rounded-full transition-colors ${permissions[selectedRole]?.[p.key] ? 'bg-blue-600' : 'bg-slate-200'}`}>
+                                     <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${permissions[selectedRole]?.[p.key] ? 'translate-x-5' : 'translate-x-0'}`} />
+                                  </div>
+                               </button>
+                            </div>
+                          ))}
+                       </div>
+                    </div>
                  </div>
               ))}
 
-              <div className="pt-8 border-t border-slate-50 flex items-center justify-between">
+              <div className="pt-8 border-t border-slate-50 flex flex-col lg:flex-row items-center justify-between gap-4">
                  {hasChanges ? (
-                    <div className="flex items-center gap-2 px-4 py-2 bg-amber-50 text-amber-600 rounded-xl text-[10px] font-black uppercase tracking-widest">
+                    <div className="flex items-center gap-2 px-4 py-2 bg-amber-50 text-amber-600 rounded-xl text-[10px] font-black uppercase tracking-widest w-full lg:w-auto justify-center">
                        <AlertTriangle className="h-4 w-4" /> {changeCount} Pending Changes
                     </div>
-                 ) : <div />}
+                 ) : <div className="hidden lg:block" />}
                  
                  <button 
                    onClick={handleSave}
                    disabled={saving || !hasChanges}
-                   className="flex items-center gap-2 px-10 py-4 bg-slate-900 hover:bg-black text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl transition-all active:scale-[0.98] disabled:opacity-50"
+                   className="w-full lg:w-auto flex items-center justify-center gap-2 px-10 py-4 bg-slate-900 hover:bg-black text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl transition-all active:scale-[0.98] disabled:opacity-50 min-h-[52px]"
                  >
                     {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-                    Save Permissions for {selectedRole}
+                    Save {selectedRole} Permissions
                  </button>
               </div>
             </>

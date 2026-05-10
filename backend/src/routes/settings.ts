@@ -74,11 +74,9 @@ router.use(authorize(['System Admin']));
 // System Settings
 router.get('/', getSettings);
 router.get('/audit', getAuditLogs);
-router.get('/:key', getSettingByKey);
+router.post('/logo', upload.single('logo'), uploadLogo);
 router.put('/', auditLog('update_setting', 'system'), updateSetting);
 router.put('/bulk', auditLog('bulk_update_settings', 'system'), bulkUpdateSettings);
-router.post('/logo', upload.single('logo'), uploadLogo);
-
 // Users & Roles
 router.get('/users/all', getUsers);
 router.post('/users', auditLog('create_user', 'user'), createUser);
@@ -93,6 +91,7 @@ router.put('/departments/:id', auditLog('update_department', 'org'), updateDepar
 router.delete('/departments/:id', auditLog('delete_department', 'org'), deleteDepartment);
 router.get('/projects', getProjects);
 router.post('/projects', auditLog('create_project', 'org'), createProject);
+router.get('/:key', getSettingByKey);
 
 // Budgeting
 router.get('/budgets/summary', getBudgetSummary);

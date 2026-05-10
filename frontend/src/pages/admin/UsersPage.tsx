@@ -67,22 +67,23 @@ export default function UsersPage() {
 
       <div className="bg-white rounded-[2rem] border border-slate-200 shadow-xl shadow-slate-900/5 overflow-hidden">
         {/* Table Header / Search */}
-        <div className="p-8 border-b border-slate-100 bg-slate-50/30 flex flex-col md:flex-row md:items-center justify-between gap-4">
-           <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest">Active Directory</h3>
-           <div className="relative w-full md:w-80">
+        <div className="p-5 lg:p-8 border-b border-slate-100 bg-slate-50/30 flex flex-col md:flex-row md:items-center justify-between gap-4">
+           <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest hidden md:block">Active Directory</h3>
+           <div className="relative w-full md:w-80 flex-shrink-0">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
               <input 
                 type="text" 
                 placeholder="Search by name or email..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-11 pr-4 py-3 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                className="w-full pl-11 pr-4 py-3 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all min-h-[44px]"
               />
            </div>
         </div>
 
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-slate-100">
+          {/* Desktop Table View */}
+          <table className="hidden lg:table min-w-full divide-y divide-slate-100">
             <thead className="bg-slate-50/50">
               <tr>
                 <th className="px-8 py-5 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">User Profile</th>
@@ -167,7 +168,7 @@ export default function UsersPage() {
                       >
                         {person.is_active
                           ? <><UserX className="h-4 w-4" /> Block</>
-                          : <><UserCheck className="h-4 w-4" /> Enable Access</>}
+                          : <><UserCheck className="h-4 w-4" /> Enable</>}
                       </button>
                     </td>
                   </tr>
@@ -175,6 +176,58 @@ export default function UsersPage() {
               )}
             </tbody>
           </table>
+
+          {/* Mobile Card View */}
+          <div className="lg:hidden divide-y divide-slate-100">
+            {loading ? (
+              <div className="p-8 space-y-4">
+                {[1, 2, 3].map(i => <div key={i} className="h-32 bg-slate-50 animate-pulse rounded-2xl" />)}
+              </div>
+            ) : filteredUsers.map((person) => (
+              <div key={person.id} className="p-6 space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-xl bg-blue-600 flex items-center justify-center text-white text-sm font-black">
+                      {(person.full_name || '?').charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                      <div className="text-sm font-black text-slate-900">{person.full_name}</div>
+                      <div className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">{person.email}</div>
+                    </div>
+                  </div>
+                  <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest border ${
+                    person.is_active ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 'bg-red-50 text-red-700 border-red-100'
+                  }`}>
+                    {person.is_active ? 'Active' : 'Inactive'}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 bg-slate-50 rounded-2xl p-4">
+                  <div>
+                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Access Control</p>
+                    <RoleBadge role={person.role} />
+                  </div>
+                  <div>
+                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Business Unit</p>
+                    <p className="text-[10px] font-bold text-slate-700 uppercase">{person.business_unit || 'Head Office'}</p>
+                  </div>
+                </div>
+
+                <button
+                  className={`w-full flex items-center justify-center gap-2 rounded-xl py-3 text-[10px] font-black uppercase tracking-widest border transition-all ${
+                    person.is_active
+                      ? 'border-red-100 text-red-600 bg-red-50/50'
+                      : 'border-emerald-100 text-emerald-600 bg-emerald-50/50'
+                  }`}
+                  onClick={() => toggleStatus(person.id, person.is_active)}
+                >
+                  {person.is_active
+                    ? <><UserX className="h-4 w-4" /> Deactivate Access</>
+                    : <><UserCheck className="h-4 w-4" /> Enable System Access</>}
+                </button>
+              </div>
+            ))}
+          </div>
         </div>
         {!loading && filteredUsers.length > 0 && (
           <div className="bg-slate-50 border-t border-slate-100 px-8 py-4 flex items-center justify-between text-[10px] font-black text-slate-400 uppercase tracking-widest">

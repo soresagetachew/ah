@@ -22,14 +22,17 @@ export const generatePDF = async (htmlContent: string) => {
 };
 
 // HTML templates for different documents
-export const getPRTemplate = (data: any) => {
+export const getPRTemplate = (data: any, brand: any = {}) => {
+  const logoUrl = brand.logoUrl || '';
   return `
     <html>
       <head>
         <style>
           body { font-family: Arial, sans-serif; padding: 20px; }
-          .header { text-align: center; margin-bottom: 30px; }
-          .title { font-size: 24px; font-weight: bold; text-decoration: underline; }
+          .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 30px; border-bottom: 2px solid #000; padding-bottom: 15px; }
+          .logo { height: 50px; }
+          .header-text { text-align: right; }
+          .title { font-size: 24px; font-weight: bold; margin: 0; }
           .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 30px; }
           table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
           th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
@@ -40,8 +43,11 @@ export const getPRTemplate = (data: any) => {
       </head>
       <body>
         <div class="header">
-          <h1 class="title">Purchase Requisition</h1>
-          <p>Serial No: <strong>${data.serial_no}</strong></p>
+          ${logoUrl ? `<img src="${logoUrl}" class="logo" alt="Logo" />` : `<div></div>`}
+          <div class="header-text">
+            <h1 class="title">Purchase Requisition</h1>
+            <p style="margin: 5px 0 0 0;">Serial No: <strong>${data.serial_no}</strong></p>
+          </div>
         </div>
         
         <div class="info-grid">
@@ -84,14 +90,17 @@ export const getPRTemplate = (data: any) => {
   `;
 };
 
-export const getGRNTemplate = (data: any) => {
+export const getGRNTemplate = (data: any, brand: any = {}) => {
+  const logoUrl = brand.logoUrl || '';
   return `
     <html>
       <head>
         <style>
           body { font-family: Arial, sans-serif; padding: 20px; }
-          .header { text-align: center; margin-bottom: 30px; }
-          .title { font-size: 24px; font-weight: bold; text-decoration: underline; }
+          .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 30px; border-bottom: 2px solid #000; padding-bottom: 15px; }
+          .logo { height: 50px; }
+          .header-text { text-align: right; }
+          .title { font-size: 24px; font-weight: bold; margin: 0; }
           .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 30px; }
           table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
           th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
@@ -102,8 +111,11 @@ export const getGRNTemplate = (data: any) => {
       </head>
       <body>
         <div class="header">
-          <h1 class="title">Goods Receiving Note</h1>
-          <p>Serial No: <strong>${data.serial_no}</strong></p>
+          ${logoUrl ? `<img src="${logoUrl}" class="logo" alt="Logo" />` : `<div></div>`}
+          <div class="header-text">
+            <h1 class="title">Goods Receiving Note</h1>
+            <p style="margin: 5px 0 0 0;">Serial No: <strong>${data.serial_no}</strong></p>
+          </div>
         </div>
         <div class="info-grid">
           <div><p><strong>Supplier:</strong> ${data.supplier_name}</p></div>
@@ -136,14 +148,17 @@ export const getGRNTemplate = (data: any) => {
   `;
 };
 
-export const getSIVTemplate = (data: any) => {
+export const getSIVTemplate = (data: any, brand: any = {}) => {
+  const logoUrl = brand.logoUrl || '';
   return `
     <html>
       <head>
         <style>
           body { font-family: Arial, sans-serif; padding: 20px; }
-          .header { text-align: center; margin-bottom: 30px; }
-          .title { font-size: 24px; font-weight: bold; text-decoration: underline; }
+          .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 30px; border-bottom: 2px solid #000; padding-bottom: 15px; }
+          .logo { height: 50px; }
+          .header-text { text-align: right; }
+          .title { font-size: 24px; font-weight: bold; margin: 0; }
           .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 30px; }
           table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
           th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
@@ -154,8 +169,11 @@ export const getSIVTemplate = (data: any) => {
       </head>
       <body>
         <div class="header">
-          <h1 class="title">Store Issued Voucher</h1>
-          <p>Serial No: <strong>${data.serial_no}</strong></p>
+          ${logoUrl ? `<img src="${logoUrl}" class="logo" alt="Logo" />` : `<div></div>`}
+          <div class="header-text">
+            <h1 class="title">Store Issued Voucher</h1>
+            <p style="margin: 5px 0 0 0;">Serial No: <strong>${data.serial_no}</strong></p>
+          </div>
         </div>
         <div class="info-grid">
           <div><p><strong>Issued To:</strong> ${data.issued_to_name}</p></div>
@@ -188,14 +206,17 @@ export const getSIVTemplate = (data: any) => {
   `;
 };
 
-export const getPRFTemplate = (data: any) => {
+export const getPRFTemplate = (data: any, brand: any = {}) => {
+  const logoUrl = brand.logoUrl || '';
   return `
     <html>
       <head>
         <style>
           body { font-family: Arial, sans-serif; padding: 20px; }
-          .header { text-align: center; margin-bottom: 30px; }
-          .title { font-size: 24px; font-weight: bold; text-decoration: underline; }
+          .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 30px; border-bottom: 2px solid #000; padding-bottom: 15px; }
+          .logo { height: 50px; }
+          .header-text { text-align: right; }
+          .title { font-size: 24px; font-weight: bold; margin: 0; }
           .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 30px; }
           .total-box { border: 2px solid #000; padding: 15px; margin-bottom: 30px; background: #f9f9f9; }
           .signatures { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-top: 50px; }
@@ -204,8 +225,11 @@ export const getPRFTemplate = (data: any) => {
       </head>
       <body>
         <div class="header">
-          <h1 class="title">Payment Request Form</h1>
-          <p>Serial No: <strong>${data.serial_no}</strong></p>
+          ${logoUrl ? `<img src="${logoUrl}" class="logo" alt="Logo" />` : `<div></div>`}
+          <div class="header-text">
+            <h1 class="title">Payment Request Form</h1>
+            <p style="margin: 5px 0 0 0;">Serial No: <strong>${data.serial_no}</strong></p>
+          </div>
         </div>
         <div class="info-grid">
           <div><p><strong>Requested By:</strong> ${data.requester_name}</p></div>

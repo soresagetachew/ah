@@ -56,4 +56,46 @@ body {
   ::-webkit-scrollbar-thumb {
     @apply bg-slate-300 rounded-full hover:bg-slate-400 transition-colors;
   }
+  .safe-area-inset-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  .scrollbar-none {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* GLOBAL MOBILE POLISH */
+
+/* Prevent blue tap highlight on mobile */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Active state for touch feedback */
+button:active, a:active {
+  opacity: 0.85;
+}
+
+/* Prevent text selection on buttons */
+button {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Fix input zoom on iOS (font-size must be >= 16px to prevent auto-zoom) */
+@media (max-width: 768px) {
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  input[type="search"],
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
 }

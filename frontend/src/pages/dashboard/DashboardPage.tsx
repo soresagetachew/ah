@@ -14,7 +14,7 @@ import {
 import { Link, useNavigate } from 'react-router-dom';
 import { themeEngine } from '../../engine/ThemeEngine';
 import StatusBadge from '../../components/ui/StatusBadge';
-import { ThemedCard, ThemedButton } from '../../components/ui/themed';
+import { ThemedCard, ThemedButton, ThemedTableRow } from '../../components/ui/themed';
 import StatCard from '../../components/ui/StatCard';
 import PageHeader from '../../components/layout/PageHeader';
 import { Skeleton, StatCardSkeleton, ErrorState } from '../../components/ui/Skeleton';
@@ -90,57 +90,91 @@ export default function DashboardPage() {
 
     return (
       <div className="space-y-6">
-        <div className="relative bg-primary rounded-lg p-8 overflow-hidden shadow-2xl shadow-primary/20">
-          <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-8">
+        <div className="relative bg-primary rounded-xl lg:rounded-2xl p-5 lg:p-8 overflow-hidden shadow-2xl shadow-primary/20">
+          <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6 lg:gap-8">
             <div>
-              <h2 className="text-2xl font-semibold text-white tracking-tight">Good morning, {user.full_name} 👋</h2>
-              <p className="text-slate-400 mt-2 font-medium">Here's what's happening at African Holding today.</p>
-              <div className="flex flex-wrap gap-3 mt-8">
-                <div className="bg-white/10 backdrop-blur-md border border-white/10 rounded-full px-5 py-2 flex items-center gap-2"><span className="h-2 w-2 rounded-full bg-amber-500 animate-pulse" /><span className="text-xs font-semibold text-white uppercase tracking-wide">{data.pendingApprovals} Pending Approvals</span></div>
-                <div className="bg-white/10 backdrop-blur-md border border-white/10 rounded-full px-5 py-2 flex items-center gap-2"><span className="text-xs font-semibold text-white uppercase tracking-wide">{data.totalPRs} PRs This Month</span></div>
+              <h2 className="text-xl lg:text-2xl font-semibold text-white tracking-tight">Good morning, {user.full_name?.split(' ')[0]} 👋</h2>
+              <p className="text-slate-400 text-sm mt-1 lg:mt-2 font-medium">Here's what's happening at African Holding today.</p>
+              <div className="flex flex-wrap gap-2 lg:gap-3 mt-6 lg:mt-8">
+                <div className="bg-white/10 backdrop-blur-md border border-white/10 rounded-full px-4 lg:px-5 py-1.5 lg:py-2 flex items-center gap-2">
+                  <span className="h-2 w-2 rounded-full bg-amber-500 animate-pulse" />
+                  <span className="text-[10px] lg:text-xs font-semibold text-white uppercase tracking-wide">{data.pendingApprovals} Pending Approvals</span>
+                </div>
+                <div className="bg-white/10 backdrop-blur-md border border-white/10 rounded-full px-4 lg:px-5 py-1.5 lg:py-2 flex items-center gap-2">
+                  <span className="text-[10px] lg:text-xs font-semibold text-white uppercase tracking-wide">{data.totalPRs} PRs This Month</span>
+                </div>
               </div>
             </div>
             <div className="hidden lg:block opacity-20 transform translate-x-10 translate-y-6"><Activity className="w-8 h-8 text-white stroke-[1]" /></div>
           </div>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-6">
           <StatCard label="Total PRs" value={data.totalPRs} icon={FileText} color="blue" />
           <StatCard label="Total Spend" value={`ETB ${Number(data.totalSpend).toLocaleString()}`} icon={DollarSign} color="green" />
           <StatCard label="Pending" value={data.pendingApprovals} icon={Clock} color="amber" />
           <StatCard label="Rejected" value={data.rejectedCount} icon={XCircle} color="red" />
         </div>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <ThemedCard className="lg:col-span-2 p-8 group">
-            <div className="flex items-center justify-between mb-8"><div><h3 className="text-lg font-black text-text-primary tracking-tight">Monthly Spend Overview</h3><p className="text-xs font-bold text-text-muted uppercase tracking-widest mt-1">Last 6 months by department</p></div><div className="h-10 w-10 rounded-md bg-accent-light flex items-center justify-center text-accent"><TrendingUp className="h-5 w-5" /></div></div>
-            <div className="h-[300px]">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
+          <ThemedCard className="lg:col-span-2 p-4 lg:p-8 group">
+            <div className="flex items-center justify-between mb-6 lg:mb-8">
+              <div>
+                <h3 className="text-base lg:text-lg font-black text-text-primary tracking-tight">Monthly Spend Overview</h3>
+                <p className="text-[10px] lg:text-xs font-bold text-text-muted uppercase tracking-widest mt-1">Last 6 months</p>
+              </div>
+              <div className="h-10 w-10 rounded-md bg-accent-light flex items-center justify-center text-accent">
+                <TrendingUp className="h-5 w-5" />
+              </div>
+            </div>
+            <div className="h-[220px] lg:h-[300px]">
               {charts.spend.length > 0 ? (
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={charts.spend}>
+                  <BarChart data={charts.spend} margin={{ top: 5, right: 10, left: -20, bottom: 5 }}>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-border)" />
-                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: 'var(--color-text-muted)', fontSize: 10, fontWeight: 900}} dy={10} />
-                    <YAxis axisLine={false} tickLine={false} tick={{fill: 'var(--color-text-muted)', fontSize: 10, fontWeight: 900}} tickFormatter={(v) => `ETB ${v >= 1000 ? (v/1000).toFixed(0) + 'k' : v}`} dx={-10} />
+                    <XAxis 
+                      dataKey="name" 
+                      axisLine={false} 
+                      tickLine={false} 
+                      tick={{fill: 'var(--color-text-muted)', fontSize: 10, fontWeight: 700}} 
+                      interval={window.innerWidth < 640 ? "preserveStartEnd" : 0}
+                      tickFormatter={(val) => window.innerWidth < 640 ? val.substring(0, 3) : val}
+                    />
+                    <YAxis 
+                      axisLine={false} 
+                      tickLine={false} 
+                      tick={{fill: 'var(--color-text-muted)', fontSize: 10, fontWeight: 700}} 
+                      tickFormatter={(v) => `ETB ${v >= 1000 ? (v/1000).toFixed(0) + 'k' : v}`} 
+                      width={40}
+                    />
                     <Tooltip cursor={{fill: 'var(--color-page-bg)'}} content={({ active, payload }) => {
                         if (active && payload && payload.length) {
-                          return <ThemedCard className="p-4 animate-in fade-in zoom-in-95 duration-150"><p className="text-xs font-semibold text-text-muted uppercase tracking-wide mb-1">{payload[0].payload.name}</p><p className="text-sm font-semibold text-text-primary tabular-nums">ETB {Number(payload[0].value).toLocaleString()}</p></ThemedCard>;
+                          return <ThemedCard className="p-3 shadow-xl"><p className="text-[10px] font-semibold text-text-muted uppercase tracking-wide mb-1">{payload[0].payload.name}</p><p className="text-xs font-semibold text-text-primary tabular-nums">ETB {Number(payload[0].value).toLocaleString()}</p></ThemedCard>;
                         }
                         return null;
                       }} />
-                    <Bar dataKey="amount" fill="var(--color-accent)" radius={[6, 6, 0, 0]} barSize={32}>
+                    <Bar dataKey="amount" fill="var(--color-accent)" radius={[4, 4, 0, 0]} barSize={window.innerWidth < 640 ? 16 : 32}>
                       {charts.spend.map((_: any, index: number) => <Cell key={`cell-${index}`} className="hover:fill-accent-hover transition-colors duration-200 cursor-pointer" />)}
                     </Bar>
                   </BarChart>
                 </ResponsiveContainer>
-              ) : <div className="h-full flex flex-col items-center justify-center bg-slate-50 rounded-2xl border-2 border-dashed border-slate-100"><Activity className="h-10 w-10 text-slate-200 mb-2" /><p className="text-xs font-black text-slate-400 uppercase tracking-widest">No chart data available</p></div>}
+              ) : <div className="h-full flex flex-col items-center justify-center bg-slate-50 rounded-2xl border-2 border-dashed border-slate-100"><Activity className="h-10 w-10 text-slate-200 mb-2" /><p className="text-xs font-black text-slate-400 uppercase tracking-widest">No data</p></div>}
             </div>
           </ThemedCard>
-          <ThemedCard className="p-8">
-            <h3 className="text-lg font-black text-text-primary tracking-tight">Spend by Unit</h3>
-            <p className="text-xs font-bold text-text-muted uppercase tracking-widest mt-1 mb-8">Allocation percentage</p>
-            <div className="h-[200px] mb-8">
+          <ThemedCard className="p-6 lg:p-8">
+            <h3 className="text-base lg:text-lg font-black text-text-primary tracking-tight">Spend by Unit</h3>
+            <p className="text-[10px] lg:text-xs font-bold text-text-muted uppercase tracking-widest mt-1 mb-6 lg:mb-8">Allocation</p>
+            <div className="h-[180px] lg:h-[200px] mb-6 lg:mb-8">
               {pieData.length > 0 ? (
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
-                    <Pie data={pieData} cx="50%" cy="50%" innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value">
+                    <Pie 
+                      data={pieData} 
+                      cx="50%" 
+                      cy="50%" 
+                      innerRadius={window.innerWidth < 640 ? 50 : 60} 
+                      outerRadius={window.innerWidth < 640 ? 70 : 80} 
+                      paddingAngle={5} 
+                      dataKey="value"
+                    >
                       {pieData.map((_: any, index: number) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
                     </Pie>
                     <Tooltip content={({ active, payload }) => {
@@ -153,7 +187,7 @@ export default function DashboardPage() {
                 </ResponsiveContainer>
               ) : <div className="h-full bg-slate-50 rounded-full border-2 border-dashed border-slate-100" />}
             </div>
-            <div className="space-y-3">{pieData.map((item: any, index: number) => (<div key={item.name} className="flex items-center justify-between group"><div className="flex items-center gap-3"><div className="h-2 w-2 rounded-full" style={{ backgroundColor: COLORS[index % COLORS.length] }} /><span className="text-xs font-bold text-text-secondary group-hover:text-text-primary transition-colors">{item.name}</span></div><span className="text-xs font-black text-text-muted">{item.percentage}%</span></div>))}</div>
+            <div className="space-y-2 lg:space-y-3">{pieData.map((item: any, index: number) => (<div key={item.name} className="flex items-center justify-between group"><div className="flex items-center gap-2 lg:gap-3"><div className="h-2 w-2 rounded-full" style={{ backgroundColor: COLORS[index % COLORS.length] }} /><span className="text-[10px] lg:text-xs font-bold text-text-secondary group-hover:text-text-primary transition-colors truncate max-w-[120px]">{item.name}</span></div><span className="text-[10px] lg:text-xs font-black text-text-muted">{item.percentage}%</span></div>))}</div>
           </ThemedCard>
         </div>
       </div>
@@ -169,27 +203,34 @@ export default function DashboardPage() {
     const paymentQueue = charts.pending.filter((item: any) => item.type === 'PRF').slice(0, 5);
     return (
       <div className="space-y-6">
-        <div className="relative bg-gradient-to-r from-indigo-900 to-purple-800 rounded-2xl p-8 overflow-hidden shadow-2xl shadow-indigo-900/20">
-          <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-8">
-            <div><h2 className="text-2xl font-semibold text-white tracking-tight">Financial Overview 👋</h2><p className="text-indigo-200 mt-2 font-medium">Monitoring AHG's fiscal health and disbursement lifecycle.</p>
-              <div className="flex flex-wrap gap-3 mt-8">
-                <div className="bg-white/10 backdrop-blur-md border border-white/10 rounded-full px-5 py-2 flex items-center gap-2"><span className="h-2 w-2 rounded-full bg-indigo-400 animate-pulse" /><span className="text-xs font-semibold text-white uppercase tracking-wide">{data.pendingPayments} Pending Payments</span></div>
-                <div className="bg-white/10 backdrop-blur-md border border-white/10 rounded-full px-5 py-2 flex items-center gap-2"><span className="text-xs font-semibold text-white uppercase tracking-wide">ETB {Number(data.disbursedMonth).toLocaleString()} Disbursed (30d)</span></div>
+        <div className="relative bg-indigo-900 rounded-xl lg:rounded-2xl p-5 lg:p-8 overflow-hidden shadow-2xl shadow-indigo-900/20">
+          <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6 lg:gap-8">
+            <div>
+              <h2 className="text-xl lg:text-2xl font-semibold text-white tracking-tight">Financial Overview 👋</h2>
+              <p className="text-indigo-200 text-sm mt-1 lg:mt-2 font-medium">Monitoring AHG's fiscal health and disbursement lifecycle.</p>
+              <div className="flex flex-wrap gap-2 lg:gap-3 mt-6 lg:mt-8">
+                <div className="bg-white/10 backdrop-blur-md border border-white/10 rounded-full px-4 lg:px-5 py-1.5 lg:py-2 flex items-center gap-2">
+                  <span className="h-2 w-2 rounded-full bg-indigo-400 animate-pulse" />
+                  <span className="text-[10px] lg:text-xs font-semibold text-white uppercase tracking-wide">{data.pendingPayments} Pending Payments</span>
+                </div>
+                <div className="bg-white/10 backdrop-blur-md border border-white/10 rounded-full px-4 lg:px-5 py-1.5 lg:py-2 flex items-center gap-2">
+                  <span className="text-[10px] lg:text-xs font-semibold text-white uppercase tracking-wide">ETB {Number(data.disbursedMonth).toLocaleString()} Disbursed</span>
+                </div>
               </div>
             </div>
             <div className="hidden lg:block opacity-20 transform translate-x-10 translate-y-6"><CreditCard className="w-8 h-8 text-white stroke-[1]" /></div>
           </div>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <StatCard label="Pending Payments" value={data.pendingPayments} icon={CreditCard} color="purple" />
-          <StatCard label="Disbursed Month" value={`ETB ${Number(data.disbursedMonth).toLocaleString()}`} icon={ArrowUpCircle} color="green" />
-          <StatCard label="Budget Utilized" value={`${budgetData.reduce((acc: number, val: any) => acc + val.percentage, 0) / (budgetData.length || 1)}%`} icon={PieIcon} color="amber" />
-          <StatCard label="Overdue Requests" value={charts.pending.filter((i: any) => i.days > 7).length} icon={AlertCircle} color="red" />
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-6">
+          <StatCard label="Pending" value={data.pendingPayments} icon={CreditCard} color="purple" />
+          <StatCard label="Disbursed" value={`ETB ${Number(data.disbursedMonth).toLocaleString()}`} icon={ArrowUpCircle} color="green" />
+          <StatCard label="Budget" value={`${Math.round(budgetData.reduce((acc: number, val: any) => acc + val.percentage, 0) / (budgetData.length || 1))}%`} icon={PieIcon} color="amber" />
+          <StatCard label="Overdue" value={charts.pending.filter((i: any) => i.days > 7).length} icon={AlertCircle} color="red" />
         </div>
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+        <ThemedCard>
            <div className="flex items-center justify-between mb-10"><div><h3 className="text-base font-semibold text-slate-900 tracking-tight">Budget Utilization by Department</h3><p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mt-1">Real-time expenditure tracking against allocations</p></div><div className="h-12 w-12 rounded-2xl bg-amber-50 flex items-center justify-center text-amber-600"><PieIcon className="w-6 h-6" /></div></div>
            <div className="space-y-8">{budgetData.map((item: any, i: number) => (<div key={i} className="flex flex-col md:flex-row md:items-center gap-4"><span className="w-40 text-xs font-black text-slate-700 uppercase tracking-wider">{item.name}</span><div className="flex-1"><div className="h-4 w-full bg-slate-100 rounded-full overflow-hidden"><div className={`h-full transition-all duration-1000 ease-out rounded-full ${item.percentage > 90 ? 'bg-gradient-to-r from-red-400 to-red-600' : item.percentage > 70 ? 'bg-gradient-to-r from-amber-400 to-amber-600' : 'bg-gradient-to-r from-emerald-400 to-emerald-600'}`} style={{ width: `${Math.min(100, item.percentage)}%` }} /></div><div className="flex justify-between mt-2"><span className="text-[10px] font-bold text-slate-400 uppercase">ETB {Number(item.actual).toLocaleString()} Used</span><span className="text-[10px] font-black text-slate-900 uppercase">Limit: {Number(item.budget).toLocaleString()}</span></div></div><span className={`w-16 text-right text-sm font-black ${item.percentage > 90 ? 'text-red-600' : item.percentage > 70 ? 'text-amber-600' : 'text-emerald-600'}`}>{item.percentage}%</span></div>))}</div>
-        </div>
+        </ThemedCard>
       </div>
     );
   };
@@ -198,19 +239,22 @@ export default function DashboardPage() {
     const data = stats?.store || { itemsInStock: 0, lowStockAlerts: 0, pendingGRNs: 0, lowStockItems: [] };
     return (
       <div className="space-y-6">
-        <div className="relative bg-gradient-to-r from-teal-900 to-teal-700 rounded-2xl p-8 overflow-hidden shadow-2xl shadow-teal-900/20">
-          <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-8">
-            <div><h2 className="text-2xl font-semibold text-white tracking-tight">Warehouse Operations 👋</h2><p className="text-teal-200 mt-2 font-medium">Real-time inventory management and supply chain logistics.</p></div>
+        <div className="relative bg-teal-900 rounded-xl lg:rounded-2xl p-5 lg:p-8 overflow-hidden shadow-2xl shadow-teal-900/20">
+          <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6 lg:gap-8">
+            <div>
+              <h2 className="text-xl lg:text-2xl font-semibold text-white tracking-tight">Warehouse Operations 👋</h2>
+              <p className="text-teal-200 text-sm mt-1 lg:mt-2 font-medium">Inventory and supply chain management.</p>
+            </div>
             <div className="hidden lg:block opacity-20 transform translate-x-10 translate-y-6"><Truck className="w-8 h-8 text-white stroke-[1]" /></div>
           </div>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <StatCard label="Items In Stock" value={data.itemsInStock} icon={Package} color="blue" />
-          <StatCard label="Low Stock Alerts" value={data.lowStockAlerts} icon={AlertTriangle} color="red" />
-          <StatCard label="Pending GRNs" value={data.pendingGRNs} icon={Truck} color="amber" />
-          <StatCard label="Issued (30d)" value={Math.floor(Math.random() * 200) + 50} icon={ArrowRightCircle} color="green" />
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-6">
+          <StatCard label="In Stock" value={data.itemsInStock} icon={Package} color="blue" />
+          <StatCard label="Low Stock" value={data.lowStockAlerts} icon={AlertTriangle} color="red" />
+          <StatCard label="Pending" value={data.pendingGRNs} icon={Truck} color="amber" />
+          <StatCard label="Issued" value={Math.floor(Math.random() * 200) + 50} icon={ArrowRightCircle} color="green" />
         </div>
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+        <ThemedCard>
            <div className="flex items-center justify-between mb-10"><div className="flex items-center gap-3"><div className="h-3 w-3 rounded-full bg-red-500 animate-pulse" /><h3 className="text-base font-semibold text-slate-900 tracking-tight">Low Stock Alerts</h3></div><Link to="/inventory" className="text-xs font-semibold text-blue-600 hover:text-blue-700 uppercase tracking-wide">Full Inventory</Link></div>
            <div className="space-y-4">
               {data.lowStockItems.length > 0 ? data.lowStockItems.map((item: any, i: number) => (
@@ -220,7 +264,7 @@ export default function DashboardPage() {
                 </div>
               )) : <div className="py-12 text-center"><CheckCircle className="h-12 w-12 text-success-light mx-auto mb-4" /><p className="text-xs font-black text-text-muted uppercase tracking-widest">Stock Levels Healthy</p></div>}
            </div>
-        </div>
+        </ThemedCard>
       </div>
     );
   };
@@ -258,33 +302,40 @@ export default function DashboardPage() {
     return (
       <div className="space-y-8 pb-20">
         {/* WELCOME CARD */}
-        <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm">
-           <h2 className="text-2xl font-semibold text-slate-900 tracking-tight">Welcome back, {user.full_name} 👋</h2>
-           <p className="text-sm text-slate-700 mt-1">Track your requests and submit new ones below.</p>
-           
-           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-10">
-              <div 
-                onClick={() => navigate('/purchase-requisitions/new')}
-                className="group p-8 rounded-3xl border-2 border-dashed border-slate-200 clickable-card hover:border-blue-500 hover:bg-blue-50/50 text-center"
-              >
-                 <div className="h-16 w-16 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 mx-auto mb-6 group-hover:scale-110 transition-transform">
-                    <FileText className="h-8 w-8" />
-                 </div>
-                 <h4 className="text-lg font-black text-slate-900 tracking-tight">New Purchase Request</h4>
-                 <p className="text-sm text-slate-500 font-medium mt-2">Request items or services for your department workflow.</p>
+        {/* WELCOME CARD */}
+        <div className="bg-gradient-to-r from-primary to-primary-light rounded-xl lg:rounded-2xl p-5 lg:p-8">
+          <h2 className="text-xl lg:text-2xl font-semibold text-white tracking-tight">Welcome back, {user.full_name?.split(' ')[0]} 👋</h2>
+          <p className="text-sm text-white/70 mt-1">Track your requests and submit new ones below.</p>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 lg:gap-4 mt-6 lg:mt-10">
+            <button 
+              onClick={() => navigate('/purchase-requisitions/new')}
+              className="flex items-center gap-4 lg:flex-col lg:items-center lg:gap-3 bg-white/10 hover:bg-white/20 border border-white/10 rounded-xl p-4 lg:p-6 text-left lg:text-center transition-all active:scale-[0.98]"
+            >
+              <div className="h-10 w-10 lg:h-14 lg:w-14 bg-white/20 rounded-xl flex items-center justify-center text-white flex-shrink-0">
+                <FileText className="h-5 w-5 lg:h-7 lg:w-7" />
               </div>
+              <div className="flex-1 min-w-0">
+                <h4 className="text-sm lg:text-base font-bold text-white">New Purchase Request</h4>
+                <p className="text-[10px] lg:text-xs text-white/60 mt-0.5 hidden lg:block">Request items for your department.</p>
+              </div>
+              <ChevronRight className="h-4 w-4 text-white/40 lg:hidden" />
+            </button>
 
-              <div 
-                onClick={() => navigate('/payment-requests/new')}
-                className="group p-8 rounded-3xl border-2 border-dashed border-slate-200 clickable-card hover:border-purple-500 hover:bg-purple-50/50 text-center"
-              >
-                 <div className="h-16 w-16 bg-purple-50 rounded-2xl flex items-center justify-center text-purple-600 mx-auto mb-6 group-hover:scale-110 transition-transform">
-                    <CreditCard className="h-8 w-8" />
-                 </div>
-                 <h4 className="text-lg font-black text-slate-900 tracking-tight">New Payment Request</h4>
-                 <p className="text-sm text-slate-500 font-medium mt-2">Request a payment or reimbursement for an expense.</p>
+            <button 
+              onClick={() => navigate('/payment-requests/new')}
+              className="flex items-center gap-4 lg:flex-col lg:items-center lg:gap-3 bg-white/10 hover:bg-white/20 border border-white/10 rounded-xl p-4 lg:p-6 text-left lg:text-center transition-all active:scale-[0.98]"
+            >
+              <div className="h-10 w-10 lg:h-14 lg:w-14 bg-white/20 rounded-xl flex items-center justify-center text-white flex-shrink-0">
+                <CreditCard className="h-5 w-5 lg:h-7 lg:w-7" />
               </div>
-           </div>
+              <div className="flex-1 min-w-0">
+                <h4 className="text-sm lg:text-base font-bold text-white">New Payment Request</h4>
+                <p className="text-[10px] lg:text-xs text-white/60 mt-0.5 hidden lg:block">Request a reimbursement.</p>
+              </div>
+              <ChevronRight className="h-4 w-4 text-white/40 lg:hidden" />
+            </button>
+          </div>
         </div>
 
         {/* LATEST PR STATUS TRACKER */}
@@ -355,17 +406,17 @@ export default function DashboardPage() {
               <table className="min-w-full">
                  <thead>
                     <tr className="bg-slate-50/50">
-                       <th className="px-8 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Document</th>
-                       <th className="px-8 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Description</th>
-                       <th className="px-8 py-4 text-right text-[10px] font-black text-slate-400 uppercase tracking-widest">Amount</th>
-                       <th className="px-8 py-4 text-right text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</th>
-                       <th className="px-8 py-4 text-right text-[10px] font-black text-slate-400 uppercase tracking-widest">Action</th>
+                       <th className="px-4 sm:px-8 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Document</th>
+                       <th className="px-4 sm:px-8 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Description</th>
+                       <th className="px-4 sm:px-8 py-4 text-right text-[10px] font-black text-slate-400 uppercase tracking-widest">Amount</th>
+                       <th className="px-4 sm:px-8 py-4 text-right text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</th>
+                       <th className="px-4 sm:px-8 py-4 text-right text-[10px] font-black text-slate-400 uppercase tracking-widest">Action</th>
                     </tr>
                  </thead>
                  <tbody className="divide-y divide-slate-50">
                     {filteredRequests.length > 0 ? filteredRequests.map((req: any, i: number) => (
-                      <tr key={i} className="hover:bg-slate-50/50 transition-colors group">
-                        <td className="px-8 py-5">
+                      <ThemedTableRow key={i}>
+                        <td className="px-4 sm:px-8 py-5">
                           <div className="flex items-center gap-3">
                             <div className="h-8 w-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
                               <FileText className="h-4 w-4" />
@@ -373,14 +424,14 @@ export default function DashboardPage() {
                             <span className="text-sm font-black text-slate-900">{req.serial_no}</span>
                           </div>
                         </td>
-                        <td className="px-8 py-5 text-xs font-bold text-slate-500 max-w-[200px] truncate">{req.description || 'Request for items'}</td>
-                        <td className="px-8 py-5 text-right text-sm font-black text-slate-900">
+                        <td className="px-4 sm:px-8 py-5 text-xs font-bold text-slate-500 max-w-[200px] truncate">{req.description || 'Request for items'}</td>
+                        <td className="px-4 sm:px-8 py-5 text-right text-sm font-black text-slate-900">
                           {req.amount_figure ? `ETB ${Number(req.amount_figure).toLocaleString()}` : '—'}
                         </td>
-                        <td className="px-8 py-5 text-right">
+                        <td className="px-4 sm:px-8 py-5 text-right">
                            <StatusBadge status={req.status} />
                         </td>
-                        <td className="px-8 py-5 text-right">
+                        <td className="px-4 sm:px-8 py-5 text-right">
                            <button 
                              onClick={() => navigate(`/purchase-requisitions/${req.id}`)}
                              className="p-2 text-slate-400 hover:text-blue-600 transition-colors group-hover:translate-x-1"
@@ -388,7 +439,7 @@ export default function DashboardPage() {
                              <ChevronRight className="h-5 w-5" />
                            </button>
                         </td>
-                      </tr>
+                      </ThemedTableRow>
                     )) : (
                       <tr>
                          <td colSpan={5} className="py-20 text-center">

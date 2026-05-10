@@ -5,13 +5,15 @@ import type { PurchaseRequisition } from '../../types';
 import { 
   Plus, Search, Eye, FileSearch, File, 
   ChevronUp, ChevronDown, Filter, X, 
-  Calendar, MoreHorizontal, FileText 
+  Calendar, MoreHorizontal, FileText,
+  Loader2, ChevronLeft, ChevronRight
 } from 'lucide-react';
 import PageHeader from '../../components/layout/PageHeader';
 import StatusBadge from '../../components/ui/StatusBadge';
 import { SkeletonTable, ErrorState } from '../../components/ui/Skeleton';
 import EmptyState from '../../components/ui/EmptyState';
-import { Loader2 } from 'lucide-react';
+import { ThemedCard, ThemedButton, ThemedTableRow } from '../../components/ui/themed';
+import { MobilePRCard } from '../../components/mobile/MobilePRCard';
 
 export default function PRListPage() {
   const navigate = useNavigate();
@@ -79,34 +81,37 @@ export default function PRListPage() {
         subtitle="Manage and track all purchase requests across the organization."
         breadcrumbs={[{ label: 'African Holding' }, { label: 'Procurement' }, { label: 'Requisitions' }]}
         actions={
-          <button
+          <ThemedButton
+            variant="accent"
             onClick={() => navigate('/purchase-requisitions/new')}
-            className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-500 text-white rounded-xl text-sm font-semibold uppercase tracking-wide hover:bg-blue-600 transition-all shadow-md"
           >
-            <Plus className="w-4 h-4" /> New Requisition
-          </button>
+            <Plus className="w-4 h-4 mr-2 inline" /> New Requisition
+          </ThemedButton>
         }
       />
 
       {/* FILTERS BAR */}
-      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 flex flex-wrap items-center justify-between gap-4">
-        <div className="flex flex-wrap items-center gap-3 flex-1">
-          <div className="relative">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <input 
-              type="text" 
-              placeholder="Search by ID or requester..." 
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pl-10 pr-4 py-2.5 w-64 bg-slate-50 border-transparent rounded-xl text-sm font-medium text-slate-900 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-            />
-          </div>
-          
-          <div className="flex items-center gap-2">
+      <ThemedCard className="!p-4 flex flex-col lg:flex-row gap-4">
+        
+        {/* Search input — full width on mobile */}
+        <div className="relative w-full lg:w-96 flex-shrink-0">
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <input 
+            type="text" 
+            placeholder="Search by ID or requester..." 
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full pl-10 pr-4 py-3 lg:py-2.5 bg-page-bg border-transparent rounded-xl text-sm font-medium text-slate-900 focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all min-h-[44px]"
+          />
+        </div>
+        
+        {/* Filter dropdowns & Actions — scroll horizontally on mobile */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-2 lg:pb-0 w-full scrollbar-none justify-between lg:justify-start">
+          <div className="flex items-center gap-2 flex-shrink-0">
             <select 
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-4 py-2.5 bg-slate-50 border-transparent rounded-xl text-sm font-semibold text-slate-500 uppercase tracking-wide focus:ring-2 focus:ring-blue-500/20 transition-all"
+              className="px-4 py-3 lg:py-2.5 bg-page-bg border-transparent rounded-xl text-xs font-black text-slate-500 uppercase tracking-widest focus:ring-2 focus:ring-accent/20 transition-all min-h-[44px] cursor-pointer"
             >
               <option value="">All Statuses</option>
               <option value="draft">Draft</option>
@@ -118,18 +123,18 @@ export default function PRListPage() {
             { (search || statusFilter) && (
               <button 
                 onClick={() => { setSearch(''); setStatusFilter(''); }}
-                className="text-xs font-semibold text-blue-600 uppercase tracking-wide hover:text-blue-700 transition-colors flex items-center gap-1"
+                className="px-3 py-3 lg:py-2.5 text-[10px] font-black text-accent uppercase tracking-widest hover:bg-accent/10 transition-colors flex items-center gap-1.5 rounded-xl min-h-[44px]"
               >
-                <X className="w-3 h-3" /> Clear Filters
+                <X className="w-3.5 h-3.5" /> Clear
               </button>
             )}
           </div>
+          
+          <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex-shrink-0 px-2">
+             {filteredPrs.length} / {prs.length}
+          </div>
         </div>
-
-        <div className="text-xs font-semibold text-slate-500 uppercase tracking-wide">
-           Showing {filteredPrs.length} of {prs.length} results
-        </div>
-      </div>
+      </ThemedCard>
 
       {loading ? <SkeletonTable /> : error ? <ErrorState message={error} onRetry={fetchPRs} /> : filteredPrs.length === 0 ? (
         <EmptyState 
@@ -142,11 +147,12 @@ export default function PRListPage() {
           }}
         />
       ) : (
-        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-slate-100">
-              <thead className="bg-slate-50/50">
-                <tr>
+        <ThemedCard className="!p-0">
+          {/* Desktop Table View */}
+          <div className="hidden md:block overflow-x-auto">
+            <table className="min-w-full divide-y divide-border">
+              <thead>
+                <tr className="bg-page-bg/50">
                   <th 
                     onClick={() => handleSort('serial_no')}
                     className="px-8 py-5 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide cursor-pointer group"
@@ -154,7 +160,7 @@ export default function PRListPage() {
                     <div className="flex items-center gap-2">
                        PR Number
                        {sortConfig?.key === 'serial_no' ? (
-                         sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3 text-blue-500" /> : <ChevronDown className="w-3 h-3 text-blue-500" />
+                         sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3 text-accent" /> : <ChevronDown className="w-3 h-3 text-accent" />
                        ) : <ChevronUp className="w-3 h-3 text-slate-300 opacity-0 group-hover:opacity-100 transition-all" />}
                     </div>
                   </th>
@@ -167,7 +173,7 @@ export default function PRListPage() {
                     <div className="flex items-center justify-end gap-2">
                        Amount
                        {sortConfig?.key === 'total_requested' ? (
-                         sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3 text-blue-500" /> : <ChevronDown className="w-3 h-3 text-blue-500" />
+                         sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3 text-accent" /> : <ChevronDown className="w-3 h-3 text-accent" />
                        ) : <ChevronUp className="w-3 h-3 text-slate-300 opacity-0 group-hover:opacity-100 transition-all" />}
                     </div>
                   </th>
@@ -176,17 +182,17 @@ export default function PRListPage() {
                   <th className="px-8 py-5"></th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-slate-50">
+              <tbody className="divide-y divide-border/50">
                 {filteredPrs.map((pr: any, index: number) => (
-                  <tr 
+                  <ThemedTableRow 
                     key={pr.id} 
                     onClick={() => navigate(`/purchase-requisitions/${pr.id}`)}
-                    className="hover:bg-blue-50/40 transition-all duration-150 cursor-pointer group animate-fade-in"
+                    className="cursor-pointer group animate-fade-in"
                     style={{ animationDelay: `${Math.min(index * 50, 250)}ms` }}
                   >
                     <td className="px-8 py-5">
                       <div className="flex items-center gap-3">
-                         <div className="h-9 w-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+                         <div className="h-9 w-9 rounded-xl bg-accent-light text-accent flex items-center justify-center group-hover:scale-110 transition-transform">
                             <File className="w-4 h-4" />
                          </div>
                          <span className="font-mono text-sm font-medium text-slate-900">{pr.serial_no}</span>
@@ -215,36 +221,74 @@ export default function PRListPage() {
                       <StatusBadge status={pr.status} />
                     </td>
                     <td className="px-8 py-5 text-right">
-                       <button className="p-2 text-slate-300 hover:text-blue-600 transition-colors group-hover:translate-x-1">
+                       <button className="p-2 text-slate-300 hover:text-accent transition-colors group-hover:translate-x-1">
                           <Eye className="h-5 w-5" />
                        </button>
                     </td>
-                  </tr>
+                  </ThemedTableRow>
                 ))}
               </tbody>
             </table>
           </div>
 
+          {/* Mobile Card List View */}
+          <div className="md:hidden space-y-3 p-4 bg-page-bg/30">
+            {filteredPrs.map((pr: any) => (
+              <MobilePRCard 
+                key={pr.id} 
+                item={pr} 
+                onClick={() => navigate(`/purchase-requisitions/${pr.id}`)} 
+              />
+            ))}
+          </div>
+
           {/* PAGINATION UI */}
-          <div className="px-8 py-6 bg-slate-50/50 border-t border-slate-100 flex items-center justify-between">
-             <div className="text-xs font-semibold text-slate-500 uppercase tracking-wide">
-                Page 1 of 1
+          {/* PAGINATION UI */}
+          <div className="px-4 lg:px-8 py-4 lg:py-6 bg-page-bg/50 border-t border-border">
+             {/* Desktop Pagination */}
+             <div className="hidden lg:flex items-center justify-between">
+                <div className="text-xs font-semibold text-slate-500 uppercase tracking-wide">
+                   Page 1 of 1
+                </div>
+                <div className="flex items-center gap-2">
+                   <ThemedButton disabled variant="outline" className="px-4 py-2 !font-semibold">
+                     Previous
+                   </ThemedButton>
+                   {[1].map(p => (
+                      <ThemedButton key={p} className="h-9 w-9 !p-0 !font-semibold">
+                       {p}
+                     </ThemedButton>
+                   ))}
+                   <ThemedButton disabled variant="outline" className="px-4 py-2 !font-semibold">
+                     Next
+                   </ThemedButton>
+                </div>
              </div>
-             <div className="flex items-center gap-2">
-                <button disabled className="px-4 py-2 rounded-xl border border-slate-200 bg-white text-xs font-semibold uppercase tracking-wide text-slate-400 cursor-not-allowed">
-                  Previous
+
+             {/* Mobile Pagination */}
+             <div className="flex lg:hidden items-center justify-between w-full">
+                <button
+                  disabled
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl border border-border bg-white text-xs font-black uppercase tracking-widest text-slate-400 disabled:opacity-50 min-h-[44px]"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                  Prev
                 </button>
-                {[1].map(p => (
-                   <button key={p} className="h-9 w-9 rounded-xl bg-blue-500 text-white text-xs font-semibold">
-                    {p}
-                  </button>
-                ))}
-                <button disabled className="px-4 py-2 rounded-xl border border-slate-200 bg-white text-xs font-semibold uppercase tracking-wide text-slate-400 cursor-not-allowed">
+
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">
+                  Page 1 / 1
+                </span>
+
+                <button
+                  disabled
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl border border-border bg-white text-xs font-black uppercase tracking-widest text-slate-400 disabled:opacity-50 min-h-[44px]"
+                >
                   Next
+                  <ChevronRight className="w-4 h-4" />
                 </button>
              </div>
           </div>
-        </div>
+        </ThemedCard>
       )}
     </div>
   );

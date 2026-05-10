@@ -69,6 +69,12 @@ export const getThemeConfig = async (req: Request, res: Response) => {
     res.json({
       cssVariables,
       brand,
+      styles: {
+        card: settings['theme_card_style'] || 'elevated',
+        button: settings['theme_button_style'] || 'rounded',
+        table: settings['theme_table_style'] || 'striped',
+        density: settings['theme_dashboard_layout'] || 'default',
+      },
       features: {
         darkModeEnabled: settings['theme_dark_mode_enabled'] === 'true',
         defaultMode: settings['theme_default_mode'] || 'light',

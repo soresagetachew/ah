@@ -12,6 +12,7 @@ import toast from 'react-hot-toast';
 import NotificationPanel from './NotificationPanel';
 import { useSessionTimeout } from '../../hooks/useSessionTimeout';
 import { useTheme } from '../../context/ThemeContext';
+import { CompanyLogo } from '../brand/CompanyLogo';
 import DarkModeToggle from '../ui/DarkModeToggle';
 import { Clock } from 'lucide-react';
 
@@ -19,8 +20,8 @@ export default function AppLayout() {
   const { user, logout, passwordExpiryWarning } = useAuthStore();
   const { showWarning, countdown, keepAlive, handleLogout: timeoutLogout } = useSessionTimeout();
   const { theme } = useTheme();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [isCollapsed, setIsCollapsed] = useState(() => {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
     const saved = localStorage.getItem('sidebar_collapsed');
     if (saved !== null) return JSON.parse(saved);
     return window.innerWidth >= 768 && window.innerWidth <= 1024;
@@ -34,8 +35,23 @@ export default function AppLayout() {
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
 
   useEffect(() => {
-    localStorage.setItem('sidebar_collapsed', JSON.stringify(isCollapsed));
-  }, [isCollapsed]);
+    localStorage.setItem('sidebar_collapsed', JSON.stringify(sidebarCollapsed));
+  }, [sidebarCollapsed]);
+
+  // Close drawer when route changes (user tapped a nav link)
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [location.pathname]);
+
+  // Prevent body scroll when drawer is open
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => { document.body.style.overflow = ''; };
+  }, [mobileMenuOpen]);
 
   useEffect(() => {
     const handleOnline = () => setIsOffline(false);
@@ -56,7 +72,7 @@ export default function AppLayout() {
     };
   }, []);
 
-  const toggleSidebar = () => setIsCollapsed(!isCollapsed);
+  const toggleSidebar = () => setSidebarCollapsed(!sidebarCollapsed);
 
   const toggleLanguage = () => {
     const newLang = i18n.language === 'en' ? 'am' : 'en';
@@ -104,33 +120,91 @@ export default function AppLayout() {
     }));
   };
 
-  const SidebarContent = ({ mobile = false }) => {
-    const collapsed = !mobile && isCollapsed;
-    
+  const SidebarNav = ({ mobile = false }) => {
     return (
-      <div className={`flex flex-col h-full bg-sidebar-bg transition-all duration-300 ${collapsed ? 'w-16' : 'w-64'}`}>
-        {/* Top: Logo Area */}
-        <div className={`flex items-center h-14 px-4 border-b border-white/5 overflow-hidden transition-all duration-300 ease-in-out ${collapsed ? 'justify-center' : 'justify-between'}`}>
-          <div className="flex items-center gap-3">
-            <div className="flex h-8 w-8 min-w-[32px] items-center justify-center rounded-lg bg-brand-primary transition-all duration-300">
-              {theme?.logoUrl ? (
-                <img src={theme.logoUrl} alt="Logo" className="h-5 w-5 object-contain" />
-              ) : (
-                <Globe className="h-5 w-5 text-white" />
+      <nav className={`flex-1 overflow-y-auto py-3 ${mobile ? 'px-2' : 'px-2 space-y-6'}`}>
+        {/* Dashboard Item (Top Level) */}
+        <div className="space-y-1">
+          {filteredNavItems.filter(i => !i.section).map(item => {
+            const Icon = item.icon || FileText;
+            const isActive = location.pathname === item.path;
+            const collapsed = !mobile && sidebarCollapsed;
+            
+            return (
+              <Link
+                key={item.name}
+                to={item.path}
+                className={`group relative flex items-center h-12 md:h-10 px-3 rounded-lg transition-all duration-300 ease-in-out ${
+                  isActive ? 'bg-sidebar-active-bg text-sidebar-active-text' : 'text-sidebar-text hover:bg-white/10 hover:text-white'
+                } ${collapsed ? 'justify-center' : ''}`}
+                title={collapsed ? item.name : ''}
+              >
+                {isActive && <div className="absolute left-0 top-2 bottom-2 w-[3px] bg-brand-primary rounded-r-full" />}
+                <Icon className={`h-5 w-5 min-w-[20px] transition-all duration-300 ${collapsed ? '' : 'mr-3'}`} />
+                {!collapsed && <span className="text-sm font-medium whitespace-nowrap opacity-100 transition-opacity duration-300">{item.name}</span>}
+                {collapsed && <span className="absolute left-full ml-2 px-2 py-1 bg-slate-800 text-white text-[10px] rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-[100] pointer-events-none">{item.name}</span>}
+              </Link>
+            );
+          })}
+        </div>
+
+        {/* Sections */}
+        {sections.map(section => {
+          const items = filteredNavItems.filter(i => i.section === section);
+          if (items.length === 0) return null;
+          return (
+            <div key={section} className={`${mobile ? 'mt-4' : 'space-y-1'}`}>
+              {!(!mobile && sidebarCollapsed) && (
+                <h3 className="px-3 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-2">{section}</h3>
               )}
+              {items.map(item => {
+                const Icon = item.icon || FileText;
+                const isActive = location.pathname === item.path || (item.path !== '/' && location.pathname.startsWith(item.path));
+                const collapsed = !mobile && sidebarCollapsed;
+                return (
+                  <Link
+                    key={item.name}
+                    to={item.path}
+                    className={`group relative flex items-center h-12 md:h-10 px-3 rounded-lg transition-all duration-300 ease-in-out ${
+                      isActive ? 'bg-sidebar-active-bg text-sidebar-active-text' : 'text-sidebar-text hover:bg-white/10 hover:text-white'
+                    } ${collapsed ? 'justify-center' : ''}`}
+                    title={collapsed ? item.name : ''}
+                  >
+                    {isActive && <div className="absolute left-0 top-2 bottom-2 w-[3px] bg-brand-primary rounded-r-full" />}
+                    <Icon className={`h-5 w-5 min-w-[20px] transition-all duration-300 ${collapsed ? '' : 'mr-3'}`} />
+                    {!collapsed && <span className="text-sm font-medium whitespace-nowrap opacity-100 transition-opacity duration-300">{item.name}</span>}
+                    {collapsed && <span className="absolute left-full ml-2 px-2 py-1 bg-slate-800 text-white text-[10px] rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-[100] pointer-events-none">{item.name}</span>}
+                  </Link>
+                );
+              })}
             </div>
-            {!collapsed && (
-              <span className="text-sm font-bold tracking-tight text-white whitespace-nowrap animate-in fade-in duration-300">
-                {theme?.brandName || 'African Holding'}
-              </span>
-            )}
+          );
+        })}
+      </nav>
+    );
+  };
+
+  return (
+    <div className="h-screen bg-page-bg flex overflow-hidden font-sans">
+      {/* Desktop sidebar — hidden on mobile */}
+      <aside className={`
+        hidden lg:flex lg:flex-col
+        fixed top-0 left-0 h-full z-30
+        transition-all duration-300
+        ${sidebarCollapsed ? 'w-16' : 'w-60'}
+        bg-sidebar-bg border-r border-sidebar-border
+      `}>
+        {/* Top: Logo Area */}
+        <div className={`flex items-center h-14 px-4 border-b border-white/5 overflow-hidden transition-all duration-300 ease-in-out ${sidebarCollapsed ? 'justify-center' : 'justify-between'}`}>
+          <div className="flex items-center gap-3">
+            <CompanyLogo variant={sidebarCollapsed ? 'icon' : 'full'} size="md" />
           </div>
-          {!collapsed && !mobile && (
+          {!sidebarCollapsed && (
             <button onClick={toggleSidebar} className="text-sidebar-text hover:text-white p-1 rounded-md transition-all duration-200 hover:bg-white/5">
               <ChevronLeft className="h-4 w-4" />
             </button>
           )}
-          {collapsed && (
+          {sidebarCollapsed && (
             <button onClick={toggleSidebar} className="absolute left-[54px] top-4 bg-sidebar-bg border border-white/10 rounded-full p-0.5 text-sidebar-text hover:text-white z-50 hover:scale-110 transition-all">
               <ChevronRight className="h-3 w-3" />
             </button>
@@ -138,7 +212,7 @@ export default function AppLayout() {
         </div>
 
         {/* User Info */}
-        {!collapsed && user && (
+        {!sidebarCollapsed && user && (
           <div className="px-4 py-4 border-b border-white/5 animate-in fade-in slide-in-from-left-4 duration-300">
             <div className="flex items-center gap-3">
               <div className="h-9 w-9 min-w-[36px] rounded-full bg-brand-primary flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-brand-primary/20">
@@ -146,225 +220,207 @@ export default function AppLayout() {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold text-white truncate">{user.full_name}</p>
-                <span className={`inline-flex mt-1 px-2 py-0.5 rounded-brand text-[10px] font-black uppercase tracking-wider ${
-                  user.role === 'System Admin' ? 'bg-red-500/20 text-red-400' :
-                  user.role === 'GM' ? 'bg-purple-500/20 text-purple-400' :
-                  'bg-blue-500/20 text-blue-400'
-                }`}>
-                  {user.role}
-                </span>
+                <span className="text-[10px] text-sidebar-text font-black uppercase tracking-widest">{user.role}</span>
               </div>
             </div>
           </div>
         )}
 
-        {/* Navigation */}
-        <div className="flex-1 overflow-y-auto px-2 py-4 space-y-6">
-          {/* Dashboard Item (Top Level) */}
-          <div className="space-y-1">
-            {filteredNavItems.filter(i => !i.section).map(item => {
-              const Icon = item.icon || FileText;
-              const isActive = location.pathname === item.path;
-              return (
-                <Link
-                  key={item.name}
-                  to={item.path}
-                  className={`group relative flex items-center h-10 px-3 rounded-lg transition-all duration-300 ease-in-out ${
-                    isActive ? 'bg-sidebar-active-bg text-sidebar-active-text' : 'text-sidebar-text hover:bg-white/10 hover:text-white'
-                  } ${collapsed ? 'justify-center' : ''}`}
-                  title={collapsed ? item.name : ''}
-                >
-                  {isActive && <div className="absolute left-0 top-2 bottom-2 w-[3px] bg-brand-primary rounded-r-full" />}
-                  <Icon className={`h-5 w-5 min-w-[20px] transition-all duration-300 ${collapsed ? '' : 'mr-3'}`} />
-                  {!collapsed && <span className="text-sm font-medium whitespace-nowrap opacity-100 transition-opacity duration-300">{item.name}</span>}
-                  {collapsed && <span className="absolute left-full ml-2 px-2 py-1 bg-slate-800 text-white text-[10px] rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-[100] pointer-events-none">{item.name}</span>}
-                </Link>
-              );
-            })}
-          </div>
-
-          {/* Sections */}
-          {sections.map(section => {
-            const items = filteredNavItems.filter(i => i.section === section);
-            if (items.length === 0) return null;
-            return (
-              <div key={section} className="space-y-1">
-                {!collapsed && (
-                  <h3 className="px-3 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-2">{section}</h3>
-                )}
-                {items.map(item => {
-                  const Icon = item.icon || FileText;
-                  const isActive = location.pathname === item.path || (item.path !== '/' && location.pathname.startsWith(item.path));
-                  return (
-                    <Link
-                      key={item.name}
-                      to={item.path}
-                      className={`group relative flex items-center h-10 px-3 rounded-lg transition-all duration-300 ease-in-out ${
-                        isActive ? 'bg-sidebar-active-bg text-sidebar-active-text' : 'text-sidebar-text hover:bg-white/10 hover:text-white'
-                      } ${collapsed ? 'justify-center' : ''}`}
-                      title={collapsed ? item.name : ''}
-                    >
-                      {isActive && <div className="absolute left-0 top-2 bottom-2 w-[3px] bg-brand-primary rounded-r-full" />}
-                      <Icon className={`h-5 w-5 min-w-[20px] transition-all duration-300 ${collapsed ? '' : 'mr-3'}`} />
-                      {!collapsed && <span className="text-sm font-medium whitespace-nowrap opacity-100 transition-opacity duration-300">{item.name}</span>}
-                      {collapsed && <span className="absolute left-full ml-2 px-2 py-1 bg-slate-800 text-white text-[10px] rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-[100] pointer-events-none">{item.name}</span>}
-                    </Link>
-                  );
-                })}
-              </div>
-            );
-          })}
-        </div>
+        <SidebarNav />
 
         {/* Bottom Section */}
         <div className="p-2 border-t border-white/5 space-y-1">
-          {user?.role === 'System Admin' && (
-            <Link
-              to="/settings"
-              className={`flex items-center h-10 px-3 rounded-lg text-slate-400 hover:bg-white/10 hover:text-white transition-all ${collapsed ? 'justify-center' : ''}`}
-              title={collapsed ? 'Settings' : ''}
-            >
-              <Settings className="h-5 w-5 min-w-[20px]" />
-              {!collapsed && <span className="ml-3 text-sm font-medium">Settings</span>}
-            </Link>
-          )}
-
           <button
             onClick={toggleLanguage}
-            className={`w-full flex items-center h-10 px-3 rounded-lg text-slate-400 hover:bg-white/10 hover:text-white transition-all ${collapsed ? 'justify-center' : ''}`}
+            className={`w-full flex items-center h-10 px-3 rounded-lg text-slate-400 hover:bg-white/10 hover:text-white transition-all ${sidebarCollapsed ? 'justify-center' : ''}`}
           >
             <div className="h-5 w-5 min-w-[20px] flex items-center justify-center text-[10px] font-black border border-slate-700 rounded bg-slate-800">
               {i18n.language === 'en' ? 'EN' : 'AM'}
             </div>
-            {!collapsed && <span className="ml-3 text-sm font-medium">Switch Language</span>}
+            {!sidebarCollapsed && <span className="ml-3 text-sm font-medium">Switch Language</span>}
           </button>
 
           <button
             onClick={handleLogout}
-            className={`w-full flex items-center h-10 px-3 rounded-lg text-slate-400 hover:bg-red-500/10 hover:text-red-400 transition-all ${collapsed ? 'justify-center' : ''}`}
-            title={collapsed ? 'Logout' : ''}
+            className={`w-full flex items-center h-10 px-3 rounded-lg text-slate-400 hover:bg-red-500/10 hover:text-red-400 transition-all ${sidebarCollapsed ? 'justify-center' : ''}`}
           >
             <LogOut className="h-5 w-5 min-w-[20px]" />
-            {!collapsed && <span className="ml-3 text-sm font-medium">Logout</span>}
+            {!sidebarCollapsed && <span className="ml-3 text-sm font-medium">Logout</span>}
           </button>
         </div>
-      </div>
-    );
-  };
+      </aside>
 
-  return (
-    <div className="h-screen bg-page-bg flex overflow-hidden font-sans">
-      {/* Sidebar for Desktop/Tablet */}
-      <div className="hidden md:flex flex-shrink-0">
-        <SidebarContent />
-      </div>
+      {/* Mobile backdrop */}
+      {mobileMenuOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden"
+          onClick={() => setMobileMenuOpen(false)}
+        />
+      )}
 
-      {/* Slide-out drawer for Mobile */}
-      <div className={`fixed inset-0 z-50 md:hidden ${sidebarOpen ? 'visible' : 'invisible pointer-events-none'}`}>
-        <div className={`absolute inset-0 bg-slate-900/80 backdrop-blur-sm transition-opacity duration-300 ${sidebarOpen ? 'opacity-100' : 'opacity-0'}`} onClick={() => setSidebarOpen(false)}></div>
-        <div className={`absolute left-0 top-0 bottom-0 w-64 bg-[#0F172A] transform transition-transform duration-300 ease-out ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-          <SidebarContent mobile />
+      {/* Mobile slide-out drawer */}
+      <aside className={`
+        fixed top-0 left-0 h-full z-50 w-72
+        bg-sidebar-bg
+        transform transition-transform duration-300 ease-out
+        lg:hidden
+        ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
+        flex flex-col
+        shadow-2xl
+      `}>
+        <div className="flex items-center justify-between px-4 py-4 border-b border-sidebar-border">
+          <CompanyLogo variant="full" size="md" />
+          <button
+            onClick={() => setMobileMenuOpen(false)}
+            className="p-2 rounded-xl text-sidebar-text hover:bg-white/10 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
+          >
+            <X className="w-5 h-5" />
+          </button>
         </div>
-      </div>
+
+        <div className="px-4 py-3 border-b border-sidebar-border">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-full bg-accent flex items-center justify-center text-white font-semibold text-sm">
+              {user?.full_name?.charAt(0)}
+            </div>
+            <div className="min-w-0">
+              <p className="text-sm font-medium text-white truncate">{user?.full_name}</p>
+              <p className="text-xs text-sidebar-text truncate font-black uppercase tracking-widest">{user?.role}</p>
+            </div>
+          </div>
+        </div>
+
+        <SidebarNav mobile />
+
+        <div className="px-4 py-4 border-t border-sidebar-border">
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-2 text-sm text-sidebar-text hover:text-white transition-colors w-full min-h-[44px] px-3 rounded-xl hover:bg-white/10"
+          >
+            <LogOut className="w-4 h-4" />
+            Sign Out
+          </button>
+        </div>
+      </aside>
 
       {/* Main Content Area */}
       <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
-        {/* Header Redesign */}
-        <header className="h-14 bg-card-bg border-b border-border flex items-center px-4 justify-between sticky top-0 z-30">
-          <div className="flex items-center gap-4">
-            <button
-              className="p-2 -ml-2 text-slate-500 hover:text-slate-900 md:hidden"
-              onClick={() => setSidebarOpen(true)}
-            >
-              <Menu className="h-5 w-5" />
-            </button>
+        <header className={`
+          fixed top-0 right-0 z-20
+          h-14 bg-surface border-b border-border
+          flex items-center px-4 gap-3
+          ${sidebarCollapsed ? 'lg:left-16' : 'lg:left-60'} left-0
+          transition-all duration-300
+        `}>
+          <button
+            className="lg:hidden p-2 rounded-xl hover:bg-background min-w-[44px] min-h-[44px] flex items-center justify-center text-text-secondary transition-colors"
+            onClick={() => setMobileMenuOpen(true)}
+          >
+            <Menu className="w-5 h-5" />
+          </button>
 
-            {/* Breadcrumbs */}
-            <nav className="hidden sm:flex items-center gap-2 text-xs font-medium">
-              <span className="text-text-muted">African Holding</span>
-              {getBreadcrumbs().map((bc, i) => (
+          <div className="flex-1 min-w-0">
+            <h1 className="text-sm font-semibold text-text-primary truncate lg:text-base">
+              {getBreadcrumbs()[getBreadcrumbs().length - 1].name.charAt(0).toUpperCase() + getBreadcrumbs()[getBreadcrumbs().length - 1].name.slice(1)}
+            </h1>
+            <nav className="hidden lg:flex items-center gap-2 text-xs font-medium text-text-muted">
+              <span>African Holding</span>
+              {getBreadcrumbs().map((bc) => (
                 <div key={bc.path} className="flex items-center gap-2">
-                  <ChevronRight className="h-3 w-3 text-text-muted" />
-                  <span className={i === getBreadcrumbs().length - 1 ? 'text-text-primary font-bold' : 'text-text-muted'}>
-                    {bc.name.charAt(0).toUpperCase() + bc.name.slice(1)}
-                  </span>
+                  <ChevronRight className="h-3 w-3" />
+                  <span>{bc.name.charAt(0).toUpperCase() + bc.name.slice(1)}</span>
                 </div>
               ))}
             </nav>
           </div>
 
-          {/* Center: Cosmetic Search Bar */}
-          <div className="hidden lg:flex flex-1 justify-center px-8">
-            <div className="relative w-full max-w-[280px]">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-text-muted" />
-              <input 
-                type="text" 
-                placeholder="Search documents..." 
-                className="w-full h-8 pl-9 pr-10 bg-page-bg border-none rounded-full text-xs font-medium focus:ring-2 focus:ring-accent/20 transition-all"
-              />
-              <div className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-black text-slate-400 tracking-tighter">
-                ⌘K
-              </div>
-            </div>
-          </div>
-
-          {/* Right side row */}
-          <div className="flex items-center gap-1.5 sm:gap-3">
-            <button className="p-2 text-text-muted hover:text-text-secondary hover:bg-page-bg rounded-lg transition-colors">
-              <HelpCircle className="h-5 w-5" />
-            </button>
-            
-            <DarkModeToggle />
-            <NotificationPanel />
-
-            <div className="h-6 w-px bg-slate-200 mx-1 hidden sm:block"></div>
-
-            <div className="flex items-center gap-3">
-               <div className="hidden md:flex flex-col text-right">
-                <span className="text-xs font-bold text-text-primary">{user?.full_name}</span>
-                <span className="text-[10px] font-black text-text-muted uppercase tracking-widest leading-none">{user?.role}</span>
-              </div>
-              <div className="h-8 w-8 rounded-full bg-accent flex items-center justify-center text-white font-black text-xs shadow-lg shadow-accent/20">
-                {user?.full_name.split(' ').map((n: string) => n[0]).join('')}
-              </div>
-            </div>
+          <div className="flex items-center gap-1">
+             <div className="hidden lg:flex">
+                <DarkModeToggle />
+             </div>
+             <NotificationPanel />
+             <button className="w-8 h-8 rounded-full bg-accent text-white font-semibold text-sm flex items-center justify-center min-w-[44px] min-h-[44px]">
+               {user?.full_name?.charAt(0)}
+             </button>
           </div>
         </header>
 
-        {/* PASSWORD EXPIRY WARNING */}
-        {passwordExpiryWarning && (
-          <div className="mx-6 mt-4 p-4 bg-warning-light border border-warning/20 rounded-lg flex items-center justify-between animate-in slide-in-from-top-4 duration-500">
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 bg-warning/10 rounded-md flex items-center justify-center">
-                <Clock className="h-5 w-5 text-warning" />
+        {/* Main Content Area with Dynamic Padding */}
+        <main className={`
+          pt-14 min-h-screen
+          ${sidebarCollapsed ? 'lg:pl-16' : 'lg:pl-60'} pl-0
+          bg-background
+          transition-all duration-300
+        `}>
+          {/* PASSWORD EXPIRY WARNING */}
+          {passwordExpiryWarning && (
+            <div className="mx-4 sm:mx-6 mt-4 p-4 bg-warning-light border border-warning/20 rounded-lg flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 bg-warning/10 rounded-md flex items-center justify-center">
+                   <Clock className="h-5 w-5 text-warning" />
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-text-primary">{passwordExpiryWarning}</p>
+                  <p className="text-xs font-medium text-text-secondary">Update your password soon.</p>
+                </div>
               </div>
-              <div>
-                <p className="text-sm font-bold text-text-primary">{passwordExpiryWarning}</p>
-                <p className="text-xs font-medium text-text-secondary">Update your password now to avoid being locked out.</p>
-              </div>
+              <Link 
+                to="/profile/change-password"
+                className="px-4 py-2 bg-warning text-white text-[10px] font-black uppercase tracking-widest rounded-md hover:opacity-90 transition-all"
+              >
+                Update
+              </Link>
             </div>
-            <Link 
-              to="/profile/change-password"
-              className="px-4 py-2 bg-warning text-white text-[10px] font-black uppercase tracking-widest rounded-md hover:opacity-90 transition-all shadow-lg shadow-warning/20"
-            >
-              Change Now
-            </Link>
-          </div>
-        )}
+          )}
 
-        {/* Offline Banner */}
-        {isOffline && (
-          <div className="bg-red-600 text-white px-4 py-1 text-[10px] font-black text-center flex items-center justify-center uppercase tracking-[0.2em] z-20">
-            <WifiOff className="h-3 w-3 mr-2" />
-            Offline Mode
-          </div>
-        )}
+          {/* Offline Banner */}
+          {isOffline && (
+            <div className="bg-red-600 text-white px-4 py-1 text-[10px] font-black text-center flex items-center justify-center uppercase tracking-[0.2em] z-20">
+              <WifiOff className="h-3 w-3 mr-2" />
+              Offline Mode
+            </div>
+          )}
 
-        {/* Scrollable Main View */}
-        <main className="flex-1 overflow-y-auto bg-slate-50/50 animate-fade-in">
-          <div className="py-6 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+          <div className="p-4 lg:p-6 xl:p-8 max-w-[1400px] mx-auto">
             <Outlet />
           </div>
+
+          {/* Bottom nav — mobile only */}
+          <nav className="
+            fixed bottom-0 left-0 right-0 z-20
+            bg-surface border-t border-border
+            lg:hidden
+            safe-area-inset-bottom
+          ">
+            <div className="flex items-center justify-around px-2 py-2">
+              {[
+                { href: '/', icon: LayoutDashboard, label: 'Home' },
+                { href: '/purchase-requisitions', icon: FileText, label: 'PRs' },
+                { href: '/approvals', icon: CheckSquare, label: 'Approvals' },
+                { href: '/inventory', icon: Package, label: 'Stock' },
+                { href: '/reports', icon: BarChart2, label: 'Reports' },
+              ]
+              .map(item => {
+                const isActive = location.pathname === item.href || (item.href !== '/' && location.pathname.startsWith(item.href));
+                return (
+                  <Link
+                    key={item.href}
+                    to={item.href}
+                    className="flex flex-col items-center gap-0.5 px-3 py-1 min-w-[44px] min-h-[44px] justify-center relative"
+                  >
+                    <div className={`relative p-1.5 rounded-xl transition-colors ${isActive ? 'bg-accent/10' : ''}`}>
+                      <item.icon className={`w-5 h-5 transition-colors ${isActive ? 'text-accent' : 'text-text-muted'}`} />
+                    </div>
+                    <span className={`text-[10px] font-medium transition-colors ${isActive ? 'text-accent' : 'text-text-muted'}`}>
+                      {item.label}
+                    </span>
+                  </Link>
+                );
+              })}
+            </div>
+          </nav>
+          {/* Bottom padding */}
+          <div className="h-16 lg:hidden" />
         </main>
       </div>
 
@@ -380,20 +436,6 @@ export default function AppLayout() {
                  <p className="text-slate-500 text-sm font-medium mb-8">
                     You will be logged out in <span className="font-black text-slate-900 underline">{countdown} seconds</span> due to inactivity.
                  </p>
-
-                 {/* Countdown Number */}
-                 <div className="text-7xl font-black text-amber-500 tracking-tighter tabular-nums mb-8 drop-shadow-sm">
-                    {countdown}
-                 </div>
-
-                 {/* Progress Bar */}
-                 <div className="w-full h-2 bg-slate-100 rounded-full mb-10 overflow-hidden">
-                    <div 
-                      className="h-full bg-red-500 transition-all duration-1000 ease-linear"
-                      style={{ width: `${(countdown / 60) * 100}%` }}
-                    />
-                 </div>
-
                  <div className="flex flex-col w-full gap-3">
                     <button 
                       onClick={keepAlive}

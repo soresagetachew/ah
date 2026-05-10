@@ -118,7 +118,7 @@ export default function InventoryPage() {
       </div>
 
       {/* TABS NAVIGATION */}
-      <div className="flex items-center gap-8 border-b border-slate-100 px-4">
+      <div className="flex items-center gap-4 sm:gap-8 border-b border-slate-100 px-4 overflow-x-auto whitespace-nowrap no-scrollbar">
          {[
            { id: 'overview', label: 'Stock Overview', icon: Package },
            { id: 'history', label: 'Movement History', icon: History },
@@ -139,91 +139,93 @@ export default function InventoryPage() {
       {activeTab === 'overview' && (
         <div className="space-y-4">
            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-              <div className="p-4 border-b border-slate-50 flex items-center justify-between gap-4">
-                 <div className="relative flex-1 max-w-sm">
+              <div className="p-4 border-b border-slate-50 flex flex-col sm:flex-row items-center justify-between gap-4">
+                 <div className="relative w-full sm:flex-1 sm:max-w-sm">
                     <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                     <input 
                       type="text" 
                       placeholder="Search ledger..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border-transparent rounded-xl text-sm font-medium focus:ring-2 focus:ring-blue-500/20 transition-all"
+                      className="w-full pl-10 pr-4 py-3 lg:py-2.5 bg-slate-50 border-transparent rounded-xl text-sm font-medium focus:ring-2 focus:ring-blue-500/20 transition-all min-h-[44px]"
                     />
                  </div>
-                 <div className="flex gap-2">
-                    <button className="p-2.5 bg-slate-50 text-slate-400 rounded-xl hover:text-blue-600 transition-colors">
+                 <div className="flex items-center gap-2 w-full sm:w-auto overflow-x-auto pb-2 sm:pb-0 scrollbar-none">
+                    <button className="p-3 lg:p-2.5 bg-slate-50 text-slate-400 rounded-xl hover:text-blue-600 transition-colors flex-shrink-0 min-h-[44px]">
                        <Filter className="h-5 w-5" />
                     </button>
                  </div>
               </div>
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-slate-50">
-                  <thead className="bg-slate-50/50">
-                    <tr>
-                      <th className="px-8 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Description</th>
-                      <th className="px-8 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Cost Center</th>
-                      <th className="px-8 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Stock Level</th>
-                      <th className="px-8 py-4 text-right text-xs font-semibold text-slate-500 uppercase tracking-wide">Status</th>
-                      {isStorekeeper && <th className="px-8 py-4"></th>}
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-50">
-                    {loading ? (
-                       <tr><td colSpan={5} className="p-8"><SkeletonTable rows={8} /></td></tr>
-                    ) : error ? (
-                       <tr><td colSpan={5} className="py-20"><ErrorState message={error} onRetry={fetchData} /></td></tr>
-                    ) : filteredItems.length === 0 ? (
-                       <tr><td colSpan={5} className="py-10">
-                          <EmptyState 
-                            icon={Package}
-                            title="No matching items"
-                            description="We couldn't find any items matching your current search criteria."
-                          />
-                       </td></tr>
-                    ) : filteredItems.map(item => {
-                      const ratio = item.current_stock / (item.minimum_stock * 3);
-                      return (
-                        <tr key={item.id} className="hover:bg-blue-50/30 transition-colors group">
-                           <td className="px-8 py-5">
-                              <p className="text-sm font-semibold text-slate-900">{item.item_name}</p>
-                              <p className="text-xs text-slate-500 mt-0.5 uppercase tracking-wide">{item.unit}</p>
-                           </td>
-                           <td className="px-8 py-5">
-                              <span className="px-2 py-1 bg-slate-100 rounded text-[10px] font-semibold text-slate-500 uppercase tracking-wide">{item.cost_center || 'General'}</span>
-                           </td>
-                           <td className="px-8 py-5">
-                              <div className="flex items-center gap-4">
-                                 <div className="flex-1 h-1.5 w-32 bg-slate-100 rounded-full overflow-hidden">
-                                    <div 
-                                      className={`h-full rounded-full transition-all duration-1000 ${getStockColor(item.current_stock, item.minimum_stock)}`}
-                                      style={{ width: `${Math.min(ratio * 100, 100)}%` }}
-                                    />
-                                 </div>
-                                 <span className="text-sm font-semibold text-slate-900 tabular-nums">{Math.round(item.current_stock)} <span className="text-xs text-slate-400">units</span></span>
-                              </div>
-                           </td>
-                           <td className="px-8 py-5 text-right">
-                              {getStatusBadge(Number(item.current_stock), Number(item.minimum_stock))}
-                           </td>
-                           {isStorekeeper && (
-                             <td className="px-8 py-5 text-right">
-                                <button className="px-4 py-2 border border-slate-200 rounded-xl text-xs font-semibold text-blue-500 uppercase tracking-wide hover:bg-blue-50 transition-all opacity-0 group-hover:opacity-100 shadow-sm">
-                                   Reorder
-                                </button>
+              <div className="overflow-x-auto -mx-4 lg:mx-0">
+                <div className="min-w-[700px] lg:min-w-0 px-4 lg:px-0">
+                  <table className="min-w-full divide-y divide-slate-50">
+                    <thead className="bg-slate-50/50">
+                      <tr>
+                        <th className="px-4 sm:px-8 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Description</th>
+                        <th className="px-4 sm:px-8 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Cost Center</th>
+                        <th className="px-4 sm:px-8 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Stock Level</th>
+                        <th className="px-4 sm:px-8 py-4 text-right text-xs font-semibold text-slate-500 uppercase tracking-wide">Status</th>
+                        {isStorekeeper && <th className="px-4 sm:px-8 py-4"></th>}
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-50">
+                      {loading ? (
+                         <tr><td colSpan={5} className="p-8"><SkeletonTable rows={8} /></td></tr>
+                      ) : error ? (
+                         <tr><td colSpan={5} className="py-20"><ErrorState message={error} onRetry={fetchData} /></td></tr>
+                      ) : filteredItems.length === 0 ? (
+                         <tr><td colSpan={5} className="py-10">
+                            <EmptyState 
+                              icon={Package}
+                              title="No matching items"
+                              description="We couldn't find any items matching your current search criteria."
+                            />
+                         </td></tr>
+                      ) : filteredItems.map(item => {
+                        const ratio = item.current_stock / (item.minimum_stock * 3);
+                        return (
+                          <tr key={item.id} className="hover:bg-blue-50/30 transition-colors group">
+                             <td className="px-4 sm:px-8 py-5">
+                                <p className="text-sm font-semibold text-slate-900">{item.item_name}</p>
+                                <p className="text-xs text-slate-500 mt-0.5 uppercase tracking-wide">{item.unit}</p>
                              </td>
-                           )}
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+                             <td className="px-4 sm:px-8 py-5">
+                                <span className="px-2 py-1 bg-slate-100 rounded text-[10px] font-semibold text-slate-500 uppercase tracking-wide">{item.cost_center || 'General'}</span>
+                             </td>
+                             <td className="px-4 sm:px-8 py-5">
+                                <div className="flex items-center gap-4">
+                                   <div className="flex-1 h-1.5 w-32 bg-slate-100 rounded-full overflow-hidden">
+                                      <div 
+                                        className={`h-full rounded-full transition-all duration-1000 ${getStockColor(item.current_stock, item.minimum_stock)}`}
+                                        style={{ width: `${Math.min(ratio * 100, 100)}%` }}
+                                      />
+                                   </div>
+                                   <span className="text-sm font-semibold text-slate-900 tabular-nums">{Math.round(item.current_stock)} <span className="text-xs text-slate-400">units</span></span>
+                                </div>
+                             </td>
+                             <td className="px-4 sm:px-8 py-5 text-right">
+                                {getStatusBadge(Number(item.current_stock), Number(item.minimum_stock))}
+                             </td>
+                             {isStorekeeper && (
+                               <td className="px-4 sm:px-8 py-5 text-right">
+                                  <button className="px-4 py-2 border border-slate-200 rounded-xl text-xs font-semibold text-blue-500 uppercase tracking-wide hover:bg-blue-50 transition-all opacity-0 group-hover:opacity-100 shadow-sm">
+                                     Reorder
+                                  </button>
+                               </td>
+                             )}
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
               </div>
            </div>
         </div>
       )}
 
       {activeTab === 'history' && (
-        <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm p-8">
+        <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm p-4 sm:p-8">
            <div className="space-y-8 relative before:absolute before:left-5 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-50">
               {history.map((move, i) => {
                 const isFirstOfDay = i === 0 || new Date(move.date).toLocaleDateString() !== new Date(history[i-1].date).toLocaleDateString();

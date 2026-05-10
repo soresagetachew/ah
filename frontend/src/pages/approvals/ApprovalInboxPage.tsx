@@ -11,6 +11,7 @@ import DocumentPreviewPanel from '../../components/approvals/DocumentPreviewPane
 import { ConfirmationModal, PromptModal } from '../../components/ui/Modal';
 import { SkeletonTable, ErrorState } from '../../components/ui/Skeleton';
 import EmptyState from '../../components/ui/EmptyState';
+import { MobileApprovalCard } from '../../components/mobile/MobileApprovalCard';
 
 type FilterType = 'all' | 'urgent' | 'PR' | 'PRF' | 'GRN' | 'SIV';
 
@@ -122,50 +123,49 @@ export default function ApprovalInboxPage() {
   });
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6 pb-20 animate-in fade-in duration-700">
-      {/* HEADER WITH URGENCY SUMMARY */}
-      <div className="bg-gradient-to-r from-slate-900 to-slate-800 rounded-[2rem] p-10 text-white shadow-2xl shadow-slate-900/20 relative overflow-hidden">
+    <div className="max-w-7xl mx-auto space-y-4 lg:space-y-6 pb-24 animate-in fade-in duration-700 px-4 lg:px-0">
+      {/* HEADER SECTION */}
+      <div className="bg-gradient-to-r from-slate-900 to-slate-800 rounded-2xl lg:rounded-[2rem] p-6 lg:p-10 text-white shadow-2xl shadow-slate-900/20 relative overflow-hidden">
          <div className="relative z-10">
-            <div className="flex items-center gap-4 mb-6">
-               <h2 className="text-3xl font-black tracking-tight">Approval Inbox</h2>
-               <span className="px-3 py-1 bg-white/10 rounded-full text-sm font-black uppercase tracking-widest border border-white/20">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-6">
+               <h2 className="text-2xl lg:text-3xl font-black tracking-tight">Approval Inbox</h2>
+               <span className="inline-flex items-center w-fit px-3 py-1 bg-white/10 rounded-full text-[10px] lg:text-sm font-black uppercase tracking-widest border border-white/20">
                   {approvals.length} Pending
                </span>
             </div>
-            <div className="flex flex-wrap gap-3">
-               <div className="px-4 py-2 bg-red-500/20 text-red-200 rounded-xl border border-red-500/30 text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
-                  <Flame className="h-4 w-4" /> {urgentCount} Urgent (&gt;3 Days)
+            
+            {/* Stats row — 2 cols on mobile */}
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
+               <div className="px-3 py-2 bg-red-500/20 text-red-200 rounded-xl border border-red-500/30 text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
+                  <Flame className="h-4 w-4 shrink-0" /> <span className="truncate">{urgentCount} Urgent</span>
                </div>
-               <div className="px-4 py-2 bg-amber-500/20 text-amber-200 rounded-xl border border-amber-500/30 text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
-                  <Clock className="h-4 w-4" /> {todayCount} Received Today
-               </div>
-               <div className="px-4 py-2 bg-blue-500/20 text-blue-200 rounded-xl border border-blue-500/30 text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4" /> Ready for Review
+               <div className="px-3 py-2 bg-amber-500/20 text-amber-200 rounded-xl border border-amber-500/30 text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
+                  <Clock className="h-4 w-4 shrink-0" /> <span className="truncate">{todayCount} New Today</span>
                </div>
             </div>
          </div>
-         <div className="absolute right-0 top-0 p-10 opacity-5">
+         <div className="absolute right-0 top-0 p-10 opacity-5 hidden lg:block">
             <CheckCircle className="h-48 w-48" />
          </div>
       </div>
 
-      {/* PRIORITY FILTER TABS */}
-      <div className="flex flex-wrap items-center gap-2 px-2">
+      {/* PRIORITY FILTER TABS — horizontal scroll on mobile */}
+      <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1 scrollbar-none">
          {[
-           { id: 'all', label: 'All Documents' },
-           { id: 'urgent', label: 'Urgent Only' },
-           { id: 'PR', label: 'Purchase Requisitions' },
-           { id: 'PRF', label: 'Payment Requests' },
-           { id: 'GRN', label: 'Goods Receipts' },
-           { id: 'SIV', label: 'Issue Vouchers' }
+           { id: 'all', label: 'All Docs' },
+           { id: 'urgent', label: 'Urgent' },
+           { id: 'PR', label: 'PRs' },
+           { id: 'PRF', label: 'Payments' },
+           { id: 'GRN', label: 'GRNs' },
+           { id: 'SIV', label: 'SIVs' }
          ].map(tab => (
            <button
              key={tab.id}
              onClick={() => setActiveFilter(tab.id as FilterType)}
-             className={`px-5 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${
+             className={`px-5 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest whitespace-nowrap flex-shrink-0 transition-all min-h-[44px] ${
                activeFilter === tab.id 
                ? 'bg-slate-900 text-white shadow-lg shadow-slate-900/20' 
-               : 'bg-white border border-slate-100 text-slate-500 hover:bg-slate-50'
+               : 'bg-white border border-slate-200 text-slate-500 hover:bg-slate-50'
              }`}
            >
               {tab.label}
@@ -175,28 +175,29 @@ export default function ApprovalInboxPage() {
 
       {/* BULK ACTION BAR */}
       {selectedIds.length > 0 && (
-        <div className="bg-blue-900 rounded-2xl px-6 py-4 text-white flex items-center justify-between shadow-xl shadow-blue-900/30 animate-in slide-in-from-top-4 duration-300">
-           <div className="flex items-center gap-4">
+        <div className="bg-blue-900 rounded-xl lg:rounded-2xl px-4 lg:px-6 py-4 text-white flex items-center justify-between shadow-xl shadow-blue-900/30 animate-in slide-in-from-top-4 duration-300">
+           <div className="flex items-center gap-3">
               <div className="h-8 w-8 rounded-lg bg-blue-800 flex items-center justify-center font-black text-sm">
                  {selectedIds.length}
               </div>
-              <p className="text-sm font-black uppercase tracking-widest">Documents Selected</p>
+              <p className="text-[10px] lg:text-sm font-black uppercase tracking-widest">Selected</p>
            </div>
-           <div className="flex items-center gap-4">
-              <button onClick={() => setSelectedIds([])} className="text-xs font-black text-blue-300 hover:text-white uppercase tracking-widest">Deselect All</button>
+           <div className="flex items-center gap-3">
+              <button onClick={() => setSelectedIds([])} className="text-[10px] font-black text-blue-300 hover:text-white uppercase tracking-widest">Deselect</button>
               <button 
                 onClick={() => setConfirmModal({ open: true, ids: selectedIds })}
-                className="px-6 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-all"
+                className="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg lg:rounded-xl text-[10px] font-black uppercase tracking-widest transition-all"
               >
-                Approve Selected
+                Approve All
               </button>
            </div>
         </div>
       )}
 
-      {/* APPROVAL TABLE */}
-      <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
+      {/* APPROVAL CONTENT */}
+      <div className="bg-white rounded-xl lg:rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden">
+        {/* Desktop Table View */}
+        <div className="hidden lg:block overflow-x-auto">
           <table className="min-w-full divide-y divide-slate-50">
             <thead className="bg-slate-50/50">
               <tr>
@@ -204,8 +205,8 @@ export default function ApprovalInboxPage() {
                    <input 
                      type="checkbox" 
                      className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-                     onChange={(e) => setSelectedIds(e.target.checked ? approvals.map(a => a.id) : [])}
-                     checked={selectedIds.length === approvals.length && approvals.length > 0}
+                     onChange={(e) => setSelectedIds(e.target.checked ? filteredApprovals.map(a => a.id) : [])}
+                     checked={selectedIds.length === filteredApprovals.length && filteredApprovals.length > 0}
                    />
                 </th>
                 <th className="px-8 py-5 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Document</th>
@@ -218,39 +219,27 @@ export default function ApprovalInboxPage() {
             <tbody className="divide-y divide-slate-50">
               {loading ? (
                 <tr><td colSpan={6} className="p-8"><SkeletonTable rows={6} /></td></tr>
-              ) : error ? (
-                <tr><td colSpan={6} className="py-20"><ErrorState message={error} onRetry={fetchApprovals} /></td></tr>
               ) : filteredApprovals.length === 0 ? (
-                <tr><td colSpan={6} className="px-8 py-10">
-                   <EmptyState 
-                     icon={CheckCircle}
-                     title="You're all caught up!"
-                     description="No documents are waiting for your approval right now. You can relax or check other modules."
-                     iconClassName="text-emerald-400"
-                     containerClassName="bg-emerald-50"
-                   />
-                </td></tr>
+                <tr><td colSpan={6} className="px-8 py-10"><EmptyState icon={CheckCircle} title="All Caught Up!" description="No pending approvals." /></td></tr>
               ) : (
                 filteredApprovals.map((doc) => (
-                  <tr 
-                    key={doc.id} 
-                    onClick={() => setPreviewDoc(doc)}
-                    className={`hover:bg-slate-50/50 cursor-pointer transition-all duration-150 group h-[72px] ${selectedIds.includes(doc.id) ? 'bg-blue-50/50' : ''}`}
-                  >
+                  <tr key={doc.id} onClick={() => setPreviewDoc(doc)} className={`hover:bg-slate-50/50 cursor-pointer transition-all ${selectedIds.includes(doc.id) ? 'bg-blue-50/50' : ''}`}>
                     <td className="px-8 py-5" onClick={(e) => e.stopPropagation()}>
-                       <input 
-                         type="checkbox" 
-                         className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-                         checked={selectedIds.includes(doc.id)}
-                         onChange={() => toggleSelect(doc.id)}
-                       />
+                       <input type="checkbox" className="rounded border-slate-300" checked={selectedIds.includes(doc.id)} onChange={() => toggleSelect(doc.id)} />
                     </td>
                     <td className="px-8 py-5">
                        <div className="flex items-center gap-4">
                           {getDocIcon(doc.doc_type)}
                           <div>
                              <p className="text-sm font-black text-slate-900 font-mono tracking-tight">{doc.serial_no}</p>
-                             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{doc.doc_type}</p>
+                             <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest mt-0.5 ${
+                               doc.doc_type === 'PR' ? 'bg-blue-50 text-blue-600 border border-blue-100' :
+                               doc.doc_type === 'GRN' ? 'bg-teal-50 text-teal-600 border border-teal-100' :
+                               doc.doc_type === 'SIV' ? 'bg-amber-50 text-amber-600 border border-amber-100' :
+                               'bg-purple-50 text-purple-600 border border-purple-100'
+                             }`}>
+                                {doc.doc_type}
+                             </span>
                           </div>
                        </div>
                     </td>
@@ -259,43 +248,14 @@ export default function ApprovalInboxPage() {
                        <p className="text-[10px] font-black text-slate-400 uppercase mt-0.5">{doc.department_name}</p>
                     </td>
                     <td className="px-8 py-5">
-                       <span className="text-xs font-bold text-slate-400 mr-1.5">ETB</span>
-                       <span className="text-sm font-black text-slate-900">{Number(doc.amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                       <span className="text-sm font-black text-slate-900">ETB {Number(doc.amount).toLocaleString()}</span>
                     </td>
-                    <td className="px-8 py-5 text-center">
-                       {getAgeBadge(doc.created_at)}
-                    </td>
+                    <td className="px-8 py-5 text-center">{getAgeBadge(doc.created_at)}</td>
                     <td className="px-8 py-5 text-right">
-                       <div className="flex items-center justify-end gap-2">
-                          {processingId === doc.id ? (
-                            <div className="px-4 py-2 bg-emerald-500 text-white rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center gap-2 animate-in zoom-in duration-200">
-                               <Check className="h-4 w-4" /> Done!
-                            </div>
-                          ) : (
-                            <div className="flex items-center gap-2 transition-opacity duration-300 md:opacity-0 group-hover:opacity-100">
-                              <button 
-                                onClick={() => handleAction(doc.doc_type, doc.id, 'approve')}
-                                className="bg-emerald-500 hover:bg-emerald-600 text-white p-2 rounded-lg transition-all"
-                                title="Quick Approve"
-                              >
-                                 <Check className="h-4 w-4" />
-                              </button>
-                              <button 
-                                onClick={() => setPromptModal({ open: true, doc, action: 'return' })}
-                                className="bg-amber-100 hover:bg-amber-200 text-amber-700 p-2 rounded-lg transition-all"
-                                title="Return for Correction"
-                              >
-                                 <RotateCcw className="h-4 w-4" />
-                              </button>
-                              <button 
-                                onClick={() => setPromptModal({ open: true, doc, action: 'reject' })}
-                                className="bg-red-100 hover:bg-red-200 text-red-700 p-2 rounded-lg transition-all"
-                                title="Reject"
-                              >
-                                 <X className="h-4 w-4" />
-                              </button>
-                            </div>
-                          )}
+                       <div className="flex items-center justify-end gap-2 group-hover:opacity-100 opacity-0">
+                          <button onClick={(e) => { e.stopPropagation(); handleAction(doc.doc_type, doc.id, 'approve'); }} className="p-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600"><Check className="w-4 h-4" /></button>
+                          <button onClick={(e) => { e.stopPropagation(); setPromptModal({ open: true, doc, action: 'return' }); }} className="p-2 bg-amber-100 text-amber-700 rounded-lg hover:bg-amber-200"><RotateCcw className="w-4 h-4" /></button>
+                          <button onClick={(e) => { e.stopPropagation(); setPromptModal({ open: true, doc, action: 'reject' }); }} className="p-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200"><X className="w-4 h-4" /></button>
                        </div>
                     </td>
                   </tr>
@@ -303,6 +263,60 @@ export default function ApprovalInboxPage() {
               )}
             </tbody>
           </table>
+        </div>
+
+        {/* Mobile Card List View */}
+        <div className="lg:hidden divide-y divide-slate-100">
+          {loading ? (
+            <div className="p-4 space-y-3">
+              {[1, 2, 3].map(i => <div key={i} className="h-32 bg-slate-50 animate-pulse rounded-xl" />)}
+            </div>
+          ) : filteredApprovals.length === 0 ? (
+            <div className="p-10 text-center"><p className="text-xs font-black text-slate-400 uppercase tracking-widest">Inbox Empty</p></div>
+          ) : (
+            filteredApprovals.map((doc) => (
+              <div key={doc.id} onClick={() => setPreviewDoc(doc)} className="p-4 active:bg-slate-50 transition-all">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    {getDocIcon(doc.doc_type)}
+                    <div>
+                      <p className="text-sm font-black text-slate-900 font-mono tracking-tight">{doc.serial_no}</p>
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest mt-0.5 ${
+                        doc.doc_type === 'PR' ? 'bg-blue-50 text-blue-600 border border-blue-100' :
+                        doc.doc_type === 'GRN' ? 'bg-teal-50 text-teal-600 border border-teal-100' :
+                        doc.doc_type === 'SIV' ? 'bg-amber-50 text-amber-600 border border-amber-100' :
+                        'bg-purple-50 text-purple-600 border border-purple-100'
+                      }`}>
+                        {doc.doc_type}
+                      </span>
+                    </div>
+                  </div>
+                  {getAgeBadge(doc.created_at)}
+                </div>
+
+                <div className="bg-slate-50 rounded-xl p-3 mb-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Requester</p>
+                    <p className="text-sm font-black text-slate-900">ETB {Number(doc.amount).toLocaleString()}</p>
+                  </div>
+                  <p className="text-xs font-bold text-slate-700">{doc.requester_name}</p>
+                  <p className="text-[10px] font-black text-slate-500 uppercase tracking-tight mt-0.5">{doc.department_name}</p>
+                </div>
+
+                <div className="grid grid-cols-3 gap-2">
+                  <button onClick={(e) => { e.stopPropagation(); handleAction(doc.doc_type, doc.id, 'approve'); }} className="py-2.5 rounded-xl bg-emerald-50 text-emerald-600 text-[10px] font-black uppercase tracking-widest border border-emerald-100 flex items-center justify-center gap-1.5 min-h-[44px]">
+                    <Check className="w-3.5 h-3.5" /> Approve
+                  </button>
+                  <button onClick={(e) => { e.stopPropagation(); setPromptModal({ open: true, doc, action: 'return' }); }} className="py-2.5 rounded-xl bg-amber-50 text-amber-700 text-[10px] font-black uppercase tracking-widest border border-amber-100 flex items-center justify-center gap-1.5 min-h-[44px]">
+                    <RotateCcw className="w-3.5 h-3.5" /> Return
+                  </button>
+                  <button onClick={(e) => { e.stopPropagation(); setPromptModal({ open: true, doc, action: 'reject' }); }} className="py-2.5 rounded-xl bg-red-50 text-red-600 text-[10px] font-black uppercase tracking-widest border border-red-100 flex items-center justify-center gap-1.5 min-h-[44px]">
+                    <X className="w-3.5 h-3.5" /> Reject
+                  </button>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </div>
 
@@ -314,14 +328,14 @@ export default function ApprovalInboxPage() {
         />
       )}
 
+      {/* Modals remain unchanged as they are already optimized */}
       <ConfirmationModal 
         isOpen={confirmModal.open}
         onClose={() => setConfirmModal({ open: false, ids: [] })}
         onConfirm={handleBulkApprove}
         title="Approve Documents?"
-        message={`You are about to authorize ${confirmModal.ids.length} selected documents. This action will trigger the next step in the workflow.`}
+        message={`Authorize ${confirmModal.ids.length} documents?`}
         type="approve"
-        confirmText="Yes, Approve All"
       />
 
       {promptModal.doc && (
@@ -329,12 +343,9 @@ export default function ApprovalInboxPage() {
           isOpen={promptModal.open}
           onClose={() => setPromptModal({ open: false, doc: null, action: null })}
           onConfirm={(val) => handleAction(promptModal.doc.doc_type, promptModal.doc.id, promptModal.action!, val)}
-          title={promptModal.action === 'reject' ? 'Reject Document' : 'Return for Correction'}
-          message={promptModal.action === 'reject' 
-            ? `Please provide a reason for rejecting ${promptModal.doc.serial_no}.`
-            : `Explain what needs to be corrected in ${promptModal.doc.serial_no}.`}
+          title={promptModal.action === 'reject' ? 'Reject' : 'Return'}
+          message={`Action for ${promptModal.doc.serial_no}`}
           type={promptModal.action === 'reject' ? 'danger' : 'warning'}
-          placeholder="Reason for decision..."
         />
       )}
     </div>

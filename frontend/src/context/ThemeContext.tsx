@@ -2,17 +2,32 @@ import React, { createContext, useContext, useEffect, useState, useCallback } fr
 import client from '../api/client';
 
 interface ThemeConfig {
-  primaryColor: string;
-  secondaryColor: string;
-  accentColor: string;
-  logoUrl: string;
-  brandName: string;
-  fontFamily: string;
-  borderRadius: string;
-  sidebarBg: string;
-  sidebarText: string;
-  sidebarActiveBg: string;
-  sidebarActiveText: string;
+  cssVariables: Record<string, string>;
+  brand: {
+    companyName: string;
+    tagline: string;
+    logoUrl: string;
+    logoDarkUrl: string;
+    faviconUrl: string;
+    logoWidth: number;
+    loginBgType: string;
+    loginBgColor: string;
+    loginBgColorEnd: string;
+    loginBgImageUrl: string;
+    loginCardPosition: string;
+  };
+  styles: {
+    card: string;
+    button: string;
+    table: string;
+    density: string;
+  };
+  features: {
+    darkModeEnabled: boolean;
+    defaultMode: string;
+  };
+  activePreset: string;
+  version: string;
 }
 
 interface ThemeContextType {
@@ -27,18 +42,16 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const applyTheme = useCallback((config: ThemeConfig) => {
     const root = document.documentElement;
-    root.style.setProperty('--brand-primary', config.primaryColor);
-    root.style.setProperty('--brand-secondary', config.secondaryColor);
-    root.style.setProperty('--brand-accent', config.accentColor);
-    root.style.setProperty('--brand-font', config.fontFamily);
-    root.style.setProperty('--brand-radius', config.borderRadius);
-    root.style.setProperty('--brand-sidebar-bg', config.sidebarBg);
-    root.style.setProperty('--brand-sidebar-text', config.sidebarText);
-    root.style.setProperty('--brand-sidebar-active-bg', config.sidebarActiveBg);
-    root.style.setProperty('--brand-sidebar-active-text', config.sidebarActiveText);
     
-    // Update body font
-    document.body.style.fontFamily = config.fontFamily;
+    // Apply CSS Variables
+    Object.entries(config.cssVariables).forEach(([key, value]) => {
+      root.style.setProperty(key, value);
+    });
+    
+    // Specifically handle font family for body
+    if (config.cssVariables['--font-family']) {
+      document.body.style.fontFamily = config.cssVariables['--font-family'];
+    }
   }, []);
 
   const refreshTheme = useCallback(async () => {

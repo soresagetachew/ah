@@ -52,34 +52,33 @@ export default function StatCard({ label, value, icon: Icon, trend, color = 'blu
   return (
     <div 
       onClick={onClick}
-      className={`bg-white rounded-2xl p-6 shadow-sm border border-slate-100 border-l-4 ${styles.border} transition-all duration-300 group ${
+      className={`bg-white rounded-xl lg:rounded-2xl p-4 lg:p-6 shadow-sm border border-slate-100 border-l-4 ${styles.border} transition-all duration-300 group ${
         onClick ? 'cursor-pointer hover:shadow-md hover:-translate-y-1 transform' : ''
       }`}
     >
       <div className="flex justify-between items-start">
-        <span className="text-xs font-semibold text-slate-500 uppercase tracking-wide">{label}</span>
-        <div className={`p-2 rounded-xl ${styles.bg} ${styles.text} transition-transform duration-500 group-hover:rotate-12`}>
-          <Icon className="w-6 h-6" />
+        <div className="flex-1 min-w-0">
+          <p className="text-[10px] lg:text-xs font-semibold text-slate-500 uppercase tracking-wide truncate">{label}</p>
+          <p className="text-2xl lg:text-3xl font-bold text-slate-900 mt-2 tabular-nums tracking-tight">
+            {typeof value === 'number' ? displayValue.toLocaleString() : value}
+          </p>
         </div>
-      </div>
-      
-      <div className="mt-3">
-        <h3 className="text-3xl font-semibold text-slate-900 tabular-nums tracking-tight">
-          {typeof value === 'number' ? displayValue.toLocaleString() : value}
-        </h3>
+        <div className={`p-2 lg:p-2.5 rounded-lg lg:rounded-xl flex-shrink-0 ml-2 ${styles.bg} ${styles.text} transition-transform duration-500 group-hover:rotate-12`}>
+          <Icon className="w-5 h-5 lg:w-6 lg:h-6" />
+        </div>
       </div>
 
       {trend && (
-        <div className="flex items-center gap-1.5 mt-3">
+        <div className="flex items-center gap-1.5 mt-2 lg:mt-3">
           {trend.direction === 'up' ? (
-            <TrendingUp className="w-4 h-4 text-emerald-500" />
+            <TrendingUp className="w-3.5 h-3.5 lg:w-4 lg:h-4 text-emerald-500" />
           ) : (
-            <TrendingDown className="w-4 h-4 text-red-500" />
+            <TrendingDown className="w-3.5 h-3.5 lg:w-4 lg:h-4 text-red-500" />
           )}
-          <span className={`text-xs font-semibold uppercase tracking-wide ${trend.direction === 'up' ? 'text-emerald-600' : 'text-red-600'}`}>
+          <span className={`text-[10px] lg:text-xs font-semibold uppercase tracking-wide ${trend.direction === 'up' ? 'text-emerald-600' : 'text-red-600'}`}>
             {trend.value}%
           </span>
-          <span className="text-xs text-slate-500 ml-1">{trend.label}</span>
+          <span className="text-[10px] lg:text-xs text-slate-500 ml-1 truncate">{trend.label}</span>
         </div>
       )}
     </div>

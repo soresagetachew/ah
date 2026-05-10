@@ -111,7 +111,12 @@ router.get('/audit_log', async (req: Request, res: Response) => {
 router.get('/export/:type/:id', async (req: Request, res: Response) => {
   try {
     const { type, id } = req.params;
-    let html = '';
+    const { settingsService } = require('../services/settingsService');
+    const settings = await settingsService.getAllSettings();
+    const brand = {
+      logoUrl: settings['brand_logo_url'],
+      companyName: settings['brand_company_name']
+    };
 
     if (type === 'PR') {
       const prResult = await pool.query(
@@ -123,7 +128,7 @@ router.get('/export/:type/:id', async (req: Request, res: Response) => {
       );
       if (prResult.rows.length === 0) return res.status(404).json({ message: 'Not found' });
       const itemsResult = await pool.query('SELECT * FROM pr_line_items WHERE pr_id = ?', [id]);
-      html = require('../services/pdfService').getPRTemplate({ ...prResult.rows[0], items: itemsResult.rows });
+      html = require('../services/pdfService').getPRTemplate({ ...prResult.rows[0], items: itemsResult.rows }, brand);
     } else if (type === 'GRN') {
       const grnResult = await pool.query(
         `SELECT g.*, s.name as supplier_name, u.full_name as receiver_name
@@ -134,7 +139,7 @@ router.get('/export/:type/:id', async (req: Request, res: Response) => {
       );
       if (grnResult.rows.length === 0) return res.status(404).json({ message: 'Not found' });
       const itemsResult = await pool.query('SELECT * FROM grn_line_items WHERE grn_id = ?', [id]);
-      html = require('../services/pdfService').getGRNTemplate({ ...grnResult.rows[0], items: itemsResult.rows });
+      html = require('../services/pdfService').getGRNTemplate({ ...grnResult.rows[0], items: itemsResult.rows }, brand);
     } else if (type === 'SIV') {
       const sivResult = await pool.query(
         `SELECT s.*, u.full_name as issued_to_name, ib.full_name as issued_by_name
@@ -145,7 +150,7 @@ router.get('/export/:type/:id', async (req: Request, res: Response) => {
       );
       if (sivResult.rows.length === 0) return res.status(404).json({ message: 'Not found' });
       const itemsResult = await pool.query('SELECT * FROM siv_line_items WHERE siv_id = ?', [id]);
-      html = require('../services/pdfService').getSIVTemplate({ ...sivResult.rows[0], items: itemsResult.rows });
+      html = require('../services/pdfService').getSIVTemplate({ ...sivResult.rows[0], items: itemsResult.rows }, brand);
     } else if (type === 'PRF') {
       const prfResult = await pool.query(
         `SELECT p.*, u.full_name as requester_name, d.name as department_name
@@ -155,7 +160,7 @@ router.get('/export/:type/:id', async (req: Request, res: Response) => {
          WHERE p.id = ?`, [id]
       );
       if (prfResult.rows.length === 0) return res.status(404).json({ message: 'Not found' });
-      html = require('../services/pdfService').getPRFTemplate(prfResult.rows[0]);
+      html = require('../services/pdfService').getPRFTemplate(prfResult.rows[0], brand);
     } else {
       return res.status(400).json({ message: 'Document type not supported for export' });
     }

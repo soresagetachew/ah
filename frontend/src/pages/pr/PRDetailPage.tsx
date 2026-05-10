@@ -4,7 +4,7 @@ import client from '../../api/client';
 import { 
   Printer, Send, Calendar, User, FileText, CheckCircle, 
   XCircle, Clock, Pencil, GitBranch, MessageSquare, Bell, 
-  RotateCcw, ArrowLeft, Building2, Wallet, Layers
+  RotateCcw, ArrowLeft, Building2, Wallet, Layers, MoreVertical, Check, FolderOpen
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import PageHeader from '../../components/layout/PageHeader';
@@ -23,6 +23,7 @@ export default function PRDetailPage() {
   const [comment, setComment] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [confirmModal, setConfirmModal] = useState(false);
+  const [showActions, setShowActions] = useState(false);
 
   const fetchPR = async () => {
     try {
@@ -106,84 +107,120 @@ export default function PRDetailPage() {
                     (user?.role === 'GM' && pr.status === 'pending_gm') ||
                     (user?.role === 'Authorized Signatory' && pr.status === 'pending_finance');
 
+  const actions = [
+    { label: 'Download PDF', icon: Printer, onClick: downloadPDF },
+    ...(['draft', 'returned'].includes(pr.status) ? [
+      { label: 'Edit PR', icon: Pencil, onClick: () => navigate(`/purchase-requisitions/${id}/edit`) },
+      { label: 'Submit PR', icon: Send, onClick: () => setConfirmModal(true) }
+    ] : [])
+  ];
+
+  const approvalSteps = [
+    { role_label: 'Document Created', actor_name: pr.requester_name, acted_at: pr.created_at, completed: true },
+    ...pr.approvals.map((app: any) => ({
+      role_label: `${app.actor_role || 'Reviewer'} Action`,
+      actor_name: app.actor_name,
+      acted_at: app.acted_at,
+      comment: app.comment,
+      completed: app.action === 'approve',
+      action: app.action
+    })),
+    ...(pr.status !== 'approved' && pr.status !== 'rejected' ? [
+      { role_label: `Awaiting ${pr.status.replace('_', ' ').toUpperCase()}`, current: true }
+    ] : [])
+  ];
+
   return (
-    <div className="max-w-5xl mx-auto space-y-6 pb-20 animate-in fade-in duration-700">
+    <div className="max-w-5xl mx-auto space-y-4 lg:space-y-6 pb-20 animate-in fade-in duration-700 px-4 lg:px-0">
       {/* HEADER SECTION */}
-      <ThemedCard className="p-8">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
-          <div className="flex items-center gap-4">
-             <div className="h-12 w-12 rounded-lg bg-primary flex items-center justify-center text-white">
-                <FileText className="h-6 w-6" />
-             </div>
-             <div>
-                <h1 className="text-2xl font-black text-text-primary tracking-tight font-mono">{pr.serial_no}</h1>
-                <div className="mt-1 flex items-center gap-2">
-                   <StatusBadge status={pr.status} />
-                </div>
-             </div>
+      <div className="bg-surface rounded-xl lg:rounded-2xl border border-border shadow-sm p-4 lg:p-6">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="font-mono text-lg lg:text-2xl font-bold text-text-primary">
+                {pr.serial_no}
+              </span>
+              <StatusBadge status={pr.status} />
+            </div>
+            <p className="text-xs text-text-secondary mt-1 truncate">
+              {pr.project_name || 'General Operations'} · {pr.department_name}
+            </p>
           </div>
-          
-          <div className="flex items-center gap-3">
-             <ThemedButton 
-               variant="outline"
-               onClick={downloadPDF} 
-             >
-                <Printer className="h-4 w-4 mr-2" /> Print PDF
-             </ThemedButton>
-             {['draft', 'returned'].includes(pr.status) && (
-               <>
-                 <button 
-                   onClick={() => navigate(`/purchase-requisitions/${id}/edit`)}
-                   className="inline-flex items-center px-5 py-2.5 bg-white border border-slate-200 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 transition-all"
-                 >
-                    <Pencil className="h-4 w-4 mr-2" /> Edit
-                 </button>
-                 <button 
-                   onClick={() => setConfirmModal(true)} 
-                   disabled={submitting}
-                   className="inline-flex items-center px-6 py-2.5 bg-blue-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-700 transition-all shadow-lg shadow-blue-900/20 disabled:opacity-50"
-                 >
-                    <Send className="h-4 w-4 mr-2" /> Submit Requisition
-                 </button>
-               </>
-             )}
+
+          {/* Actions: dropdown on mobile, buttons on desktop */}
+          <div className="flex-shrink-0">
+            {/* Mobile: kebab menu */}
+            <div className="lg:hidden relative">
+              <button
+                onClick={() => setShowActions(!showActions)}
+                className="p-2.5 rounded-xl border border-border bg-white min-w-[44px] min-h-[44px] flex items-center justify-center"
+              >
+                <MoreVertical className="w-5 h-5 text-text-secondary" />
+              </button>
+              {showActions && (
+                <div className="absolute right-0 top-12 w-48 bg-white rounded-xl border border-border shadow-xl z-[60]">
+                  {actions.map(action => (
+                    <button
+                      key={action.label}
+                      onClick={() => { action.onClick(); setShowActions(false); }}
+                      className="flex items-center gap-2.5 w-full px-4 py-3 text-sm text-text-primary hover:bg-slate-50 first:rounded-t-xl last:rounded-b-xl border-b last:border-0 border-slate-100"
+                    >
+                      <action.icon className="w-4 h-4 text-text-muted" />
+                      {action.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Desktop: row of buttons */}
+            <div className="hidden lg:flex items-center gap-2">
+              {actions.map(action => (
+                <button key={action.label} onClick={action.onClick}
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-border bg-white text-sm font-medium text-text-primary hover:bg-slate-50 transition-all">
+                  <action.icon className="w-4 h-4" />
+                  {action.label}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-2 pt-6 border-t border-border">
-           <div className="px-3 py-1.5 bg-page-bg rounded-md flex items-center gap-2 text-[10px] font-black text-text-muted uppercase tracking-widest">
-              <Layers className="h-3 w-3" /> {pr.project_name || 'General Operations'}
-           </div>
-           <div className="px-3 py-1.5 bg-page-bg rounded-md flex items-center gap-2 text-[10px] font-black text-text-muted uppercase tracking-widest">
-              <Building2 className="h-3 w-3" /> {pr.department_name}
-           </div>
-           <div className="px-3 py-1.5 bg-page-bg rounded-md flex items-center gap-2 text-[10px] font-black text-text-muted uppercase tracking-widest">
-              <User className="h-3 w-3" /> {pr.requester_name}
-           </div>
-           <div className="px-3 py-1.5 bg-page-bg rounded-md flex items-center gap-2 text-[10px] font-black text-text-muted uppercase tracking-widest">
-              <Calendar className="h-3 w-3" /> {new Date(pr.created_at).toLocaleDateString()}
-           </div>
-           <div className="px-3 py-1.5 bg-accent-light rounded-md flex items-center gap-2 text-[10px] font-black text-accent uppercase tracking-widest">
-              <Wallet className="h-3 w-3" /> ETB {Number(pr.total_requested).toLocaleString()}
-           </div>
+        {/* Info chips — horizontal scroll on mobile */}
+        <div className="flex gap-2 mt-4 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-none">
+          {[
+            { icon: FolderOpen, label: pr.project_name || 'General Operations' },
+            { icon: Building2, label: pr.department_name },
+            { icon: User, label: pr.requester_name },
+            { icon: Calendar, label: new Date(pr.created_at).toLocaleDateString() },
+            { icon: Wallet, label: `ETB ${Number(pr.total_requested).toLocaleString()}` },
+          ].map(chip => (
+            <div key={chip.label}
+              className="flex items-center gap-1.5 bg-slate-50 rounded-full px-3 py-1.5 text-[10px] font-black text-text-secondary whitespace-nowrap flex-shrink-0 border border-border uppercase tracking-widest">
+              <chip.icon className="w-3 h-3 flex-shrink-0" />
+              {chip.label}
+            </div>
+          ))}
         </div>
-      </ThemedCard>
+      </div>
 
       {/* REASON CARD */}
-      <div className="bg-warning-light border border-warning/20 rounded-lg p-6">
-         <h4 className="text-[10px] font-black text-warning uppercase tracking-[0.2em] mb-2 flex items-center gap-2">
-            <MessageSquare className="h-3 w-3" /> Reason for Purchase
+      <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 lg:p-6">
+         <h4 className="text-[10px] font-black text-amber-700 uppercase tracking-[0.2em] mb-2 flex items-center gap-2">
+            <MessageSquare className="h-3.5 h-3.5" /> Reason for Purchase
          </h4>
-         <p className="text-sm font-bold text-text-primary leading-relaxed italic">"{pr.reason}"</p>
+         <p className="text-sm font-bold text-amber-900 leading-relaxed italic">"{pr.reason}"</p>
       </div>
 
       {/* LINE ITEMS CARD */}
-      <ThemedCard className="overflow-hidden">
-        <div className="px-8 py-5 border-b border-border flex items-center justify-between">
+      <div className="bg-white rounded-xl lg:rounded-2xl border border-border shadow-sm overflow-hidden">
+        <div className="px-6 py-4 border-b border-border flex items-center justify-between">
            <h3 className="text-sm font-black text-text-primary uppercase tracking-widest">Line Items</h3>
-           <span className="px-2 py-0.5 bg-page-bg rounded text-[9px] font-black text-text-muted uppercase tracking-widest">{pr.items.length} Items</span>
+           <span className="px-2 py-0.5 bg-slate-100 rounded text-[9px] font-black text-text-muted uppercase tracking-widest">{pr.items.length} Items</span>
         </div>
-        <div className="overflow-x-auto">
+        
+        {/* Desktop Table */}
+        <div className="hidden lg:block overflow-x-auto">
            <table className="min-w-full divide-y divide-slate-50">
               <thead className="bg-slate-50/30">
                  <tr>
@@ -208,90 +245,126 @@ export default function PRDetailPage() {
               </tbody>
            </table>
         </div>
-        <div className="bg-page-bg p-8 flex justify-end">
-           <div className="w-full max-w-xs space-y-3">
-              <div className="flex justify-between items-center text-xs font-bold text-text-secondary uppercase tracking-widest">
-                 <span>Requested Total</span>
-                 <span>ETB {Number(pr.total_requested).toLocaleString()}</span>
+
+        {/* Mobile List */}
+        <div className="lg:hidden divide-y divide-slate-100">
+          {pr.items.map((item: any) => (
+            <div key={item.id} className="p-4">
+              <p className="text-sm font-bold text-slate-900 mb-1">{item.description}</p>
+              <div className="flex items-center justify-between mt-2">
+                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                  {item.quantity} {item.unit} × ETB {Number(item.unit_price).toLocaleString()}
+                </span>
+                <span className="text-sm font-black text-slate-900">
+                  ETB {Number(item.requested_amount).toLocaleString()}
+                </span>
               </div>
-              {pr.status === 'approved' && (
-                <div className="flex justify-between items-center text-xs font-black text-success uppercase tracking-widest">
-                   <span>Approved Total</span>
-                   <span>ETB {Number(pr.total_requested).toLocaleString()}</span>
+            </div>
+          ))}
+        </div>
+
+        <div className="bg-slate-50/50 p-4 lg:p-6">
+           <div className="w-full lg:max-w-xs lg:ml-auto space-y-2">
+              {[
+                { label: 'Requested Total', value: pr.total_requested, color: 'text-text-primary' },
+                { label: 'Approved Total', value: pr.status === 'approved' ? pr.total_requested : null, color: 'text-emerald-600' },
+              ].filter(row => row.value != null).map(row => (
+                <div key={row.label} className="flex items-center justify-between py-1 border-b border-slate-100 last:border-0">
+                  <span className="text-[10px] font-black text-text-secondary uppercase tracking-widest">{row.label}</span>
+                  <span className={`text-sm font-black tabular-nums ${row.color}`}>
+                    ETB {Number(row.value).toLocaleString()}
+                  </span>
                 </div>
-              )}
-              <div className="pt-3 border-t border-border flex justify-between items-center text-lg font-black text-text-primary tracking-tighter">
-                 <span>Grand Total</span>
+              ))}
+              <div className="pt-2 flex justify-between items-center text-lg font-black text-text-primary tracking-tight">
+                 <span className="text-[10px] uppercase tracking-[0.2em]">Total</span>
                  <span>ETB {Number(pr.total_requested).toLocaleString()}</span>
               </div>
            </div>
         </div>
-      </ThemedCard>
+      </div>
 
       {/* APPROVAL TIMELINE CARD */}
-      <ThemedCard className="p-8">
-        <div className="flex items-center gap-3 mb-10">
-           <div className="h-10 w-10 rounded-lg bg-accent-light flex items-center justify-center text-accent">
-              <GitBranch className="h-5 w-5" />
-           </div>
-           <h3 className="text-sm font-black text-text-primary uppercase tracking-widest">Approval Journey</h3>
-        </div>
+      <div className="bg-surface rounded-xl lg:rounded-2xl border border-border shadow-sm p-4 lg:p-6">
+        <h3 className="text-sm font-black text-text-primary mb-6 flex items-center gap-2 uppercase tracking-widest">
+          <GitBranch className="w-4 h-4 text-text-muted" />
+          Approval Journey
+        </h3>
 
-        <div className="relative pl-12 space-y-12 before:absolute before:left-5 before:top-2 before:bottom-2 before:w-0.5 before:bg-border">
-           {/* Start node */}
-           <div className="relative">
-              <div className="absolute -left-[38px] top-0 h-8 w-8 rounded-full bg-success text-white flex items-center justify-center border-4 border-card-bg shadow-sm">
-                 <CheckCircle className="h-4 w-4" />
+        <div className="relative">
+          {/* Vertical connecting line */}
+          <div className="absolute left-4 top-4 bottom-4 w-px bg-slate-100" />
+
+          <div className="space-y-6">
+            {approvalSteps.map((step, i) => (
+              <div key={i} className="flex gap-4 relative">
+                {/* Step circle */}
+                <div className={`
+                  relative z-10 w-8 h-8 rounded-full flex-shrink-0
+                  flex items-center justify-center
+                  ${step.completed
+                    ? 'bg-emerald-500 text-white'
+                    : step.current
+                      ? 'bg-blue-600 text-white ring-4 ring-blue-600/20'
+                      : 'bg-white border-2 border-slate-100 text-slate-400'
+                  }
+                `}>
+                  {step.completed
+                    ? <Check className="w-4 h-4" />
+                    : step.current
+                      ? <Clock className="w-3.5 h-3.5" />
+                      : <span className="text-[10px] font-bold">{i + 1}</span>
+                  }
+                </div>
+
+                {/* Step content */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className={`text-sm font-bold truncate ${
+                        step.completed || step.current
+                          ? 'text-slate-900'
+                          : 'text-slate-400'
+                      }`}>
+                        {step.role_label}
+                      </p>
+                      {step.actor_name && (
+                        <p className="text-[10px] font-black text-slate-500 mt-0.5 truncate uppercase tracking-widest">
+                          {step.actor_name}
+                        </p>
+                      )}
+                    </div>
+                    {step.acted_at && (
+                      <span className="text-[9px] font-black text-slate-400 flex-shrink-0 uppercase tracking-widest">
+                        {new Date(step.acted_at).toLocaleDateString()}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Comment */}
+                  {step.comment && (
+                    <div className="mt-2 bg-slate-50 rounded-xl px-4 py-3 border border-slate-100 border-l-4 border-l-slate-200">
+                      <p className="text-xs text-slate-600 font-medium italic leading-relaxed">
+                        "{step.comment}"
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Current step: pending indicator */}
+                  {step.current && (
+                    <div className="mt-2 flex items-center gap-1.5">
+                      <div className="w-1.5 h-1.5 rounded-full bg-blue-600 animate-pulse" />
+                      <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest">
+                        Awaiting action
+                      </span>
+                    </div>
+                  )}
+                </div>
               </div>
-              <div>
-                 <p className="text-sm font-black text-text-primary uppercase tracking-widest">Document Created</p>
-                 <p className="text-xs font-bold text-text-muted mt-0.5 uppercase tracking-tight">{new Date(pr.created_at).toLocaleString()}</p>
-                 <p className="text-xs text-text-secondary mt-1 font-medium">By {pr.requester_name}</p>
-              </div>
-           </div>
-
-           {pr.approvals.map((app: any, i: number) => (
-             <div key={app.id} className="relative">
-                <div className={`absolute -left-[38px] top-0 h-8 w-8 rounded-full flex items-center justify-center border-4 border-white shadow-sm ${
-                  app.action === 'approve' ? 'bg-emerald-500 text-white' : 
-                  app.action === 'reject' ? 'bg-red-500 text-white' : 
-                  'bg-amber-500 text-white'
-                }`}>
-                   {app.action === 'approve' ? <CheckCircle className="h-4 w-4" /> : 
-                    app.action === 'reject' ? <XCircle className="h-4 w-4" /> : 
-                    <RotateCcw className="h-4 w-4" />}
-                </div>
-                <div>
-                   <p className="text-sm font-black text-slate-900 uppercase tracking-widest">{app.actor_role || 'Reviewer'} Action</p>
-                   <div className="flex items-center gap-3 mt-0.5">
-                      <span className="text-xs font-bold text-slate-600">{app.actor_name}</span>
-                      <span className="h-1 w-1 bg-slate-300 rounded-full" />
-                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{new Date(app.acted_at).toLocaleString()}</span>
-                   </div>
-                   {app.comment && (
-                     <div className="mt-4 p-4 bg-slate-50 rounded-2xl text-sm font-medium text-slate-600 italic border-l-4 border-slate-200">
-                        <MessageSquare className="h-4 w-4 mb-2 text-slate-300" />
-                        "{app.comment}"
-                     </div>
-                   )}
-                </div>
-             </div>
-           ))}
-
-           {/* Current/Pending step */}
-           {pr.status !== 'approved' && pr.status !== 'rejected' && (
-             <div className="relative">
-                <div className="absolute -left-[38px] top-0 h-8 w-8 rounded-full bg-blue-500 text-white flex items-center justify-center border-4 border-white shadow-sm animate-pulse">
-                   <Clock className="h-4 w-4" />
-                </div>
-                <div>
-                   <p className="text-sm font-black text-blue-600 uppercase tracking-widest">Pending Review</p>
-                   <p className="text-xs font-bold text-slate-400 mt-0.5 uppercase tracking-tight">Awaiting {pr.status.replace('_', ' ').toUpperCase()}</p>
-                </div>
-             </div>
-           )}
+            ))}
+          </div>
         </div>
-      </ThemedCard>
+      </div>
 
       {/* COMMENTS / ACTION AREA */}
       {canApprove && (

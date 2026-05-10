@@ -68,11 +68,21 @@ export default {
         fadeIn: {
           '0%': { opacity: '0', transform: 'translateY(8px)' },
           '100%': { opacity: '1', transform: 'translateY(0)' }
+        },
+        'slide-up': {
+          from: { transform: 'translateY(100%)' },
+          to: { transform: 'translateY(0)' }
+        },
+        'scale-in': {
+          from: { opacity: '0', transform: 'scale(0.95)' },
+          to: { opacity: '1', transform: 'scale(1)' }
         }
       },
       animation: {
         'fade-in': 'fadeIn 0.2s ease-out forwards',
-        'bounce-once': 'bounce 1s ease-in-out 1'
+        'bounce-once': 'bounce 1s ease-in-out 1',
+        'slide-up': 'slide-up 0.25s ease-out',
+        'scale-in': 'scale-in 0.15s ease-out',
       }
     },
   },

@@ -70,7 +70,8 @@ function SerialsTab() {
 
   const getPreview = (seq: any) => {
     const year = new Date().getFullYear();
-    const pad = '0'.repeat(seq.padding - 1) + '1';
+    const paddingCount = Math.max(0, (seq.padding || 3) - 1);
+    const pad = '0'.repeat(paddingCount) + '1';
     return `${seq.prefix}${seq.include_year ? '-' + year : ''}-${pad}`;
   };
 

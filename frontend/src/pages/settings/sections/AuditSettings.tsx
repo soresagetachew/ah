@@ -127,51 +127,55 @@ function AuditLogTab() {
 
        {/* AUDIT TABLE */}
        <div className="bg-white rounded-[3rem] border border-slate-100 shadow-sm overflow-hidden">
-          <table className="min-w-full divide-y divide-slate-100">
-             <thead className="bg-slate-50/50">
-                <tr>
-                   <th className="px-8 py-5 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Actor</th>
-                   <th className="px-8 py-5 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Operation</th>
-                   <th className="px-8 py-5 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Entity Target</th>
-                   <th className="px-8 py-5 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Descriptor</th>
-                   <th className="px-8 py-5 text-right text-[10px] font-black text-slate-400 uppercase tracking-widest">Timestamp</th>
-                </tr>
-             </thead>
-             <tbody className="divide-y divide-slate-50">
-                {loading ? (
-                   <tr><td colSpan={5} className="p-20 text-center"><Loader2 className="h-8 w-8 animate-spin mx-auto opacity-10" /></td></tr>
-                ) : logs.map(l => (
-                  <tr key={l.id} onClick={() => setExpandedRow(expandedRow === l.id ? null : l.id)} className="hover:bg-slate-50/50 transition-colors cursor-pointer group">
-                     <td className="px-8 py-6">
-                        <div className="flex items-center gap-3">
-                           <div className="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center font-black text-[10px]">
-                              {l.user_name?.substring(0,2).toUpperCase()}
-                           </div>
-                           <p className="text-xs font-black text-slate-900">{l.user_name}</p>
-                        </div>
-                     </td>
-                     <td className="px-8 py-6">
-                        <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-widest ${l.action === 'CREATE' ? 'bg-emerald-50 text-emerald-600' : l.action === 'UPDATE' ? 'bg-blue-50 text-blue-600' : l.action === 'DELETE' ? 'bg-red-50 text-red-600' : 'bg-slate-100 text-slate-600'}`}>
-                           {l.action}
-                        </span>
-                     </td>
-                     <td className="px-8 py-6">
-                        <div className="flex items-center gap-2">
-                           <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{l.entity_type}</span>
-                           <span className="text-[10px] font-mono font-bold text-slate-900 bg-slate-100 px-1.5 py-0.5 rounded">{l.entity_id?.substring(0,8)}</span>
-                        </div>
-                     </td>
-                     <td className="px-8 py-6 max-w-xs truncate">
-                        <p className="text-xs text-slate-500 font-medium">{l.description}</p>
-                     </td>
-                     <td className="px-8 py-6 text-right">
-                        <p className="text-xs font-black text-slate-900 tabular-nums">{new Date(l.created_at).toLocaleString()}</p>
-                        <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">{l.ip_address}</p>
-                     </td>
-                  </tr>
-                ))}
-             </tbody>
-          </table>
+          <div className="overflow-x-auto -mx-4 lg:mx-0">
+             <div className="min-w-[800px] lg:min-w-0 px-4 lg:px-0">
+                <table className="min-w-full divide-y divide-slate-100">
+                   <thead className="bg-slate-50/50">
+                      <tr>
+                         <th className="px-8 py-5 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Actor</th>
+                         <th className="px-8 py-5 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Operation</th>
+                         <th className="px-8 py-5 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Entity Target</th>
+                         <th className="px-8 py-5 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Descriptor</th>
+                         <th className="px-8 py-5 text-right text-[10px] font-black text-slate-400 uppercase tracking-widest">Timestamp</th>
+                      </tr>
+                   </thead>
+                   <tbody className="divide-y divide-slate-50">
+                      {loading ? (
+                         <tr><td colSpan={5} className="p-20 text-center"><Loader2 className="h-8 w-8 animate-spin mx-auto opacity-10" /></td></tr>
+                      ) : logs.map(l => (
+                        <tr key={l.id} onClick={() => setExpandedRow(expandedRow === l.id ? null : l.id)} className="hover:bg-slate-50/50 transition-colors cursor-pointer group">
+                           <td className="px-8 py-6">
+                              <div className="flex items-center gap-3">
+                                 <div className="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center font-black text-[10px]">
+                                    {l.user_name?.substring(0,2).toUpperCase()}
+                                 </div>
+                                 <p className="text-xs font-black text-slate-900">{l.user_name}</p>
+                              </div>
+                           </td>
+                           <td className="px-8 py-6">
+                              <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-widest ${l.action === 'CREATE' ? 'bg-emerald-50 text-emerald-600' : l.action === 'UPDATE' ? 'bg-blue-50 text-blue-600' : l.action === 'DELETE' ? 'bg-red-50 text-red-600' : 'bg-slate-100 text-slate-600'}`}>
+                                 {l.action}
+                              </span>
+                           </td>
+                           <td className="px-8 py-6">
+                              <div className="flex items-center gap-2">
+                                 <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{l.entity_type}</span>
+                                 <span className="text-[10px] font-mono font-bold text-slate-900 bg-slate-100 px-1.5 py-0.5 rounded">{l.entity_id?.substring(0,8)}</span>
+                              </div>
+                           </td>
+                           <td className="px-8 py-6 max-w-xs truncate">
+                              <p className="text-xs text-slate-500 font-medium">{l.description}</p>
+                           </td>
+                           <td className="px-8 py-6 text-right">
+                              <p className="text-xs font-black text-slate-900 tabular-nums">{new Date(l.created_at).toLocaleString()}</p>
+                              <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">{l.ip_address}</p>
+                           </td>
+                        </tr>
+                      ))}
+                   </tbody>
+                </table>
+             </div>
+          </div>
        </div>
     </div>
   );

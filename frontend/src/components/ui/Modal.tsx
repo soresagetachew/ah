@@ -11,44 +11,58 @@ interface ModalProps {
 }
 
 export function Modal({ isOpen, onClose, title, children, footer, size = 'md' }: ModalProps) {
-  const [show, setShow] = useState(false);
-
-  useEffect(() => {
-    if (isOpen) {
-      setShow(true);
-      document.body.style.overflow = 'hidden';
-    } else {
-      setTimeout(() => setShow(false), 150);
-      document.body.style.overflow = 'unset';
-    }
-  }, [isOpen]);
-
-  if (!isOpen && !show) return null;
-
-  const maxWidths = {
-    sm: 'max-w-[480px]',
-    md: 'max-w-[600px]',
-    lg: 'max-w-[800px]'
-  };
+  if (!isOpen) return null;
 
   return (
-    <div className={`fixed inset-0 z-[200] flex items-center justify-center p-4 transition-opacity duration-150 ${isOpen ? 'opacity-100' : 'opacity-0'}`}>
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
-      
-      <div className={`relative bg-white rounded-2xl shadow-2xl border border-slate-100 w-full ${maxWidths[size]} overflow-hidden transition-all duration-150 ${isOpen ? 'scale-100 opacity-100' : 'scale-95 opacity-0'}`}>
-        <div className="px-6 pt-6 pb-4 border-b border-slate-100 flex justify-between items-center bg-white">
-          <h3 className="text-lg font-semibold text-slate-900 tracking-tight">{title}</h3>
-          <button onClick={onClose} aria-label="Close modal" className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-500 hover:text-slate-700 transition-colors">
+    <div className="fixed inset-0 z-50 flex items-end lg:items-center justify-center">
+      {/* Backdrop */}
+      <div
+        className="fixed inset-0 bg-black/60 backdrop-blur-sm"
+        onClick={onClose}
+      />
+
+      {/* Modal panel */}
+      <div className={`
+        relative z-10 bg-white
+        w-full lg:max-w-${size === 'sm' ? 'md' : size === 'md' ? 'lg' : '2xl'}
+        lg:w-full lg:mx-4
+        
+        {/* Mobile: slide up from bottom, rounded top corners */}
+        rounded-t-2xl lg:rounded-2xl
+
+        {/* Mobile: max 90vh height with scroll */}
+        max-h-[90vh] lg:max-h-[85vh]
+        flex flex-col
+        shadow-2xl
+        animate-slide-up lg:animate-scale-in
+        overflow-hidden
+      `}>
+        {/* Drag handle — mobile only */}
+        <div className="flex justify-center pt-3 pb-1 lg:hidden">
+          <div className="w-10 h-1 rounded-full bg-slate-200" />
+        </div>
+
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 flex-shrink-0">
+          <h2 className="text-base font-semibold text-slate-900 tracking-tight">
+            {title}
+          </h2>
+          <button
+            onClick={onClose}
+            className="p-2 rounded-xl hover:bg-slate-50 min-w-[40px] min-h-[40px] flex items-center justify-center text-slate-400 hover:text-slate-900 transition-all"
+          >
             <X className="w-5 h-5" />
           </button>
         </div>
-        
-        <div className="px-6 py-6 overflow-y-auto max-h-[70vh] custom-scrollbar">
+
+        {/* Scrollable body */}
+        <div className="flex-1 overflow-y-auto px-5 py-6">
           {children}
         </div>
-        
+
+        {/* Footer */}
         {footer && (
-          <div className="px-6 pb-6 pt-4 border-t border-slate-100 flex justify-end gap-3 bg-slate-50/30">
+          <div className="px-5 py-4 border-t border-slate-100 flex-shrink-0 bg-slate-50/50 safe-area-inset-bottom">
             {footer}
           </div>
         )}
@@ -84,26 +98,38 @@ export function ConfirmationModal({
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="">
-      <div className="flex flex-col items-center text-center">
-        <div className={`h-16 w-16 rounded-full ${bg} ${color} flex items-center justify-center mb-6`}>
-           <Icon className="w-8 h-8" />
+      <div className="space-y-6">
+        {/* Icon */}
+        <div className="flex justify-center">
+          <div className={`w-16 h-16 rounded-full ${bg} flex items-center justify-center`}>
+            <Icon className={`w-8 h-8 ${color}`} />
+          </div>
         </div>
-        <h3 className="text-lg font-semibold text-slate-900 mb-2 tracking-tight">{title}</h3>
-        <p className="text-sm text-slate-700 leading-relaxed px-4">{message}</p>
-        
-        <div className="mt-10 w-full grid grid-cols-2 gap-3">
-           <button 
-             onClick={onClose}
-             className="px-6 py-3 border border-slate-200 rounded-xl text-xs font-semibold uppercase tracking-wide text-slate-700 hover:bg-slate-50 transition-all"
-           >
-              {cancelText}
-           </button>
-           <button 
-             onClick={() => { onConfirm(); onClose(); }}
-             className={`px-6 py-3 ${btn} text-white rounded-xl text-xs font-semibold uppercase tracking-wide transition-all shadow-lg`}
-           >
-              {confirmText}
-           </button>
+
+        {/* Text */}
+        <div className="text-center">
+          <h3 className="text-lg font-semibold text-slate-900 tracking-tight">
+            {title}
+          </h3>
+          <p className="text-sm text-slate-600 mt-2 leading-relaxed">
+            {message}
+          </p>
+        </div>
+
+        {/* Action buttons — full width on mobile */}
+        <div className="flex flex-col-reverse sm:flex-row gap-3">
+          <button 
+            onClick={onClose}
+            className="w-full sm:flex-1 py-3.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-all min-h-[48px]"
+          >
+            {cancelText}
+          </button>
+          <button 
+            onClick={() => { onConfirm(); onClose(); }}
+            className={`w-full sm:flex-1 py-3.5 ${btn} text-white rounded-xl text-sm font-semibold transition-all shadow-lg min-h-[48px]`}
+          >
+            {confirmText}
+          </button>
         </div>
       </div>
     </Modal>
@@ -120,52 +146,65 @@ interface DrawerProps {
 }
 
 export function Drawer({ isOpen, onClose, title, subtitle, children, footer }: DrawerProps) {
-  const [show, setShow] = useState(false);
-
-  useEffect(() => {
-    if (isOpen) {
-      setShow(true);
-      document.body.style.overflow = 'hidden';
-    } else {
-      setTimeout(() => setShow(false), 300);
-      document.body.style.overflow = 'unset';
-    }
-  }, [isOpen]);
-
-  if (!isOpen && !show) return null;
-
   return (
-    <div className="fixed inset-0 z-[200] overflow-hidden">
-      <div className={`absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity duration-300 ${isOpen ? 'opacity-100' : 'opacity-0'}`} onClick={onClose} />
-      
-      <div className={`absolute inset-y-0 right-0 flex max-w-full pl-10 transform transition-transform duration-300 ease-out ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}>
-        <div className="w-screen max-w-md bg-white shadow-2xl flex flex-col h-full">
-           <div className="sticky top-0 z-10 bg-white border-b border-slate-100 px-8 py-6 flex justify-between items-center">
-              <div>
-                 <h2 className="text-lg font-semibold text-slate-900 tracking-tight">{title}</h2>
-                 {subtitle && <p className="text-xs text-slate-500 mt-0.5">{subtitle}</p>}
-              </div>
-              <button 
-                onClick={onClose}
-                aria-label="Close drawer"
-                className="p-2 rounded-xl text-slate-400 hover:bg-slate-50 hover:text-slate-900 transition-all border border-transparent hover:border-slate-100"
-              >
-                 <X className="w-5 h-5" />
-              </button>
-           </div>
-           
-           <div className="flex-1 overflow-y-auto px-8 py-8 custom-scrollbar">
-              {children}
-           </div>
+    <>
+      {/* Backdrop */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm"
+          onClick={onClose}
+        />
+      )}
 
-           {footer && (
-             <div className="sticky bottom-0 bg-white border-t border-slate-100 px-8 py-6 flex justify-end gap-3">
-                {footer}
-             </div>
-           )}
+      {/* Drawer panel */}
+      <div className={`
+        fixed z-50 bg-white shadow-2xl flex flex-col
+        
+        {/* Mobile: full screen / bottom sheet */}
+        inset-x-0 bottom-0 top-14 rounded-t-2xl
+
+        {/* Desktop: right slide-in */}
+        lg:inset-auto lg:top-0 lg:right-0 lg:bottom-0
+        lg:w-[480px] lg:rounded-none
+
+        transform transition-transform duration-300 ease-out
+        ${isOpen
+          ? 'translate-y-0 lg:translate-x-0'
+          : 'translate-y-full lg:translate-x-full'
+        }
+      `}>
+        {/* Drag handle — mobile only */}
+        <div className="flex justify-center pt-3 pb-1 lg:hidden flex-shrink-0">
+          <div className="w-10 h-1 rounded-full bg-slate-200" />
         </div>
+
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 flex-shrink-0">
+          <div>
+            <h2 className="text-base font-semibold text-slate-900 tracking-tight">{title}</h2>
+            {subtitle && <p className="text-[10px] font-medium text-slate-500 mt-0.5 uppercase tracking-wider">{subtitle}</p>}
+          </div>
+          <button
+            onClick={onClose}
+            className="p-2 rounded-xl hover:bg-slate-50 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
+          >
+            <X className="w-5 h-5 text-slate-400 hover:text-slate-900" />
+          </button>
+        </div>
+
+        {/* Scrollable body */}
+        <div className="flex-1 overflow-y-auto px-5 py-6 custom-scrollbar">
+          {children}
+        </div>
+
+        {/* Footer */}
+        {footer && (
+          <div className="px-5 py-4 border-t border-slate-100 flex-shrink-0 bg-slate-50/50 safe-area-inset-bottom">
+            {footer}
+          </div>
+        )}
       </div>
-    </div>
+    </>
   );
 }
 
@@ -204,19 +243,19 @@ export function PromptModal({
           value={value}
           onChange={(e) => setValue(e.target.value)}
           placeholder={placeholder}
-          className="w-full px-5 py-4 rounded-xl border border-slate-200 bg-white text-sm font-medium placeholder:text-slate-300 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all resize-none"
+          className="w-full px-5 py-4 rounded-xl border border-slate-200 bg-white text-sm font-medium placeholder:text-slate-300 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all resize-none min-h-[120px]"
         />
-        <div className="flex gap-3 pt-4">
+        <div className="flex flex-col-reverse sm:flex-row gap-3 pt-4">
            <button 
              onClick={onClose}
-             className="flex-1 px-6 py-3 border border-slate-200 rounded-xl text-xs font-semibold uppercase tracking-wide text-slate-700 hover:bg-slate-50 transition-all"
+             className="w-full sm:flex-1 px-6 py-3.5 border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-all min-h-[48px]"
            >
               {cancelText}
            </button>
            <button 
              onClick={() => { if(value.trim()) { onConfirm(value); onClose(); setValue(''); } }}
              disabled={!value.trim()}
-             className={`flex-1 px-6 py-3 ${config[type]} text-white rounded-xl text-xs font-semibold uppercase tracking-wide transition-all shadow-lg disabled:opacity-50`}
+             className={`w-full sm:flex-1 px-6 py-3.5 ${config[type]} text-white rounded-xl text-sm font-semibold transition-all shadow-lg disabled:opacity-50 min-h-[48px]`}
            >
               {confirmText}
            </button>
