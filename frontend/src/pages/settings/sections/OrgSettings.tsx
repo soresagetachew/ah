@@ -1,25 +1,25 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Building2, Briefcase, PiggyBank, Plus, Trash2, Edit3, ChevronRight, ChevronDown, Users, Loader2, Save, TrendingUp, TrendingDown, DollarSign } from 'lucide-react';
+import { Building2, Briefcase, PiggyBank, Plus, Trash2, Edit3, ChevronRight, ChevronDown, Users, Loader2, TrendingUp, TrendingDown, DollarSign } from 'lucide-react';
 import toast from 'react-hot-toast';
 import client from '../../../api/client';
 import { Modal, Drawer } from '../../../components/ui/Modal';
 import { useForm } from 'react-hook-form';
 import {
-  Card,
-  SectionTitle,
-  FieldLabel,
-  HelperText,
-  Input,
-  Textarea,
-  Select,
-  Button,
-  Badge,
-  Divider,
-  Toggle,
-  FormGroup,
-  SectionGroup,
-  FieldRow,
-} from '../../../components/settings/SettingsComponents';
+  SettingsCard,
+  SettingsField,
+  SettingsInput,
+  SettingsSelect,
+  SettingsTextarea,
+  SettingsToggle,
+  SettingsToggleRow,
+  SettingsDivider,
+  SettingsSaveBar,
+  SettingsAlert,
+  SettingsBadge,
+  SettingsTable,
+  SettingsSectionHeader,
+  SettingsNumberInput,
+} from '../../../components/settings/ui';
 
 type Tab = 'departments' | 'projects' | 'budget';
 
@@ -106,14 +106,14 @@ function DepartmentsTab() {
           </div>
 
           <div className="flex-1">
-             <span className="text-sm font-black text-slate-900">{node.name}</span>
-             <span className="ml-3 text-[10px] font-black text-slate-400 uppercase tracking-widest">{node.business_unit}</span>
+             <span className="text-sm font-semibold text-slate-900">{node.name}</span>
+             <span className="ml-3 text-[10px] font-medium text-slate-400 uppercase tracking-widest">{node.business_unit}</span>
           </div>
 
           <div className="flex items-center gap-3">
              <div className="flex items-center gap-1.5 px-3 py-1 bg-slate-100 text-slate-600 rounded-full">
                 <Users className="h-3 w-3" />
-                <span className="text-[10px] font-black">{node.user_count || 0}</span>
+                <span className="text-[10px] font-medium">{node.user_count || 0}</span>
              </div>
              <div className="hidden group-hover:flex items-center gap-1">
                 <button 
@@ -157,18 +157,20 @@ function DepartmentsTab() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-         <div className="space-y-1">
-            <SectionTitle>Organization Hierarchy</SectionTitle>
-            <HelperText>Manage structural units and parent-child relationships across business units.</HelperText>
-         </div>
-         <Button
+         <SettingsSectionHeader 
+           title="Organization Hierarchy"
+           description="Manage structural units and parent-child relationships across business units."
+         />
+         <button
            onClick={() => { setSelectedDept(null); setIsModalOpen(true); }}
+           className="flex items-center gap-2 px-4 h-9 bg-blue-500 text-white rounded-lg text-xs font-medium hover:bg-blue-600 transition-all"
          >
             <Plus className="h-4 w-4" /> Add Department
-         </Button>
+         </button>
       </div>
 
-      <Card>
+      {/* @ts-ignore */}
+      <SettingsCard title="Organizational Structure">
          {loading ? (
            <div className="py-20 text-center"><Loader2 className="h-10 w-10 animate-spin mx-auto opacity-10" /></div>
          ) : depts.length === 0 ? (
@@ -178,7 +180,7 @@ function DepartmentsTab() {
               {tree.map(node => <DepartmentItem key={node.id} node={node} />)}
            </div>
          )}
-      </Card>
+      </SettingsCard>
 
       <Modal
         isOpen={isModalOpen}
@@ -211,39 +213,48 @@ function DepartmentForm({ dept, depts, onSuccess }: any) {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-       <FieldRow>
-          <FormGroup label="Department Name" className="md:col-span-2">
-             <Input {...register('name', { required: true })} />
-          </FormGroup>
-          <FormGroup label="Unique Code" helper="e.g., FIN-01">
-             <Input {...register('code')} placeholder="e.g., FIN-01" />
-          </FormGroup>
-          <FormGroup label="Business Unit">
-             <Select {...register('business_unit')}>
-                <option value="HO">Head Office</option>
-                <option value="Construction">Construction</option>
-                <option value="Real Estate">Real Estate</option>
-                <option value="Kodeko">Kodeko</option>
-             </Select>
-          </FormGroup>
-          <FormGroup label="Parent Department" className="md:col-span-2">
-             <Select {...register('parent_id')}>
-                <option value="">No Parent (Top Level)</option>
-                {depts.filter((d: any) => d.id !== dept?.id).map((d: any) => (
-                  <option key={d.id} value={d.id}>{d.name} ({d.business_unit})</option>
-                ))}
-             </Select>
-          </FormGroup>
-       </FieldRow>
-       <Button
-         type="submit"
-         isLoading={loading}
-         className="w-full"
-       >
-          {loading ? <Loader2 className="h-4 w-4" /> : <Save className="h-4 w-4" />}
-          {dept ? 'Update Department' : 'Create Department'}
-       </Button>
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* @ts-ignore */}
+          <SettingsField label="Department Name" required className="md:col-span-2">
+             <SettingsInput {...register('name', { required: true })} />
+          </SettingsField>
+          {/* @ts-ignore */}
+          <SettingsField label="Unique Code" description="e.g., FIN-01">
+             <SettingsInput {...register('code')} placeholder="e.g., FIN-01" />
+          </SettingsField>
+          {/* @ts-ignore */}
+          <SettingsField label="Business Unit">
+             <SettingsSelect
+               {...register('business_unit')}
+               options={[
+                 { value: 'HO', label: 'Head Office' },
+                 { value: 'Construction', label: 'Construction' },
+                 { value: 'Real Estate', label: 'Real Estate' },
+                 { value: 'Kodeko', label: 'Kodeko' }
+               ]}
+             />
+          </SettingsField>
+          {/* @ts-ignore */}
+          <SettingsField label="Parent Department" className="md:col-span-2">
+             <SettingsSelect
+               {...register('parent_id')}
+               options={[
+                 { value: '', label: 'No Parent (Top Level)' },
+                 ...depts.filter((d: any) => d.id !== dept?.id).map((d: any) => ({
+                   value: d.id,
+                   label: `${d.name} (${d.business_unit})`
+                 }))
+               ]}
+             />
+          </SettingsField>
+       </div>
+       {/* @ts-ignore */}
+       <SettingsSaveBar
+         onSave={handleSubmit(onSubmit)}
+         isSaving={loading}
+         saveLabel={dept ? 'Update Department' : 'Create Department'}
+       />
     </form>
   );
 }
@@ -278,74 +289,85 @@ function ProjectsTab() {
   return (
     <div className="space-y-4">
        <div className="flex items-center justify-between">
-          <div className="space-y-1">
-             <SectionTitle>Active Projects</SectionTitle>
-             <HelperText>Track and manage specialized operational units with independent budgets.</HelperText>
-          </div>
-          <Button
+          <SettingsSectionHeader 
+            title="Active Projects"
+            description="Track and manage specialized operational units with independent budgets."
+          />
+          <button
             onClick={() => { setSelectedProject(null); setIsDrawerOpen(true); }}
+            className="flex items-center gap-2 px-4 h-9 bg-blue-500 text-white rounded-lg text-xs font-medium hover:bg-blue-600 transition-all"
           >
              <Plus className="h-4 w-4" /> New Project
-          </Button>
+          </button>
        </div>
 
-       <Card className="overflow-hidden">
-          <table className="min-w-full divide-y divide-slate-100">
-             <thead className="bg-slate-50/50">
-                <tr>
-                   <th className="px-5 py-4 text-left text-[10px] font-medium text-slate-400 uppercase tracking-widest">Project & Code</th>
-                   <th className="px-5 py-4 text-left text-[10px] font-medium text-slate-400 uppercase tracking-widest">Business Unit</th>
-                   <th className="px-5 py-4 text-left text-[10px] font-medium text-slate-400 uppercase tracking-widest text-right">Budget (ETB)</th>
-                   <th className="px-5 py-4 text-left text-[10px] font-medium text-slate-400 uppercase tracking-widest">Status</th>
-                   <th className="px-5 py-4 text-right text-[10px] font-medium text-slate-400 uppercase tracking-widest">Actions</th>
-                </tr>
-             </thead>
-             <tbody className="divide-y divide-slate-50">
-                {loading ? (
-                  <tr><td colSpan={5} className="p-20 text-center"><Loader2 className="h-8 w-8 animate-spin mx-auto opacity-10" /></td></tr>
-                ) : projects.length === 0 ? (
-                  <tr><td colSpan={5} className="p-20 text-center text-slate-400">No active projects defined.</td></tr>
-                ) : projects.map(p => (
-                  <tr key={p.id} className="hover:bg-slate-50/50 transition-colors group">
-                    <td className="px-5 py-4">
-                       <div className="flex items-center gap-3">
-                          <div className="h-8 w-8 rounded-lg bg-slate-900 text-white flex items-center justify-center font-medium text-xs">
-                             <Briefcase className="h-4 w-4" />
-                          </div>
-                          <div>
-                             <p className="text-sm font-semibold text-slate-900">{p.name}</p>
-                             <p className="text-[10px] font-medium text-blue-500 uppercase tracking-widest mt-0.5">{p.code}</p>
-                          </div>
-                       </div>
-                    </td>
-                    <td className="px-5 py-4">
-                       <span className="text-xs font-medium text-slate-500 uppercase tracking-widest">{p.business_unit}</span>
-                       <p className="text-[10px] font-normal text-slate-400 uppercase">{p.department_name || 'Organization'}</p>
-                    </td>
-                    <td className="px-5 py-4 text-right font-semibold text-slate-900 tabular-nums">
-                       {Number(p.budget).toLocaleString()}
-                    </td>
-                    <td className="px-5 py-4">
-                       <button
-                         onClick={() => handleToggle(p)}
-                         className={`px-3 py-1 rounded-full text-[9px] font-medium uppercase tracking-widest border transition-all ${p.is_active ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-slate-50 text-slate-400 border-slate-100'}`}
-                       >
-                          {p.is_active ? 'Active' : 'Inactive'}
-                       </button>
-                    </td>
-                    <td className="px-5 py-4 text-right">
-                       <button
-                         onClick={() => { setSelectedProject(p); setIsDrawerOpen(true); }}
-                         className="p-2 text-slate-300 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-all"
-                       >
-                          <ChevronRight className="h-4 w-4" />
-                       </button>
-                    </td>
-                  </tr>
-                ))}
-             </tbody>
-          </table>
-       </Card>
+       {/* @ts-ignore */}
+       <SettingsTable
+         columns={[
+           {
+             key: 'project',
+             header: 'Project & Code',
+             render: (p: any) => (
+               <div className="flex items-center gap-3">
+                  <div className="h-8 w-8 rounded-lg bg-slate-900 text-white flex items-center justify-center font-medium text-xs">
+                     <Briefcase className="h-4 w-4" />
+                  </div>
+                  <div>
+                     <p className="text-sm font-semibold text-slate-900">{p.name}</p>
+                     <p className="text-[10px] font-medium text-blue-500 uppercase tracking-widest mt-0.5">{p.code}</p>
+                  </div>
+               </div>
+             )
+           },
+           {
+             key: 'business_unit',
+             header: 'Business Unit',
+             render: (p: any) => (
+               <div>
+                  <span className="text-xs font-medium text-slate-500 uppercase tracking-widest">{p.business_unit}</span>
+                  <p className="text-[10px] font-normal text-slate-400 uppercase">{p.department_name || 'Organization'}</p>
+               </div>
+             )
+           },
+           {
+             key: 'budget',
+             header: 'Budget (ETB)',
+             render: (p: any) => (
+               <span className="text-sm font-semibold text-slate-900 tabular-nums">
+                  {Number(p.budget).toLocaleString()}
+               </span>
+             )
+           },
+           {
+             key: 'status',
+             header: 'Status',
+             render: (p: any) => (
+               <button
+                 onClick={() => handleToggle(p)}
+                 className={`px-3 py-1 rounded-full text-[9px] font-medium uppercase tracking-widest border transition-all ${p.is_active ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-slate-50 text-slate-400 border-slate-100'}`}
+               >
+                  {p.is_active ? 'Active' : 'Inactive'}
+               </button>
+             )
+           },
+           {
+             key: 'actions',
+             header: 'Actions',
+             render: (p: any) => (
+               <button
+                 onClick={() => { setSelectedProject(p); setIsDrawerOpen(true); }}
+                 className="p-2 text-slate-300 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-all"
+               >
+                  <ChevronRight className="h-4 w-4" />
+               </button>
+             )
+           }
+         ]}
+         data={projects}
+         keyExtractor={(p: any) => p.id}
+         isLoading={loading}
+         emptyState="No active projects defined."
+       />
 
        <Drawer isOpen={isDrawerOpen} onClose={() => setIsDrawerOpen(false)} title={selectedProject ? "Project Parameters" : "Initialize Project"}>
           <ProjectForm project={selectedProject} onSuccess={() => { setIsDrawerOpen(false); fetchProjects(); }} />
@@ -375,50 +397,56 @@ function ProjectForm({ project, onSuccess }: any) {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-       <SectionGroup>
-          <FormGroup label="Project Name">
-             <Input {...register('name', { required: true })} />
-          </FormGroup>
-          <FieldRow>
-             <FormGroup label="Project Code">
-                <Input {...register('code')} />
-             </FormGroup>
-             <FormGroup label="Location">
-                <Input {...register('location')} />
-             </FormGroup>
-          </FieldRow>
-          <FieldRow>
-             <FormGroup label="Business Unit">
-                <Select {...register('business_unit')}>
-                   <option value="Construction">Construction</option>
-                   <option value="Real Estate">Real Estate</option>
-                   <option value="Plant">Plant</option>
-                   <option value="Kodeko">Kodeko</option>
-                </Select>
-             </FormGroup>
-             <FormGroup label="Home Department">
-                <Select {...register('department_id')}>
-                   <option value="">General Project</option>
-                   {depts.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
-                </Select>
-             </FormGroup>
-          </FieldRow>
-          <FormGroup label="Total Budget (ETB)">
-             <Input type="number" {...register('budget')} className="tabular-nums" />
-          </FormGroup>
-          <FormGroup label="Project Description">
-             <Textarea rows={4} {...register('description')} />
-          </FormGroup>
-       </SectionGroup>
-       <Button
-         type="submit"
-         isLoading={loading}
-         className="w-full"
-       >
-          {loading ? <Loader2 className="h-4 w-4" /> : <Save className="h-4 w-4" />}
-          {project ? 'Update Project' : 'Initialize Project'}
-       </Button>
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+       <SettingsField label="Project Name" required>
+          <SettingsInput {...register('name', { required: true })} />
+       </SettingsField>
+       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+       <SettingsField label="Project Code">
+             <SettingsInput {...register('code')} />
+          </SettingsField>
+          <SettingsField label="Location">
+             <SettingsInput {...register('location')} />
+          </SettingsField>
+       </div>
+       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* @ts-ignore */}
+          <SettingsField label="Business Unit">
+             <SettingsSelect
+               {...register('business_unit')}
+               options={[
+                 { value: 'Construction', label: 'Construction' },
+                 { value: 'Real Estate', label: 'Real Estate' },
+                 { value: 'Plant', label: 'Plant' },
+                 { value: 'Kodeko', label: 'Kodeko' }
+               ]}
+             />
+          </SettingsField>
+          <SettingsField label="Home Department">
+             <SettingsSelect
+               {...register('department_id')}
+               options={[
+                 { value: '', label: 'General Project' },
+                 ...depts.map(d => ({ value: d.id, label: d.name }))
+               ]}
+             />
+          </SettingsField>
+       </div>
+       <SettingsField label="Total Budget (ETB)">
+          <SettingsNumberInput
+            value={project?.budget || 0}
+            onChange={(val) => register('budget').onChange({ target: { value: val } })}
+          />
+       </SettingsField>
+       <SettingsField label="Project Description">
+          <SettingsTextarea rows={4} {...register('description')} />
+       </SettingsField>
+       {/* @ts-ignore */}
+       <SettingsSaveBar
+         onSave={handleSubmit(onSubmit)}
+         isSaving={loading}
+         saveLabel={project ? 'Update Project' : 'Initialize Project'}
+       />
     </form>
   );
 }
@@ -465,16 +493,16 @@ function BudgetTab() {
   return (
     <div className="space-y-4">
        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
-          <div className="space-y-1">
-             <SectionTitle>Fiscal Resource Planning</SectionTitle>
-             <HelperText>Allocate and monitor departmental spending limits for the selected fiscal year.</HelperText>
-          </div>
+          <SettingsSectionHeader 
+            title="Fiscal Resource Planning"
+            description="Allocate and monitor departmental spending limits for the selected fiscal year."
+          />
           <div className="flex gap-1 p-1 bg-slate-100 rounded-lg">
              {['2023-2024', '2024-2025', '2025-2026'].map(y => (
                 <button
                   key={y}
                   onClick={() => setFiscalYear(y)}
-                  className={`px-4 py-2 rounded-lg text-[10px] font-medium uppercase tracking-widest transition-all ${fiscalYear === y ? 'bg-white text-blue-500 shadow-sm' : 'text-slate-500 hover:text-slate-900'}`}
+                  className={`px-4 h-9 rounded-lg text-[10px] font-medium uppercase tracking-widest transition-all ${fiscalYear === y ? 'bg-white text-blue-500 shadow-sm' : 'text-slate-500 hover:text-slate-900'}`}
                 >
                    {y}
                 </button>
@@ -484,103 +512,121 @@ function BudgetTab() {
 
        {/* SUMMARY CARDS */}
        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card>
+          {/* @ts-ignore */}
+          <SettingsCard title="Total Allocation">
              <div className="flex items-center gap-3 mb-4">
                 <div className="h-8 w-8 rounded-lg bg-blue-50 text-blue-500 flex items-center justify-center"><TrendingUp className="h-4 w-4" /></div>
                 <span className="text-[10px] font-medium text-slate-400 uppercase tracking-widest">Total Allocation</span>
              </div>
-             <p className="text-2xl font-semibold text-slate-900 tabular-nums">{totals.allocated.toLocaleString()}</p>
+             <p className="text-lg font-semibold text-slate-900 tabular-nums">{totals.allocated.toLocaleString()}</p>
              <p className="text-[10px] font-normal text-slate-400 uppercase mt-1 tracking-widest">Across {budgets.length} entities</p>
-          </Card>
-          <Card>
+          </SettingsCard>
+          {/* @ts-ignore */}
+          <SettingsCard title="Current Expenditure">
              <div className="flex items-center gap-3 mb-4">
                 <div className="h-8 w-8 rounded-lg bg-emerald-50 text-emerald-500 flex items-center justify-center"><TrendingDown className="h-4 w-4" /></div>
                 <span className="text-[10px] font-medium text-slate-400 uppercase tracking-widest">Current Expenditure</span>
              </div>
-             <p className="text-2xl font-semibold text-slate-900 tabular-nums">{totals.spent.toLocaleString()}</p>
+             <p className="text-lg font-semibold text-slate-900 tabular-nums">{totals.spent.toLocaleString()}</p>
              <p className="text-[10px] font-normal text-slate-400 uppercase mt-1 tracking-widest">{totals.utilization.toFixed(1)}% Utilization</p>
-          </Card>
-          <Card>
+          </SettingsCard>
+          {/* @ts-ignore */}
+          <SettingsCard title="Net Remaining">
              <div className="flex items-center gap-3 mb-4">
                 <div className="h-8 w-8 rounded-lg bg-amber-50 text-amber-500 flex items-center justify-center"><DollarSign className="h-4 w-4" /></div>
                 <span className="text-[10px] font-medium text-slate-400 uppercase tracking-widest">Net Remaining</span>
              </div>
-             <p className="text-2xl font-semibold text-slate-900 tabular-nums">{totals.remaining.toLocaleString()}</p>
+             <p className="text-lg font-semibold text-slate-900 tabular-nums">{totals.remaining.toLocaleString()}</p>
              <div className="w-full h-1.5 bg-slate-100 rounded-full mt-3 overflow-hidden">
                 <div className="h-full bg-blue-500 transition-all duration-1000" style={{ width: `${totals.utilization}%` }} />
              </div>
-          </Card>
+          </SettingsCard>
        </div>
 
-       <Card className="overflow-hidden">
-          <table className="min-w-full divide-y divide-slate-100">
-             <thead className="bg-slate-50/50">
-                <tr>
-                   <th className="px-5 py-4 text-left text-[10px] font-medium text-slate-400 uppercase tracking-widest">Organizational Entity</th>
-                   <th className="px-5 py-4 text-right text-[10px] font-medium text-slate-400 uppercase tracking-widest">Allocated (ETB)</th>
-                   <th className="px-5 py-4 text-right text-[10px] font-medium text-slate-400 uppercase tracking-widest">Expended</th>
-                   <th className="px-5 py-4 text-right text-[10px] font-medium text-slate-400 uppercase tracking-widest">Remaining</th>
-                   <th className="px-5 py-4 text-left text-[10px] font-medium text-slate-400 uppercase tracking-widest">Utilization</th>
-                </tr>
-             </thead>
-             <tbody className="divide-y divide-slate-50">
-                {loading ? (
-                   <tr><td colSpan={5} className="p-20 text-center"><Loader2 className="h-8 w-8 animate-spin mx-auto opacity-10" /></td></tr>
-                ) : budgets.map(b => {
-                  const util = b.allocated > 0 ? (Number(b.spent || 0) / b.allocated) * 100 : 0;
-                  const remaining = b.allocated - Number(b.spent || 0);
-                  const remPercent = b.allocated > 0 ? (remaining / b.allocated) * 100 : 0;
-
-                  return (
-                    <tr key={b.id} className="hover:bg-slate-50/50 transition-colors">
-                       <td className="px-5 py-4">
-                          <p className="text-sm font-semibold text-slate-900">{b.name}</p>
-                          <p className="text-[10px] font-normal text-slate-400 uppercase tracking-widest mt-0.5">Department Unit</p>
-                       </td>
-                       <td className="px-5 py-4 text-right">
-                          {editingId === b.id ? (
-                            <Input
-                              autoFocus
-                              type="number"
-                              defaultValue={b.allocated}
-                              onBlur={(e) => handleUpdate(b.id, e.target.value)}
-                              onKeyDown={(e) => {
-                                if (e.key === 'Enter') handleUpdate(b.id, (e.target as any).value);
-                                if (e.key === 'Escape') setEditingId(null);
-                              }}
-                              className="w-32 text-right"
-                            />
-                          ) : (
-                            <button
-                              onClick={() => setEditingId(b.id)}
-                              className="text-sm font-semibold text-slate-900 tabular-nums border-b border-dashed border-slate-200 hover:border-blue-500 transition-all"
-                            >
-                               {Number(b.allocated).toLocaleString()}
-                            </button>
-                          )}
-                       </td>
-                       <td className="px-5 py-4 text-right text-xs font-medium text-slate-500 tabular-nums">
-                          {Number(b.spent || 0).toLocaleString()}
-                       </td>
-                       <td className="px-5 py-4 text-right">
-                          <span className={`text-sm font-semibold tabular-nums ${remPercent < 10 ? 'text-red-600' : remPercent < 30 ? 'text-amber-600' : 'text-emerald-600'}`}>
-                             {remaining.toLocaleString()}
-                          </span>
-                       </td>
-                       <td className="px-5 py-4">
-                          <div className="flex items-center gap-3">
-                             <div className="w-24 h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                                <div className={`h-full transition-all duration-1000 ${util > 90 ? 'bg-red-500' : util > 70 ? 'bg-amber-500' : 'bg-blue-500'}`} style={{ width: `${util}%` }} />
-                             </div>
-                             <span className="text-[10px] font-medium text-slate-400 w-8">{util.toFixed(0)}%</span>
-                          </div>
-                       </td>
-                    </tr>
-                  );
-                })}
-             </tbody>
-          </table>
-       </Card>
+       {/* @ts-ignore */}
+       <SettingsTable
+         columns={[
+           {
+             key: 'entity',
+             header: 'Organizational Entity',
+             render: (b: any) => (
+               <div>
+                  <p className="text-sm font-semibold text-slate-900">{b.name}</p>
+                  <p className="text-[10px] font-normal text-slate-400 uppercase tracking-widest mt-0.5">Department Unit</p>
+               </div>
+             )
+           },
+           {
+             key: 'allocated',
+             header: 'Allocated (ETB)',
+             render: (b: any) => {
+               if (editingId === b.id) {
+                 return (
+                   <SettingsInput
+                     autoFocus
+                     type="number"
+                     defaultValue={b.allocated}
+                     onBlur={(e) => handleUpdate(b.id, e.target.value)}
+                     onKeyDown={(e) => {
+                       if (e.key === 'Enter') handleUpdate(b.id, (e.target as any).value);
+                       if (e.key === 'Escape') setEditingId(null);
+                     }}
+                     className="w-32 text-right"
+                   />
+                 );
+               }
+               return (
+                 <button
+                   onClick={() => setEditingId(b.id)}
+                   className="text-sm font-semibold text-slate-900 tabular-nums border-b border-dashed border-slate-200 hover:border-blue-500 transition-all"
+                 >
+                    {Number(b.allocated).toLocaleString()}
+                 </button>
+               );
+             }
+           },
+           {
+             key: 'spent',
+             header: 'Expended',
+             render: (b: any) => (
+               <span className="text-xs font-medium text-slate-500 tabular-nums">
+                  {Number(b.spent || 0).toLocaleString()}
+               </span>
+             )
+           },
+           {
+             key: 'remaining',
+             header: 'Remaining',
+             render: (b: any) => {
+               const remaining = b.allocated - Number(b.spent || 0);
+               const remPercent = b.allocated > 0 ? (remaining / b.allocated) * 100 : 0;
+               return (
+                 <span className={`text-sm font-semibold tabular-nums ${remPercent < 10 ? 'text-red-600' : remPercent < 30 ? 'text-amber-600' : 'text-emerald-600'}`}>
+                    {remaining.toLocaleString()}
+                 </span>
+               );
+             }
+           },
+           {
+             key: 'utilization',
+             header: 'Utilization',
+             render: (b: any) => {
+               const util = b.allocated > 0 ? (Number(b.spent || 0) / b.allocated) * 100 : 0;
+               return (
+                 <div className="flex items-center gap-3">
+                    <div className="w-24 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                       <div className={`h-full transition-all duration-1000 ${util > 90 ? 'bg-red-500' : util > 70 ? 'bg-amber-500' : 'bg-blue-500'}`} style={{ width: `${util}%` }} />
+                    </div>
+                    <span className="text-[10px] font-medium text-slate-400 w-8">{util.toFixed(0)}%</span>
+                 </div>
+               );
+             }
+           }
+         ]}
+         data={budgets}
+         keyExtractor={(b: any) => b.id}
+         isLoading={loading}
+       />
     </div>
   );
 }
