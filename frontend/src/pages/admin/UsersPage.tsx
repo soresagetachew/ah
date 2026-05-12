@@ -7,6 +7,7 @@ import UserFormDrawer from '../../components/users/UserFormDrawer';
 import PageHeader from '../../components/layout/PageHeader';
 import { SkeletonTable, ErrorState } from '../../components/ui/Skeleton';
 import EmptyState from '../../components/ui/EmptyState';
+import { SPACING } from '../../components/shared/DesignTokens';
 import { Search, Plus, UserX, UserCheck, Shield, Mail, Building2, MapPin, Users } from 'lucide-react';
 
 export default function UsersPage() {
@@ -49,7 +50,7 @@ export default function UsersPage() {
   });
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8 pb-20 animate-in fade-in slide-in-from-bottom-8 duration-700">
+    <div className={`max-w-7xl mx-auto ${SPACING.cardGap} pb-20 animate-in fade-in slide-in-from-bottom-8 duration-700`}>
       <PageHeader 
         title="User Management"
         subtitle="Manage system access, roles, and business units across the organization."

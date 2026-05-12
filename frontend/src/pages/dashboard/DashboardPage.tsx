@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuthStore } from '../../store/authStore';
 import client from '../../api/client';
+import { TYPOGRAPHY, SPACING, RADIUS, HEIGHTS, COLORS } from '../../components/shared/DesignTokens';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
   ResponsiveContainer, Cell, PieChart, Pie, AreaChart, Area
@@ -89,19 +90,19 @@ export default function DashboardPage() {
     }));
 
     return (
-      <div className="space-y-6">
+      <div className={SPACING.cardGap}>
         <div className="relative bg-primary rounded-xl lg:rounded-2xl p-5 lg:p-8 overflow-hidden shadow-2xl shadow-primary/20">
           <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6 lg:gap-8">
             <div>
-              <h2 className="text-xl lg:text-2xl font-semibold text-white tracking-tight">Good morning, {user.full_name?.split(' ')[0]} 👋</h2>
+              <h2 className={`${TYPOGRAPHY.pageTitle} text-white tracking-tight`}>Good morning, {user.full_name?.split(' ')[0]} 👋</h2>
               <p className="text-slate-400 text-sm mt-1 lg:mt-2 font-medium">Here's what's happening at African Holding today.</p>
               <div className="flex flex-wrap gap-2 lg:gap-3 mt-6 lg:mt-8">
                 <div className="bg-white/10 backdrop-blur-md border border-white/10 rounded-full px-4 lg:px-5 py-1.5 lg:py-2 flex items-center gap-2">
                   <span className="h-2 w-2 rounded-full bg-amber-500 animate-pulse" />
-                  <span className="text-[10px] lg:text-xs font-semibold text-white uppercase tracking-wide">{data.pendingApprovals} Pending Approvals</span>
+                  <span className={`${TYPOGRAPHY.badgeText} font-semibold text-white uppercase tracking-wide`}>{data.pendingApprovals} Pending Approvals</span>
                 </div>
                 <div className="bg-white/10 backdrop-blur-md border border-white/10 rounded-full px-4 lg:px-5 py-1.5 lg:py-2 flex items-center gap-2">
-                  <span className="text-[10px] lg:text-xs font-semibold text-white uppercase tracking-wide">{data.totalPRs} PRs This Month</span>
+                  <span className={`${TYPOGRAPHY.badgeText} font-semibold text-white uppercase tracking-wide`}>{data.totalPRs} PRs This Month</span>
                 </div>
               </div>
             </div>
@@ -118,10 +119,10 @@ export default function DashboardPage() {
           <ThemedCard className="lg:col-span-2 p-4 lg:p-8 group">
             <div className="flex items-center justify-between mb-6 lg:mb-8">
               <div>
-                <h3 className="text-base lg:text-lg font-black text-text-primary tracking-tight">Monthly Spend Overview</h3>
-                <p className="text-[10px] lg:text-xs font-bold text-text-muted uppercase tracking-widest mt-1">Last 6 months</p>
+                <h3 className={`${TYPOGRAPHY.sectionTitle} lg:text-lg text-text-primary tracking-tight`}>Monthly Spend Overview</h3>
+                <p className={`${TYPOGRAPHY.sectionGroupLabel} text-text-muted mt-1`}>Last 6 months</p>
               </div>
-              <div className="h-10 w-10 rounded-md bg-accent-light flex items-center justify-center text-accent">
+              <div className={`h-10 w-10 ${RADIUS.buttonSmall} bg-accent-light flex items-center justify-center text-accent`}>
                 <TrendingUp className="h-5 w-5" />
               </div>
             </div>
@@ -159,9 +160,9 @@ export default function DashboardPage() {
               ) : <div className="h-full flex flex-col items-center justify-center bg-slate-50 rounded-2xl border-2 border-dashed border-slate-100"><Activity className="h-10 w-10 text-slate-200 mb-2" /><p className="text-xs font-black text-slate-400 uppercase tracking-widest">No data</p></div>}
             </div>
           </ThemedCard>
-          <ThemedCard className="p-6 lg:p-8">
-            <h3 className="text-base lg:text-lg font-black text-text-primary tracking-tight">Spend by Unit</h3>
-            <p className="text-[10px] lg:text-xs font-bold text-text-muted uppercase tracking-widest mt-1 mb-6 lg:mb-8">Allocation</p>
+          <ThemedCard className={`p-6 lg:p-8 ${SPACING.cardGap}`}>
+            <h3 className={`${TYPOGRAPHY.sectionTitle} lg:text-lg text-text-primary tracking-tight`}>Spend by Unit</h3>
+            <p className={`${TYPOGRAPHY.sectionGroupLabel} text-text-muted mt-1 mb-6 lg:mb-8`}>Allocation</p>
             <div className="h-[180px] lg:h-[200px] mb-6 lg:mb-8">
               {pieData.length > 0 ? (
                 <ResponsiveContainer width="100%" height="100%">
@@ -187,7 +188,7 @@ export default function DashboardPage() {
                 </ResponsiveContainer>
               ) : <div className="h-full bg-slate-50 rounded-full border-2 border-dashed border-slate-100" />}
             </div>
-            <div className="space-y-2 lg:space-y-3">{pieData.map((item: any, index: number) => (<div key={item.name} className="flex items-center justify-between group"><div className="flex items-center gap-2 lg:gap-3"><div className="h-2 w-2 rounded-full" style={{ backgroundColor: COLORS[index % COLORS.length] }} /><span className="text-[10px] lg:text-xs font-bold text-text-secondary group-hover:text-text-primary transition-colors truncate max-w-[120px]">{item.name}</span></div><span className="text-[10px] lg:text-xs font-black text-text-muted">{item.percentage}%</span></div>))}</div>
+            <div className={`space-y-2 lg:space-y-3`}>{pieData.map((item: any, index: number) => (<div key={item.name} className="flex items-center justify-between group"><div className="flex items-center gap-2 lg:gap-3"><div className="h-2 w-2 rounded-full" style={{ backgroundColor: COLORS.primary[index % COLORS.primary.length] || COLORS.neutral[index % COLORS.neutral.length] }} /><span className={`${TYPOGRAPHY.badgeText} lg:text-xs font-bold text-text-secondary group-hover:text-text-primary transition-colors truncate max-w-[120px]`}>{item.name}</span></div><span className={`${TYPOGRAPHY.badgeText} lg:text-xs font-black text-text-muted`}>{item.percentage}%</span></div>))}</div>
           </ThemedCard>
         </div>
       </div>
@@ -202,19 +203,19 @@ export default function DashboardPage() {
     });
     const paymentQueue = charts.pending.filter((item: any) => item.type === 'PRF').slice(0, 5);
     return (
-      <div className="space-y-6">
+      <div className={SPACING.cardGap}>
         <div className="relative bg-indigo-900 rounded-xl lg:rounded-2xl p-5 lg:p-8 overflow-hidden shadow-2xl shadow-indigo-900/20">
           <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6 lg:gap-8">
             <div>
-              <h2 className="text-xl lg:text-2xl font-semibold text-white tracking-tight">Financial Overview 👋</h2>
+              <h2 className={`${TYPOGRAPHY.pageTitle} text-white tracking-tight`}>Financial Overview 👋</h2>
               <p className="text-indigo-200 text-sm mt-1 lg:mt-2 font-medium">Monitoring AHG's fiscal health and disbursement lifecycle.</p>
               <div className="flex flex-wrap gap-2 lg:gap-3 mt-6 lg:mt-8">
                 <div className="bg-white/10 backdrop-blur-md border border-white/10 rounded-full px-4 lg:px-5 py-1.5 lg:py-2 flex items-center gap-2">
                   <span className="h-2 w-2 rounded-full bg-indigo-400 animate-pulse" />
-                  <span className="text-[10px] lg:text-xs font-semibold text-white uppercase tracking-wide">{data.pendingPayments} Pending Payments</span>
+                  <span className={`${TYPOGRAPHY.badgeText} font-semibold text-white uppercase tracking-wide`}>{data.pendingPayments} Pending Payments</span>
                 </div>
                 <div className="bg-white/10 backdrop-blur-md border border-white/10 rounded-full px-4 lg:px-5 py-1.5 lg:py-2 flex items-center gap-2">
-                  <span className="text-[10px] lg:text-xs font-semibold text-white uppercase tracking-wide">ETB {Number(data.disbursedMonth).toLocaleString()} Disbursed</span>
+                  <span className={`${TYPOGRAPHY.badgeText} font-semibold text-white uppercase tracking-wide`}>ETB {Number(data.disbursedMonth).toLocaleString()} Disbursed</span>
                 </div>
               </div>
             </div>
@@ -228,8 +229,8 @@ export default function DashboardPage() {
           <StatCard label="Overdue" value={charts.pending.filter((i: any) => i.days > 7).length} icon={AlertCircle} color="red" />
         </div>
         <ThemedCard>
-           <div className="flex items-center justify-between mb-10"><div><h3 className="text-base font-semibold text-slate-900 tracking-tight">Budget Utilization by Department</h3><p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mt-1">Real-time expenditure tracking against allocations</p></div><div className="h-12 w-12 rounded-2xl bg-amber-50 flex items-center justify-center text-amber-600"><PieIcon className="w-6 h-6" /></div></div>
-           <div className="space-y-8">{budgetData.map((item: any, i: number) => (<div key={i} className="flex flex-col md:flex-row md:items-center gap-4"><span className="w-40 text-xs font-black text-slate-700 uppercase tracking-wider">{item.name}</span><div className="flex-1"><div className="h-4 w-full bg-slate-100 rounded-full overflow-hidden"><div className={`h-full transition-all duration-1000 ease-out rounded-full ${item.percentage > 90 ? 'bg-gradient-to-r from-red-400 to-red-600' : item.percentage > 70 ? 'bg-gradient-to-r from-amber-400 to-amber-600' : 'bg-gradient-to-r from-emerald-400 to-emerald-600'}`} style={{ width: `${Math.min(100, item.percentage)}%` }} /></div><div className="flex justify-between mt-2"><span className="text-[10px] font-bold text-slate-400 uppercase">ETB {Number(item.actual).toLocaleString()} Used</span><span className="text-[10px] font-black text-slate-900 uppercase">Limit: {Number(item.budget).toLocaleString()}</span></div></div><span className={`w-16 text-right text-sm font-black ${item.percentage > 90 ? 'text-red-600' : item.percentage > 70 ? 'text-amber-600' : 'text-emerald-600'}`}>{item.percentage}%</span></div>))}</div>
+           <div className="flex items-center justify-between mb-10"><div><h3 className={`${TYPOGRAPHY.sectionTitle} text-slate-900 tracking-tight`}>Budget Utilization by Department</h3><p className={`${TYPOGRAPHY.badgeText} font-semibold text-slate-500 uppercase tracking-wide mt-1`}>Real-time expenditure tracking against allocations</p></div><div className={`h-12 w-12 ${RADIUS.card} bg-amber-50 flex items-center justify-center text-amber-600`}><PieIcon className="w-6 h-6" /></div></div>
+           <div className={`space-y-8`}>{budgetData.map((item: any, i: number) => (<div key={i} className="flex flex-col md:flex-row md:items-center gap-4"><span className="w-40 text-xs font-black text-slate-700 uppercase tracking-wider">{item.name}</span><div className="flex-1"><div className={`h-4 w-full bg-slate-100 ${RADIUS.toggle} overflow-hidden`}><div className={`h-full transition-all duration-1000 ease-out rounded-full ${item.percentage > 90 ? 'bg-gradient-to-r from-red-400 to-red-600' : item.percentage > 70 ? 'bg-gradient-to-r from-amber-400 to-amber-600' : 'bg-gradient-to-r from-emerald-400 to-emerald-600'}`} style={{ width: `${Math.min(100, item.percentage)}%` }} /></div><div className="flex justify-between mt-2"><span className={`${TYPOGRAPHY.badgeText} font-bold text-slate-400 uppercase`}>ETB {Number(item.actual).toLocaleString()} Used</span><span className={`${TYPOGRAPHY.badgeText} font-black text-slate-900 uppercase`}>Limit: {Number(item.budget).toLocaleString()}</span></div></div><span className={`w-16 text-right text-sm font-black ${item.percentage > 90 ? 'text-red-600' : item.percentage > 70 ? 'text-amber-600' : 'text-emerald-600'}`}>{item.percentage}%</span></div>))}</div>
         </ThemedCard>
       </div>
     );
@@ -238,11 +239,11 @@ export default function DashboardPage() {
   const renderStorekeeper = () => {
     const data = stats?.store || { itemsInStock: 0, lowStockAlerts: 0, pendingGRNs: 0, lowStockItems: [] };
     return (
-      <div className="space-y-6">
+      <div className={SPACING.cardGap}>
         <div className="relative bg-teal-900 rounded-xl lg:rounded-2xl p-5 lg:p-8 overflow-hidden shadow-2xl shadow-teal-900/20">
           <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6 lg:gap-8">
             <div>
-              <h2 className="text-xl lg:text-2xl font-semibold text-white tracking-tight">Warehouse Operations 👋</h2>
+              <h2 className={`${TYPOGRAPHY.pageTitle} text-white tracking-tight`}>Warehouse Operations 👋</h2>
               <p className="text-teal-200 text-sm mt-1 lg:mt-2 font-medium">Inventory and supply chain management.</p>
             </div>
             <div className="hidden lg:block opacity-20 transform translate-x-10 translate-y-6"><Truck className="w-8 h-8 text-white stroke-[1]" /></div>
@@ -255,14 +256,14 @@ export default function DashboardPage() {
           <StatCard label="Issued" value={Math.floor(Math.random() * 200) + 50} icon={ArrowRightCircle} color="green" />
         </div>
         <ThemedCard>
-           <div className="flex items-center justify-between mb-10"><div className="flex items-center gap-3"><div className="h-3 w-3 rounded-full bg-red-500 animate-pulse" /><h3 className="text-base font-semibold text-slate-900 tracking-tight">Low Stock Alerts</h3></div><Link to="/inventory" className="text-xs font-semibold text-blue-600 hover:text-blue-700 uppercase tracking-wide">Full Inventory</Link></div>
-           <div className="space-y-4">
+           <div className="flex items-center justify-between mb-10"><div className="flex items-center gap-3"><div className="h-3 w-3 rounded-full bg-red-500 animate-pulse" /><h3 className={`${TYPOGRAPHY.sectionTitle} text-slate-900 tracking-tight`}>Low Stock Alerts</h3></div><Link to="/inventory" className={`${TYPOGRAPHY.badgeText} font-semibold text-blue-600 hover:text-blue-700 uppercase tracking-wide`}>Full Inventory</Link></div>
+           <div className={`space-y-4`}>
               {data.lowStockItems.length > 0 ? data.lowStockItems.map((item: any, i: number) => (
                 <div key={i} className="flex items-center justify-between p-6 bg-slate-50/50 rounded-2xl border border-transparent hover:bg-white hover:border-slate-100 hover:shadow-md transition-all group">
-                   <div className="flex items-center gap-6"><div className={`h-12 w-12 rounded-md flex items-center justify-center font-black text-xs ${item.stock <= 0 ? 'bg-danger-light text-danger border border-danger/10' : 'bg-warning-light text-warning border border-warning/10'}`}>{Math.round(item.stock)}</div><div><p className="text-sm font-black text-text-primary">{item.name}</p></div></div>
+                   <div className="flex items-center gap-6"><div className={`h-12 w-12 ${RADIUS.input} flex items-center justify-center font-black text-xs ${item.stock <= 0 ? 'bg-danger-light text-danger border border-danger/10' : 'bg-warning-light text-warning border border-warning/10'}`}>{Math.round(item.stock)}</div><div><p className={`${TYPOGRAPHY.inputValue} font-black text-text-primary`}>{item.name}</p></div></div>
                    <ThemedButton variant="ghost" className="px-4 py-2">Reorder</ThemedButton>
                 </div>
-              )) : <div className="py-12 text-center"><CheckCircle className="h-12 w-12 text-success-light mx-auto mb-4" /><p className="text-xs font-black text-text-muted uppercase tracking-widest">Stock Levels Healthy</p></div>}
+              )) : <div className="py-12 text-center"><CheckCircle className="h-12 w-12 text-success-light mx-auto mb-4" /><p className={`${TYPOGRAPHY.badgeText} font-black text-text-muted uppercase tracking-widest`}>Stock Levels Healthy</p></div>}
            </div>
         </ThemedCard>
       </div>
@@ -300,11 +301,10 @@ export default function DashboardPage() {
     };
 
     return (
-      <div className="space-y-8 pb-20">
-        {/* WELCOME CARD */}
+      <div className={`${SPACING.cardGap} pb-20`}>
         {/* WELCOME CARD */}
         <div className="bg-gradient-to-r from-primary to-primary-light rounded-xl lg:rounded-2xl p-5 lg:p-8">
-          <h2 className="text-xl lg:text-2xl font-semibold text-white tracking-tight">Welcome back, {user.full_name?.split(' ')[0]} 👋</h2>
+          <h2 className={`${TYPOGRAPHY.pageTitle} text-white tracking-tight`}>Welcome back, {user.full_name?.split(' ')[0]} 👋</h2>
           <p className="text-sm text-white/70 mt-1">Track your requests and submit new ones below.</p>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 lg:gap-4 mt-6 lg:mt-10">
@@ -316,8 +316,8 @@ export default function DashboardPage() {
                 <FileText className="h-5 w-5 lg:h-7 lg:w-7" />
               </div>
               <div className="flex-1 min-w-0">
-                <h4 className="text-sm lg:text-base font-bold text-white">New Purchase Request</h4>
-                <p className="text-[10px] lg:text-xs text-white/60 mt-0.5 hidden lg:block">Request items for your department.</p>
+                <h4 className={`${TYPOGRAPHY.sectionTitle} lg:text-base font-bold text-white`}>New Purchase Request</h4>
+                <p className={`${TYPOGRAPHY.badgeText} lg:text-xs text-white/60 mt-0.5 hidden lg:block`}>Request items for your department.</p>
               </div>
               <ChevronRight className="h-4 w-4 text-white/40 lg:hidden" />
             </button>
@@ -330,8 +330,8 @@ export default function DashboardPage() {
                 <CreditCard className="h-5 w-5 lg:h-7 lg:w-7" />
               </div>
               <div className="flex-1 min-w-0">
-                <h4 className="text-sm lg:text-base font-bold text-white">New Payment Request</h4>
-                <p className="text-[10px] lg:text-xs text-white/60 mt-0.5 hidden lg:block">Request a reimbursement.</p>
+                <h4 className={`${TYPOGRAPHY.sectionTitle} lg:text-base font-bold text-white`}>New Payment Request</h4>
+                <p className={`${TYPOGRAPHY.badgeText} lg:text-xs text-white/60 mt-0.5 hidden lg:block`}>Request a reimbursement.</p>
               </div>
               <ChevronRight className="h-4 w-4 text-white/40 lg:hidden" />
             </button>
@@ -340,14 +340,14 @@ export default function DashboardPage() {
 
         {/* LATEST PR STATUS TRACKER */}
         {latestPR && (
-          <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm overflow-hidden">
+          <div className={`bg-white ${RADIUS.card} p-6 border border-slate-100 shadow-sm overflow-hidden`}>
              <div className="flex items-center gap-3 mb-10">
-                <div className="h-10 w-10 rounded-xl bg-blue-600 flex items-center justify-center text-white">
+                <div className={`h-10 w-10 rounded-xl bg-blue-600 flex items-center justify-center text-white`}>
                   <Activity className="h-5 w-5" />
                 </div>
                 <div>
-                   <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest">Latest PR Status</h3>
-                   <p className="text-xs font-bold text-slate-400 mt-0.5">{latestPR.serial_no} — Updated {new Date(latestPR.created_at).toLocaleDateString()}</p>
+                   <h3 className={`${TYPOGRAPHY.badgeText} font-black text-slate-900 uppercase tracking-widest`}>Latest PR Status</h3>
+                   <p className={`${TYPOGRAPHY.badgeText} font-bold text-slate-400 mt-0.5`}>{latestPR.serial_no} — Updated {new Date(latestPR.created_at).toLocaleDateString()}</p>
                 </div>
              </div>
 
@@ -457,11 +457,11 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto space-y-10 pb-20 animate-in fade-in slide-in-from-bottom-8 duration-1000 ease-out">
+    <div className={`max-w-7xl mx-auto ${SPACING.sectionGap} pb-20 animate-in fade-in slide-in-from-bottom-8 duration-1000 ease-out`}>
       <PageHeader title="Dashboard" subtitle={`Welcome back, ${user.full_name}. Here's what's happening today.`} breadcrumbs={[{ label: 'African Holding' }, { label: 'Dashboard' }]} badge={{ label: 'Live Insights', color: 'bg-blue-50 text-blue-700 border-blue-100' }} />
       {loading ? (
-        <div className="space-y-10 animate-in fade-in duration-1000">
-           <Skeleton height={200} rounded="rounded-[2.5rem]" />
+        <div className={`${SPACING.sectionGap} animate-in fade-in duration-1000`}>
+           <Skeleton height={200} rounded={RADIUS.card} />
            <StatCardSkeleton />
            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <Skeleton height={350} className="md:col-span-2" />
@@ -469,7 +469,7 @@ export default function DashboardPage() {
            </div>
         </div>
       ) : error ? (
-        <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm p-12 text-center">
+        <div className={`bg-white ${RADIUS.card} border border-slate-100 shadow-sm ${SPACING.cardPadding} text-center`}>
            <ErrorState message={error} onRetry={fetchDashboardData} />
         </div>
       ) : (

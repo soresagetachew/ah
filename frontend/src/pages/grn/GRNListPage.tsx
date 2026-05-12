@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import client from '../../api/client';
+import { TYPOGRAPHY, SPACING, RADIUS, HEIGHTS, COLORS } from '../../components/shared/DesignTokens';
 import { 
   Plus, Search, Package, Eye, Truck, 
   FileText, ChevronUp, ChevronDown, X, 
@@ -77,7 +78,7 @@ export default function GRNListPage() {
 
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6 pb-20 animate-in fade-in duration-700">
+    <div className={`max-w-7xl mx-auto ${SPACING.cardGap} pb-20 animate-in fade-in duration-700`}>
       <PageHeader 
         title="Goods Receiving Notes"
         subtitle="Monitor and track all inventory deliveries and supplier fulfillments."
@@ -85,7 +86,7 @@ export default function GRNListPage() {
         actions={
           <button
             onClick={() => navigate('/goods-receiving-notes/new')}
-            className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-900 text-white rounded-xl text-sm font-black uppercase tracking-widest hover:bg-slate-800 transition-all shadow-lg shadow-slate-900/20"
+            className={`inline-flex items-center gap-2 px-5 py-2.5 bg-slate-900 text-white ${RADIUS.card} ${TYPOGRAPHY.badgeText} font-black uppercase tracking-widest hover:bg-slate-800 transition-all shadow-lg shadow-slate-900/20`}
           >
             <Plus className="h-4 w-4" /> Record New Receipt
           </button>
@@ -93,7 +94,7 @@ export default function GRNListPage() {
       />
 
       {/* FILTERS BAR */}
-      <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm p-5 flex flex-col lg:flex-row gap-4">
+      <div className={`bg-white ${RADIUS.card} border border-slate-100 shadow-sm p-5 flex flex-col lg:flex-row gap-4`}>
         
         {/* Search input — full width on mobile */}
         <div className="relative w-full lg:w-96 flex-shrink-0">
@@ -103,7 +104,7 @@ export default function GRNListPage() {
             placeholder="Search by GRN, supplier or invoice..." 
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-3 lg:py-2.5 bg-slate-50 border-transparent rounded-xl text-sm font-bold text-slate-900 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all min-h-[44px]"
+            className={`w-full pl-10 pr-4 py-3 lg:py-2.5 bg-slate-50 border-transparent ${RADIUS.card} ${TYPOGRAPHY.inputValue} font-bold text-slate-900 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all min-h-[44px]`}
           />
         </div>
         
@@ -113,7 +114,7 @@ export default function GRNListPage() {
             <select 
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-4 py-3 lg:py-2.5 bg-slate-50 border-transparent rounded-xl text-xs font-black text-slate-500 uppercase tracking-widest focus:ring-2 focus:ring-blue-500/20 transition-all min-h-[44px] cursor-pointer"
+              className={`px-4 py-3 lg:py-2.5 bg-slate-50 border-transparent ${RADIUS.card} ${TYPOGRAPHY.badgeText} font-black text-slate-500 uppercase tracking-widest focus:ring-2 focus:ring-blue-500/20 transition-all min-h-[44px] cursor-pointer`}
             >
               <option value="">All Statuses</option>
               <option value="draft">Draft</option>
@@ -123,14 +124,14 @@ export default function GRNListPage() {
             { (search || statusFilter) && (
               <button 
                 onClick={() => { setSearch(''); setStatusFilter(''); }}
-                className="px-3 py-3 lg:py-2.5 text-[10px] font-black text-blue-600 uppercase tracking-widest hover:bg-blue-50 transition-colors flex items-center gap-1.5 rounded-xl min-h-[44px]"
+                className={`px-3 py-3 lg:py-2.5 ${TYPOGRAPHY.badgeText} font-black text-blue-600 uppercase tracking-widest hover:bg-blue-50 transition-colors flex items-center gap-1.5 ${RADIUS.card} min-h-[44px]`}
               >
                 <X className="h-3.5 w-3.5" /> Clear
               </button>
             )}
           </div>
           
-          <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex-shrink-0 px-2">
+          <div className={`${TYPOGRAPHY.badgeText} font-black text-slate-400 uppercase tracking-widest flex-shrink-0 px-2`}>
              {filtered.length} Records Found
           </div>
         </div>
@@ -147,13 +148,13 @@ export default function GRNListPage() {
           }}
         />
       ) : (
-        <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden">
+        <div className={`bg-white ${RADIUS.card} border border-slate-100 shadow-sm overflow-hidden`}>
           {/* Desktop View */}
           <div className="hidden lg:block overflow-x-auto">
             <table className="min-w-full divide-y divide-slate-100">
               <thead className="bg-slate-50/50">
                 <tr>
-                  <th onClick={() => handleSort('serial_no')} className="px-8 py-5 text-left text-[10px] font-black text-slate-500 uppercase tracking-widest cursor-pointer group">
+                  <th onClick={() => handleSort('serial_no')} className={`px-8 py-5 text-left ${TYPOGRAPHY.badgeText} font-black text-slate-500 uppercase tracking-widest cursor-pointer group`}>
                     <div className="flex items-center gap-2">
                        GRN #
                        {sortConfig?.key === 'serial_no' ? (
@@ -161,11 +162,11 @@ export default function GRNListPage() {
                        ) : <ChevronUp className="h-3 w-3 text-slate-300 opacity-0 group-hover:opacity-100 transition-all" />}
                     </div>
                   </th>
-                  <th className="px-8 py-5 text-left text-[10px] font-black text-slate-500 uppercase tracking-widest">Supplier</th>
-                  <th className="px-8 py-5 text-left text-[10px] font-black text-slate-500 uppercase tracking-widest">Invoice No</th>
-                  <th className="px-8 py-5 text-left text-[10px] font-black text-slate-500 uppercase tracking-widest">PR Reference</th>
-                  <th className="px-8 py-5 text-left text-[10px] font-black text-slate-500 uppercase tracking-widest">Date</th>
-                  <th className="px-8 py-5 text-center text-[10px] font-black text-slate-500 uppercase tracking-widest">Status</th>
+                  <th className={`px-8 py-5 text-left ${TYPOGRAPHY.badgeText} font-black text-slate-500 uppercase tracking-widest`}>Supplier</th>
+                  <th className={`px-8 py-5 text-left ${TYPOGRAPHY.badgeText} font-black text-slate-500 uppercase tracking-widest`}>Invoice No</th>
+                  <th className={`px-8 py-5 text-left ${TYPOGRAPHY.badgeText} font-black text-slate-500 uppercase tracking-widest`}>PR Reference</th>
+                  <th className={`px-8 py-5 text-left ${TYPOGRAPHY.badgeText} font-black text-slate-500 uppercase tracking-widest`}>Date</th>
+                  <th className={`px-8 py-5 text-center ${TYPOGRAPHY.badgeText} font-black text-slate-500 uppercase tracking-widest`}>Status</th>
                   <th className="px-8 py-5"></th>
                 </tr>
               </thead>
@@ -179,31 +180,31 @@ export default function GRNListPage() {
                   >
                     <td className="px-8 py-5">
                       <div className="flex items-center gap-3">
-                         <div className="h-9 w-9 rounded-xl bg-slate-50 text-slate-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+                         <div className={`h-9 w-9 ${RADIUS.card} bg-slate-50 text-slate-600 flex items-center justify-center group-hover:scale-110 transition-transform`}>
                             <Truck className="h-4 w-4" />
                          </div>
-                         <span className="font-mono font-bold text-sm text-slate-900">{grn.serial_no}</span>
+                         <span className={`font-mono font-bold ${TYPOGRAPHY.inputValue} text-slate-900`}>{grn.serial_no}</span>
                       </div>
                     </td>
                     <td className="px-8 py-5">
                        <div className="flex items-center gap-2">
                           <Building2 className="h-3.5 w-3.5 text-slate-300" />
-                          <span className="text-sm font-bold text-slate-700">{grn.supplier_name || '—'}</span>
+                          <span className={`${TYPOGRAPHY.inputValue} font-bold text-slate-700`}>{grn.supplier_name || '—'}</span>
                        </div>
                     </td>
                     <td className="px-8 py-5">
                        <div className="flex items-center gap-2">
                           <Hash className="h-3.5 w-3.5 text-slate-300" />
-                          <span className="text-xs font-black text-slate-500 uppercase tracking-widest">{grn.invoice_no || '—'}</span>
+                          <span className={`${TYPOGRAPHY.badgeText} font-black text-slate-500 uppercase tracking-widest`}>{grn.invoice_no || '—'}</span>
                        </div>
                     </td>
                     <td className="px-8 py-5">
                        <div className="flex items-center gap-2">
                           <FileText className="h-3.5 w-3.5 text-blue-400" />
-                          <span className="text-xs font-bold text-blue-600 uppercase tracking-widest">{grn.pr_serial_no || 'Manual'}</span>
+                          <span className={`${TYPOGRAPHY.badgeText} font-bold text-blue-600 uppercase tracking-widest`}>{grn.pr_serial_no || 'Manual'}</span>
                        </div>
                     </td>
-                    <td className="px-8 py-5 text-sm font-bold text-slate-500">
+                    <td className={`px-8 py-5 ${TYPOGRAPHY.inputValue} font-bold text-slate-500`}>
                        {new Date(grn.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                     </td>
                     <td className="px-8 py-5 text-center">
@@ -234,11 +235,11 @@ export default function GRNListPage() {
           {/* Pagination */}
           <div className="px-4 lg:px-8 py-4 bg-slate-50 border-t border-slate-100">
              <div className="flex items-center justify-between">
-                <button disabled className="flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-200 bg-white text-[10px] font-black uppercase tracking-widest text-slate-400 disabled:opacity-50 min-h-[44px]">
+                <button disabled className={`flex items-center gap-2 px-4 py-2 ${RADIUS.card} border border-slate-200 bg-white ${TYPOGRAPHY.badgeText} font-black uppercase tracking-widest text-slate-400 disabled:opacity-50 min-h-[44px]`}>
                    <ChevronLeft className="w-4 h-4" /> Prev
                 </button>
-                <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Page 1 / 1</span>
-                <button disabled className="flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-200 bg-white text-[10px] font-black uppercase tracking-widest text-slate-400 disabled:opacity-50 min-h-[44px]">
+                <span className={`${TYPOGRAPHY.badgeText} font-black uppercase tracking-widest text-slate-500`}>Page 1 / 1</span>
+                <button disabled className={`flex items-center gap-2 px-4 py-2 ${RADIUS.card} border border-slate-200 bg-white ${TYPOGRAPHY.badgeText} font-black uppercase tracking-widest text-slate-400 disabled:opacity-50 min-h-[44px]`}>
                    Next <ChevronRight className="w-4 h-4" />
                 </button>
              </div>

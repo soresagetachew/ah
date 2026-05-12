@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm, useFieldArray } from 'react-hook-form';
 import client from '../../api/client';
+import { SPACING } from '../../components/shared/DesignTokens';
 import { Plus, Trash2, AlertTriangle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuthStore } from '../../store/authStore';
@@ -49,7 +50,7 @@ export default function CreateSIVPage() {
   };
 
   return (
-    <div className="space-y-6 max-w-5xl">
+    <div className={`max-w-5xl mx-auto ${SPACING.cardGap} pb-20 animate-in fade-in duration-700`}>
       <div>
         <h2 className="text-2xl font-bold text-gray-900">Issue Store Voucher</h2>
         <p className="mt-1 text-sm text-gray-500">Issue goods from store to a department or individual.</p>

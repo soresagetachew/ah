@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import client from '../../api/client';
+import { SPACING } from '../../components/shared/DesignTokens';
 import { Plus, Search, CreditCard, Eye, X, ChevronRight, FileText, ChevronLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
 import PageHeader from '../../components/layout/PageHeader';
@@ -66,7 +67,7 @@ export default function PRFListPage() {
   const totalAmount = filtered.reduce((sum, p) => sum + Number(p.amount_figure || 0), 0);
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8 pb-20 animate-in fade-in duration-700">
+    <div className={`max-w-7xl mx-auto ${SPACING.cardGap} pb-20 animate-in fade-in duration-700`}>
       <PageHeader 
         title="Payment Requests"
         subtitle="Manage and track all payment request forms (PRF) organization-wide."

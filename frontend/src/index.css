@@ -12,6 +12,17 @@
   --color-surface: #ffffff;
   --color-background: #f8fafc;
   --color-border: #e2e8f0;
+  --color-sidebar-bg: #0f172a;
+  --color-sidebar-text: #94a3b8;
+  --color-sidebar-active: #3b82f6;
+  --color-sidebar-hover: rgba(255, 255, 255, 0.1);
+  --color-sidebar-border: #1e293b;
+  --color-page-bg: #f8fafc;
+  --color-card-bg: #ffffff;
+  --color-text-primary: #0f172a;
+  --color-text-secondary: #64748b;
+  --color-text-muted: #94a3b8;
+  --color-brand-primary: #3b82f6;
 }
 
 body {

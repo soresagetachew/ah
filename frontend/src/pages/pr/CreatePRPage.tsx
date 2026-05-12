@@ -6,6 +6,7 @@ import { useAuthStore } from '../../store/authStore';
 import client from '../../api/client';
 import toast from 'react-hot-toast';
 import { ConfirmationModal } from '../../components/ui/Modal';
+import { TYPOGRAPHY, SPACING, RADIUS, HEIGHTS, COLORS } from '../../components/shared/DesignTokens';
 
 export default function CreatePRPage() {
   const { user } = useAuthStore();
@@ -67,7 +68,7 @@ export default function CreatePRPage() {
   const currentStep = 1; // Logic for progress indicator
 
   return (
-    <div className="max-w-[900px] mx-auto pb-32 animate-in fade-in duration-700">
+    <div className={`max-w-[900px] mx-auto pb-32 animate-in fade-in duration-700 ${SPACING.cardGap}`}>
       {/* PROGRESS INDICATOR */}
       <div className="mb-10 px-4">
         <div className="flex items-center justify-between relative">
@@ -78,14 +79,14 @@ export default function CreatePRPage() {
             { id: 3, label: 'Submit' }
           ].map((step) => (
             <div key={step.id} className="relative z-10 flex flex-col items-center">
-              <div className={`h-8 w-8 rounded-full flex items-center justify-center text-xs font-black transition-all duration-500 border-4 ${
+              <div className={`h-8 w-8 ${RADIUS.toggle} flex items-center justify-center ${TYPOGRAPHY.badgeText} font-black transition-all duration-500 border-4 ${
                 currentStep > step.id ? 'bg-emerald-500 border-emerald-100 text-white' :
                 currentStep === step.id ? 'bg-blue-600 border-blue-100 text-white shadow-lg shadow-blue-200' :
                 'bg-white border-slate-100 text-slate-400'
               }`}>
                 {currentStep > step.id ? <Check className="h-4 w-4" /> : step.id}
               </div>
-              <span className={`mt-2 text-[10px] font-black uppercase tracking-widest hidden sm:block ${
+              <span className={`mt-2 ${TYPOGRAPHY.badgeText} font-black uppercase tracking-widest hidden sm:block ${
                 currentStep === step.id ? 'text-blue-600' : 'text-slate-400'
               }`}>
                 {step.label}
@@ -95,30 +96,30 @@ export default function CreatePRPage() {
         </div>
       </div>
 
-      <form onSubmit={(e) => e.preventDefault()} className="space-y-6">
+      <form onSubmit={(e) => e.preventDefault()} className={SPACING.cardGap}>
         {/* SECTION 1 - REQUEST DETAILS */}
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 sm:p-8 mx-4 sm:mx-0">
+        <div className={`bg-white ${RADIUS.card} shadow-sm border border-slate-100 p-6 sm:p-8 mx-4 sm:mx-0`}>
           <div className="flex items-center gap-4 mb-8">
-            <div className="h-12 w-12 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600">
+            <div className={`h-12 w-12 ${RADIUS.card} bg-blue-50 flex items-center justify-center text-blue-600`}>
               <FileText className="h-6 w-6" />
             </div>
             <div>
-              <h3 className="text-lg font-black text-slate-900 tracking-tight">Request Details</h3>
-              <p className="text-sm text-slate-500 font-medium mt-0.5">Fill in the basic information for this request</p>
+              <h3 className={`${TYPOGRAPHY.pageTitle} font-black text-slate-900 tracking-tight`}>Request Details</h3>
+              <p className={`${TYPOGRAPHY.badgeText} text-slate-500 font-medium mt-0.5`}>Fill in the basic information for this request</p>
             </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
             <div className="space-y-6">
               <div>
-                <label className="text-sm font-black text-slate-700 mb-2 block uppercase tracking-widest">PR Number</label>
-                <div className="w-full px-3.5 py-3 lg:py-2.5 rounded-xl border border-slate-100 bg-slate-50 text-xs font-black text-slate-400 uppercase tracking-widest cursor-not-allowed min-h-[48px] lg:min-h-[42px] flex items-center">
+                <label className={`${TYPOGRAPHY.badgeText} font-black text-slate-700 mb-2 block uppercase tracking-widest`}>PR Number</label>
+                <div className={`w-full px-3.5 py-3 lg:py-2.5 ${RADIUS.card} border border-slate-100 bg-slate-50 ${TYPOGRAPHY.badgeText} font-black text-slate-400 uppercase tracking-widest cursor-not-allowed min-h-[48px] lg:min-h-[42px] flex items-center`}>
                   Auto-generated on save
                 </div>
               </div>
               <div>
-                <label className="text-sm font-black text-slate-700 mb-2 block uppercase tracking-widest">Date</label>
-                <div className="w-full px-3.5 py-3 lg:py-2.5 rounded-xl border border-slate-100 bg-slate-50 text-sm font-bold text-slate-500 cursor-not-allowed min-h-[48px] lg:min-h-[42px] flex items-center">
+                <label className={`${TYPOGRAPHY.badgeText} font-black text-slate-700 mb-2 block uppercase tracking-widest`}>Date</label>
+                <div className={`w-full px-3.5 py-3 lg:py-2.5 ${RADIUS.card} border border-slate-100 bg-slate-50 ${TYPOGRAPHY.inputValue} font-bold text-slate-500 cursor-not-allowed min-h-[48px] lg:min-h-[42px] flex items-center`}>
                   {new Date().toLocaleDateString()}
                 </div>
               </div>
@@ -126,17 +127,17 @@ export default function CreatePRPage() {
 
             <div className="space-y-6">
               <div>
-                <label className="text-sm font-black text-slate-700 mb-2 block uppercase tracking-widest">Requested By</label>
-                <div className="flex items-center gap-3 px-3.5 py-3 lg:py-2.5 bg-slate-50 rounded-xl border border-slate-100 min-h-[48px] lg:min-h-[42px]">
-                   <div className="h-7 w-7 rounded-lg bg-blue-600 flex items-center justify-center text-[10px] font-black text-white">
+                <label className={`${TYPOGRAPHY.badgeText} font-black text-slate-700 mb-2 block uppercase tracking-widest`}>Requested By</label>
+                <div className={`flex items-center gap-3 px-3.5 py-3 lg:py-2.5 bg-slate-50 ${RADIUS.card} border border-slate-100 min-h-[48px] lg:min-h-[42px]`}>
+                   <div className={`h-7 w-7 ${RADIUS.card} bg-blue-600 flex items-center justify-center ${TYPOGRAPHY.badgeText} font-black text-white`}>
                       {user?.full_name?.split(' ').map(n => n[0]).join('')}
                    </div>
-                   <span className="text-sm font-bold text-slate-600">{user?.full_name}</span>
+                   <span className={`${TYPOGRAPHY.inputValue} font-bold text-slate-600`}>{user?.full_name}</span>
                 </div>
               </div>
               <div>
-                <label className="text-sm font-black text-slate-700 mb-2 block uppercase tracking-widest">Department</label>
-                <div className="w-full px-3.5 py-3 lg:py-2.5 rounded-xl border border-slate-100 bg-slate-50 text-sm font-bold text-slate-500 cursor-not-allowed min-h-[48px] lg:min-h-[42px] flex items-center">
+                <label className={`${TYPOGRAPHY.badgeText} font-black text-slate-700 mb-2 block uppercase tracking-widest`}>Department</label>
+                <div className={`w-full px-3.5 py-3 lg:py-2.5 ${RADIUS.card} border border-slate-100 bg-slate-50 ${TYPOGRAPHY.inputValue} font-bold text-slate-500 cursor-not-allowed min-h-[48px] lg:min-h-[42px] flex items-center`}>
                   {user?.business_unit || 'General'}
                 </div>
               </div>
@@ -144,12 +145,12 @@ export default function CreatePRPage() {
 
             <div className="sm:col-span-2 space-y-6 pt-4 border-t border-slate-50">
               <div>
-                <label className="text-sm font-black text-slate-700 mb-2 block uppercase tracking-widest">
+                <label className={`${TYPOGRAPHY.badgeText} font-black text-slate-700 mb-2 block uppercase tracking-widest`}>
                   Project / Business Unit <span className="text-red-500 ml-0.5">*</span>
                 </label>
                 <select 
                   {...register('project_id', { required: 'Project is required' })}
-                  className={`w-full px-3.5 py-3 lg:py-2.5 rounded-xl border bg-surface text-text-primary text-sm min-h-[48px] lg:min-h-[42px] focus:outline-none focus:ring-2 transition-all duration-150 ${
+                  className={`w-full px-3.5 py-3 lg:py-2.5 ${RADIUS.card} border bg-surface text-text-primary ${TYPOGRAPHY.inputValue} min-h-[48px] lg:min-h-[42px] focus:outline-none focus:ring-2 transition-all duration-150 ${
                     errors.project_id ? 'border-red-400 focus:ring-red-400/20' : 'border-slate-200 focus:ring-blue-500/20 focus:border-blue-500'
                   }`}
                 >
@@ -157,38 +158,38 @@ export default function CreatePRPage() {
                   {projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
                 </select>
                 {errors.project_id && (
-                  <p className="mt-2 text-xs font-black text-red-500 flex items-center gap-1 uppercase tracking-widest">
+                  <p className={`mt-2 ${TYPOGRAPHY.badgeText} font-black text-red-500 flex items-center gap-1 uppercase tracking-widest`}>
                     <AlertCircle className="h-3 w-3" /> {errors.project_id.message}
                   </p>
                 )}
               </div>
 
               <div>
-                <label className="text-sm font-black text-slate-700 mb-2 block uppercase tracking-widest">
+                <label className={`${TYPOGRAPHY.badgeText} font-black text-slate-700 mb-2 block uppercase tracking-widest`}>
                   Reason for Purchase <span className="text-red-500 ml-0.5">*</span>
                 </label>
                 <textarea
                   {...register('reason', { required: 'Reason is required', maxLength: 500 })}
                   rows={3}
                   placeholder="Explain why these items are needed..."
-                  className={`w-full px-3.5 py-3 lg:py-2.5 rounded-xl border bg-surface text-text-primary text-sm min-h-[48px] lg:min-h-[42px] focus:outline-none focus:ring-2 transition-all duration-150 resize-none ${
+                  className={`w-full px-3.5 py-3 lg:py-2.5 ${RADIUS.card} border bg-surface text-text-primary ${TYPOGRAPHY.inputValue} min-h-[48px] lg:min-h-[42px] focus:outline-none focus:ring-2 transition-all duration-150 resize-none ${
                     errors.reason ? 'border-red-400 focus:ring-red-400/20' : 'border-slate-200 focus:ring-blue-500/20 focus:border-blue-500'
                   }`}
                 />
                 {errors.reason && (
-                  <p className="mt-2 text-xs font-black text-red-500 flex items-center gap-1 uppercase tracking-widest">
+                  <p className={`mt-2 ${TYPOGRAPHY.badgeText} font-black text-red-500 flex items-center gap-1 uppercase tracking-widest`}>
                     <AlertCircle className="h-3 w-3" /> {errors.reason.message}
                   </p>
                 )}
               </div>
 
               <div>
-                <label className="text-sm font-black text-slate-700 mb-2 block uppercase tracking-widest">Cheque No (Optional)</label>
+                <label className={`${TYPOGRAPHY.badgeText} font-black text-slate-700 mb-2 block uppercase tracking-widest`}>Cheque No (Optional)</label>
                 <input
                   type="text"
                   placeholder="Reference number if applicable"
                   {...register('cheque_no')}
-                  className="w-full px-3.5 py-3 lg:py-2.5 rounded-xl border border-slate-200 bg-surface text-text-primary text-sm min-h-[48px] lg:min-h-[42px] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-150 placeholder:text-text-muted"
+                  className={`w-full px-3.5 py-3 lg:py-2.5 ${RADIUS.card} border border-slate-200 bg-surface text-text-primary ${TYPOGRAPHY.inputValue} min-h-[48px] lg:min-h-[42px] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-150 placeholder:text-text-muted`}
                 />
               </div>
             </div>
@@ -196,26 +197,26 @@ export default function CreatePRPage() {
         </div>
 
         {/* SECTION 2 - LINE ITEMS */}
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 sm:p-8 mx-4 sm:mx-0">
+        <div className={`bg-white ${RADIUS.card} shadow-sm border border-slate-100 p-6 sm:p-8 mx-4 sm:mx-0`}>
           <div className="flex justify-between items-center mb-8">
-            <h3 className="text-lg font-black text-slate-900 tracking-tight uppercase tracking-widest">Line Items</h3>
-            <div className="px-3 py-1 bg-slate-50 rounded-lg text-[10px] font-black text-slate-400 uppercase tracking-widest">
+            <h3 className={`${TYPOGRAPHY.pageTitle} font-black text-slate-900 tracking-tight uppercase tracking-widest`}>Line Items</h3>
+            <div className={`px-3 py-1 bg-slate-50 ${RADIUS.badge} ${TYPOGRAPHY.badgeText} font-black text-slate-400 uppercase tracking-widest`}>
               {fields.length} Items Added
             </div>
           </div>
 
           <div>
             {/* ── DESKTOP TABLE ── */}
-            <div className="hidden lg:block overflow-hidden border border-slate-100 rounded-2xl">
+            <div className={`hidden lg:block overflow-hidden border border-slate-100 ${RADIUS.card}`}>
               <table className="min-w-full divide-y divide-slate-100">
                 <thead className="bg-slate-50/50">
                   <tr>
-                    <th className="px-6 py-4 text-left text-[10px] font-black text-slate-500 uppercase tracking-widest">#</th>
-                    <th className="px-6 py-4 text-left text-[10px] font-black text-slate-500 uppercase tracking-widest w-1/3">Description</th>
-                    <th className="px-6 py-4 text-left text-[10px] font-black text-slate-500 uppercase tracking-widest">Unit</th>
-                    <th className="px-6 py-4 text-left text-[10px] font-black text-slate-500 uppercase tracking-widest">Qty</th>
-                    <th className="px-6 py-4 text-left text-[10px] font-black text-slate-500 uppercase tracking-widest">Unit Price</th>
-                    <th className="px-6 py-4 text-right text-[10px] font-black text-slate-500 uppercase tracking-widest">Amount</th>
+                    <th className={`px-6 py-4 text-left ${TYPOGRAPHY.badgeText} font-black text-slate-500 uppercase tracking-widest`}>#</th>
+                    <th className={`px-6 py-4 text-left ${TYPOGRAPHY.badgeText} font-black text-slate-500 uppercase tracking-widest w-1/3`}>Description</th>
+                    <th className={`px-6 py-4 text-left ${TYPOGRAPHY.badgeText} font-black text-slate-500 uppercase tracking-widest`}>Unit</th>
+                    <th className={`px-6 py-4 text-left ${TYPOGRAPHY.badgeText} font-black text-slate-500 uppercase tracking-widest`}>Qty</th>
+                    <th className={`px-6 py-4 text-left ${TYPOGRAPHY.badgeText} font-black text-slate-500 uppercase tracking-widest`}>Unit Price</th>
+                    <th className={`px-6 py-4 text-right ${TYPOGRAPHY.badgeText} font-black text-slate-500 uppercase tracking-widest`}>Amount</th>
                     <th className="px-6 py-4"></th>
                   </tr>
                 </thead>
@@ -265,7 +266,7 @@ export default function CreatePRPage() {
                           type="button"
                           onClick={() => remove(index)}
                           disabled={fields.length === 1}
-                          className="p-1.5 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all opacity-0 group-hover:opacity-100 disabled:opacity-0"
+                          className={`p-1.5 text-slate-300 hover:text-red-500 hover:bg-red-50 ${RADIUS.card} transition-all opacity-0 group-hover:opacity-100 disabled:opacity-0`}
                         >
                           <Trash2 className="h-4 w-4" />
                         </button>
@@ -280,7 +281,7 @@ export default function CreatePRPage() {
                 <button
                   type="button"
                   onClick={() => append({ description: '', unit: 'Pcs', quantity: 1, unit_price: 0 })}
-                  className="flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-black text-blue-600 uppercase tracking-widest hover:bg-blue-50 transition-all active:scale-95"
+                  className={`flex items-center gap-2 px-4 py-2 ${RADIUS.card} ${TYPOGRAPHY.badgeText} font-black text-blue-600 uppercase tracking-widest hover:bg-blue-50 transition-all active:scale-95`}
                 >
                   <Plus className="w-4 h-4" />
                   Add Another Item
@@ -293,21 +294,21 @@ export default function CreatePRPage() {
             <div className="lg:hidden space-y-3">
               {fields.map((field, index) => (
                 <div key={field.id}
-                  className="bg-slate-50 rounded-xl border border-slate-100 p-4">
+                  className={`bg-slate-50 ${RADIUS.card} border border-slate-100 p-4`}>
 
                   {/* Card header: item number + delete */}
                   <div className="flex items-center justify-between mb-3">
-                    <span className="text-[10px] font-black uppercase tracking-widest text-blue-600
-                                     bg-blue-50 rounded-full px-2.5 py-1">
+                    <span className={`${TYPOGRAPHY.badgeText} font-black uppercase tracking-widest text-blue-600
+                                     bg-blue-50 ${RADIUS.badge} px-2.5 py-1`}>
                       Item {index + 1}
                     </span>
                     <button
                       type="button"
                       onClick={() => remove(index)}
                       disabled={fields.length === 1}
-                      className="p-2 rounded-lg text-slate-400 hover:text-red-500
+                      className={`p-2 ${RADIUS.card} text-slate-400 hover:text-red-500
                                  hover:bg-red-50 transition-colors disabled:opacity-30
-                                 min-w-[36px] min-h-[36px] flex items-center justify-center"
+                                 min-w-[36px] min-h-[36px] flex items-center justify-center`}
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -315,28 +316,28 @@ export default function CreatePRPage() {
 
                   {/* Description field */}
                   <div className="mb-3">
-                    <label className="text-[10px] font-black text-slate-500 uppercase mb-1 block">
+                    <label className={`${TYPOGRAPHY.badgeText} font-black text-slate-500 uppercase mb-1 block`}>
                       Description *
                     </label>
                     <input
                       {...register(`items.${index}.description`, { required: true })}
                       placeholder="Item description"
-                      className="w-full px-3 py-3 rounded-xl border border-slate-200
-                                 text-sm font-bold min-h-[48px] bg-white focus:ring-2
-                                 focus:ring-blue-500/20 focus:border-blue-500 outline-none"
+                      className={`w-full px-3 py-3 ${RADIUS.card} border border-slate-200
+                                 ${TYPOGRAPHY.inputValue} font-bold min-h-[48px] bg-white focus:ring-2
+                                 focus:ring-blue-500/20 focus:border-blue-500 outline-none`}
                     />
                   </div>
 
                   {/* Unit + Qty row */}
                   <div className="grid grid-cols-2 gap-3 mb-3">
                     <div>
-                      <label className="text-[10px] font-black text-slate-500 uppercase mb-1 block">
+                      <label className={`${TYPOGRAPHY.badgeText} font-black text-slate-500 uppercase mb-1 block`}>
                         Unit
                       </label>
                       <select
                         {...register(`items.${index}.unit`)}
-                        className="w-full px-3 py-3 rounded-xl border border-slate-200
-                                   text-sm font-bold min-h-[48px] bg-white outline-none appearance-none"
+                        className={`w-full px-3 py-3 ${RADIUS.card} border border-slate-200
+                                   ${TYPOGRAPHY.inputValue} font-bold min-h-[48px] bg-white outline-none appearance-none`}
                       >
                         <option>Pcs</option>
                         <option>Box</option>
@@ -347,16 +348,16 @@ export default function CreatePRPage() {
                       </select>
                     </div>
                     <div>
-                      <label className="text-[10px] font-black text-slate-500 uppercase mb-1 block">
+                      <label className={`${TYPOGRAPHY.badgeText} font-black text-slate-500 uppercase mb-1 block`}>
                         Quantity
                       </label>
                       <input
                         type="number"
                         {...register(`items.${index}.quantity`, { required: true, min: 1 })}
                         placeholder="0"
-                        className="w-full px-3 py-3 rounded-xl border border-slate-200
-                                   text-sm font-bold min-h-[48px] bg-white focus:ring-2
-                                   focus:ring-blue-500/20 focus:border-blue-500 outline-none"
+                        className={`w-full px-3 py-3 ${RADIUS.card} border border-slate-200
+                                   ${TYPOGRAPHY.inputValue} font-bold min-h-[48px] bg-white focus:ring-2
+                                   focus:ring-blue-500/20 focus:border-blue-500 outline-none`}
                       />
                     </div>
                   </div>
@@ -364,7 +365,7 @@ export default function CreatePRPage() {
                   {/* Unit price + computed amount */}
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="text-[10px] font-black text-slate-500 uppercase mb-1 block">
+                      <label className={`${TYPOGRAPHY.badgeText} font-black text-slate-500 uppercase mb-1 block`}>
                         Unit Price (ETB)
                       </label>
                       <input
@@ -372,18 +373,18 @@ export default function CreatePRPage() {
                         step="0.01"
                         {...register(`items.${index}.unit_price`, { required: true, min: 0 })}
                         placeholder="0.00"
-                        className="w-full px-3 py-3 rounded-xl border border-slate-200
-                                   text-sm font-bold min-h-[48px] bg-white focus:ring-2
-                                   focus:ring-blue-500/20 focus:border-blue-500 outline-none"
+                        className={`w-full px-3 py-3 ${RADIUS.card} border border-slate-200
+                                   ${TYPOGRAPHY.inputValue} font-bold min-h-[48px] bg-white focus:ring-2
+                                   focus:ring-blue-500/20 focus:border-blue-500 outline-none`}
                       />
                     </div>
                     <div>
-                      <label className="text-[10px] font-black text-slate-500 uppercase mb-1 block">
+                      <label className={`${TYPOGRAPHY.badgeText} font-black text-slate-500 uppercase mb-1 block`}>
                         Subtotal
                       </label>
-                      <div className="flex items-center h-[48px] px-3 rounded-xl
-                                      bg-white border border-slate-200">
-                        <span className="text-sm font-black text-slate-900 tabular-nums">
+                      <div className={`flex items-center h-[48px] px-3 ${RADIUS.card}
+                                      bg-white border border-slate-200`}>
+                        <span className={`${TYPOGRAPHY.inputValue} font-black text-slate-900 tabular-nums`}>
                           ETB {(Number(items[index]?.quantity || 0) * Number(items[index]?.unit_price || 0)).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                         </span>
                       </div>
@@ -396,11 +397,11 @@ export default function CreatePRPage() {
               <button
                 type="button"
                 onClick={() => append({ description: '', unit: 'Pcs', quantity: 1, unit_price: 0 })}
-                className="w-full py-3.5 rounded-xl border-2 border-dashed border-slate-200
-                           text-[10px] font-black text-slate-400 uppercase tracking-widest
+                className={`w-full py-3.5 ${RADIUS.card} border-2 border-dashed border-slate-200
+                           ${TYPOGRAPHY.badgeText} font-black text-slate-400 uppercase tracking-widest
                            hover:border-blue-500 hover:text-blue-600 hover:bg-blue-50/5
                            min-h-[52px] flex items-center justify-center gap-2
-                           transition-all duration-150 active:scale-[0.98]"
+                           transition-all duration-150 active:scale-[0.98]`}
               >
                 <Plus className="w-4 h-4" />
                 Add Item to Request
@@ -410,11 +411,11 @@ export default function CreatePRPage() {
             {/* Total row — always visible */}
             <div className="flex items-center justify-between mt-6 pt-6
                             border-t border-slate-100">
-              <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
+              <span className={`${TYPOGRAPHY.badgeText} font-black text-slate-500 uppercase tracking-widest`}>
                 Total Requested Amount
               </span>
-              <span className="text-xl font-black text-slate-900 tabular-nums">
-                <span className="text-xs font-bold text-slate-400 mr-2 uppercase">ETB</span>
+              <span className={`text-xl font-black text-slate-900 tabular-nums`}>
+                <span className={`${TYPOGRAPHY.badgeText} font-bold text-slate-400 mr-2 uppercase`}>ETB</span>
                 {totalAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
               </span>
             </div>
@@ -431,8 +432,8 @@ export default function CreatePRPage() {
         ">
            <div className="max-w-[900px] mx-auto flex flex-col-reverse lg:flex-row items-center lg:justify-end gap-3 lg:gap-4">
               {/* Desktop-only status indicator */}
-              <div className="hidden lg:flex items-center gap-2 text-[10px] font-black uppercase tracking-widest mr-auto">
-                 <div className={`h-2 w-2 rounded-full ${saving ? 'bg-amber-500 animate-pulse' : 'bg-emerald-500'}`} />
+              <div className={`hidden lg:flex items-center gap-2 ${TYPOGRAPHY.badgeText} font-black uppercase tracking-widest mr-auto`}>
+                 <div className={`h-2 w-2 ${RADIUS.toggle} ${saving ? 'bg-amber-500 animate-pulse' : 'bg-emerald-500'}`} />
                  <span className={saving ? 'text-amber-600' : 'text-emerald-600'}>
                     {saving ? 'Syncing...' : 'All changes saved'}
                  </span>
@@ -442,7 +443,7 @@ export default function CreatePRPage() {
                  <button
                    type="button"
                    onClick={() => navigate('/purchase-requisitions')}
-                   className="w-full lg:w-auto px-6 py-3 lg:py-2.5 rounded-xl border border-slate-200 bg-white text-[10px] font-black text-slate-400 uppercase tracking-widest hover:text-slate-900 min-h-[48px] transition-all flex items-center justify-center gap-2"
+                   className={`w-full lg:w-auto px-6 py-3 lg:py-2.5 ${RADIUS.card} border border-slate-200 bg-white ${TYPOGRAPHY.badgeText} font-black text-slate-400 uppercase tracking-widest hover:text-slate-900 min-h-[48px] transition-all flex items-center justify-center gap-2`}
                  >
                     <X className="h-4 w-4" /> Cancel
                  </button>
@@ -451,7 +452,7 @@ export default function CreatePRPage() {
                    type="button"
                    disabled={saving}
                    onClick={handleSubmit((data) => onSubmit(data, false))}
-                   className="w-full lg:w-auto px-6 py-3 lg:py-2.5 rounded-xl border border-slate-200 bg-white text-[10px] font-black text-slate-600 uppercase tracking-widest hover:bg-slate-50 min-h-[48px] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                   className={`w-full lg:w-auto px-6 py-3 lg:py-2.5 ${RADIUS.card} border border-slate-200 bg-white ${TYPOGRAPHY.badgeText} font-black text-slate-600 uppercase tracking-widest hover:bg-slate-50 min-h-[48px] transition-all flex items-center justify-center gap-2 disabled:opacity-50`}
                  >
                     {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
                     Save Draft
@@ -464,7 +465,7 @@ export default function CreatePRPage() {
                      setFormData(data);
                      setConfirmModal(true);
                    })}
-                   className="w-full lg:w-auto px-10 py-3 lg:py-2.5 bg-blue-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-700 min-h-[48px] transition-all shadow-lg shadow-blue-900/20 flex items-center justify-center gap-2 disabled:opacity-50"
+                   className={`w-full lg:w-auto px-10 py-3 lg:py-2.5 bg-blue-600 text-white ${RADIUS.card} ${TYPOGRAPHY.badgeText} font-black uppercase tracking-widest hover:bg-blue-700 min-h-[48px] transition-all shadow-lg shadow-blue-900/20 flex items-center justify-center gap-2 disabled:opacity-50`}
                  >
                     {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
                     Submit PR

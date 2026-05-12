@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import client from '../../api/client';
 import type { PurchaseRequisition } from '../../types';
+import { TYPOGRAPHY, SPACING, RADIUS, HEIGHTS, COLORS } from '../../components/shared/DesignTokens';
 import { 
   Plus, Search, Eye, FileSearch, File, 
   ChevronUp, ChevronDown, Filter, X, 
@@ -75,7 +76,7 @@ export default function PRListPage() {
 
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6 pb-20 animate-in fade-in duration-700">
+    <div className={`max-w-7xl mx-auto ${SPACING.cardGap} pb-20 animate-in fade-in duration-700`}>
       <PageHeader 
         title="Purchase Requisitions"
         subtitle="Manage and track all purchase requests across the organization."
@@ -91,7 +92,7 @@ export default function PRListPage() {
       />
 
       {/* FILTERS BAR */}
-      <ThemedCard className="!p-4 flex flex-col lg:flex-row gap-4">
+      <ThemedCard className={`!p-4 flex flex-col lg:flex-row gap-4`}>
         
         {/* Search input — full width on mobile */}
         <div className="relative w-full lg:w-96 flex-shrink-0">
@@ -101,7 +102,7 @@ export default function PRListPage() {
             placeholder="Search by ID or requester..." 
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-3 lg:py-2.5 bg-page-bg border-transparent rounded-xl text-sm font-medium text-slate-900 focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all min-h-[44px]"
+            className={`w-full pl-10 pr-4 py-3 lg:py-2.5 bg-page-bg border-transparent ${RADIUS.card} ${TYPOGRAPHY.inputValue} font-medium text-slate-900 focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all min-h-[44px]`}
           />
         </div>
         
@@ -111,7 +112,7 @@ export default function PRListPage() {
             <select 
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-4 py-3 lg:py-2.5 bg-page-bg border-transparent rounded-xl text-xs font-black text-slate-500 uppercase tracking-widest focus:ring-2 focus:ring-accent/20 transition-all min-h-[44px] cursor-pointer"
+              className={`px-4 py-3 lg:py-2.5 bg-page-bg border-transparent ${RADIUS.card} ${TYPOGRAPHY.badgeText} font-black text-slate-500 uppercase tracking-widest focus:ring-2 focus:ring-accent/20 transition-all min-h-[44px] cursor-pointer`}
             >
               <option value="">All Statuses</option>
               <option value="draft">Draft</option>
@@ -123,14 +124,14 @@ export default function PRListPage() {
             { (search || statusFilter) && (
               <button 
                 onClick={() => { setSearch(''); setStatusFilter(''); }}
-                className="px-3 py-3 lg:py-2.5 text-[10px] font-black text-accent uppercase tracking-widest hover:bg-accent/10 transition-colors flex items-center gap-1.5 rounded-xl min-h-[44px]"
+                className={`px-3 py-3 lg:py-2.5 ${TYPOGRAPHY.badgeText} font-black text-accent uppercase tracking-widest hover:bg-accent/10 transition-colors flex items-center gap-1.5 ${RADIUS.card} min-h-[44px]`}
               >
                 <X className="w-3.5 h-3.5" /> Clear
               </button>
             )}
           </div>
           
-          <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex-shrink-0 px-2">
+          <div className={`${TYPOGRAPHY.badgeText} font-black text-slate-400 uppercase tracking-widest flex-shrink-0 px-2`}>
              {filteredPrs.length} / {prs.length}
           </div>
         </div>
@@ -243,23 +244,22 @@ export default function PRListPage() {
           </div>
 
           {/* PAGINATION UI */}
-          {/* PAGINATION UI */}
           <div className="px-4 lg:px-8 py-4 lg:py-6 bg-page-bg/50 border-t border-border">
              {/* Desktop Pagination */}
              <div className="hidden lg:flex items-center justify-between">
-                <div className="text-xs font-semibold text-slate-500 uppercase tracking-wide">
+                <div className={`${TYPOGRAPHY.badgeText} font-semibold text-slate-500 uppercase tracking-wide`}>
                    Page 1 of 1
                 </div>
                 <div className="flex items-center gap-2">
-                   <ThemedButton disabled variant="outline" className="px-4 py-2 !font-semibold">
+                   <ThemedButton disabled variant="outline" className={`px-4 py-2 ${HEIGHTS.button} !font-semibold`}>
                      Previous
                    </ThemedButton>
                    {[1].map(p => (
-                      <ThemedButton key={p} className="h-9 w-9 !p-0 !font-semibold">
+                      <ThemedButton key={p} className={`h-9 w-9 !p-0 !font-semibold ${HEIGHTS.button}`}>
                        {p}
                      </ThemedButton>
                    ))}
-                   <ThemedButton disabled variant="outline" className="px-4 py-2 !font-semibold">
+                   <ThemedButton disabled variant="outline" className={`px-4 py-2 ${HEIGHTS.button} !font-semibold`}>
                      Next
                    </ThemedButton>
                 </div>
@@ -269,19 +269,19 @@ export default function PRListPage() {
              <div className="flex lg:hidden items-center justify-between w-full">
                 <button
                   disabled
-                  className="flex items-center gap-2 px-4 py-2 rounded-xl border border-border bg-white text-xs font-black uppercase tracking-widest text-slate-400 disabled:opacity-50 min-h-[44px]"
+                  className={`flex items-center gap-2 px-4 py-2 ${RADIUS.card} border border-border bg-white ${TYPOGRAPHY.badgeText} font-black uppercase tracking-widest text-slate-400 disabled:opacity-50 min-h-[44px]`}
                 >
                   <ChevronLeft className="w-4 h-4" />
                   Prev
                 </button>
 
-                <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">
+                <span className={`${TYPOGRAPHY.badgeText} font-black uppercase tracking-widest text-slate-500`}>
                   Page 1 / 1
                 </span>
 
                 <button
                   disabled
-                  className="flex items-center gap-2 px-4 py-2 rounded-xl border border-border bg-white text-xs font-black uppercase tracking-widest text-slate-400 disabled:opacity-50 min-h-[44px]"
+                  className={`flex items-center gap-2 px-4 py-2 ${RADIUS.card} border border-border bg-white ${TYPOGRAPHY.badgeText} font-black uppercase tracking-widest text-slate-400 disabled:opacity-50 min-h-[44px]`}
                 >
                   Next
                   <ChevronRight className="w-4 h-4" />

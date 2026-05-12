@@ -12,6 +12,7 @@ import { ConfirmationModal, PromptModal } from '../../components/ui/Modal';
 import { SkeletonTable, ErrorState } from '../../components/ui/Skeleton';
 import EmptyState from '../../components/ui/EmptyState';
 import { MobileApprovalCard } from '../../components/mobile/MobileApprovalCard';
+import { SPACING } from '../../components/shared/DesignTokens';
 
 type FilterType = 'all' | 'urgent' | 'PR' | 'PRF' | 'GRN' | 'SIV';
 
@@ -123,7 +124,7 @@ export default function ApprovalInboxPage() {
   });
 
   return (
-    <div className="max-w-7xl mx-auto space-y-4 lg:space-y-6 pb-24 animate-in fade-in duration-700 px-4 lg:px-0">
+    <div className={`max-w-7xl mx-auto ${SPACING.cardGap} lg:space-y-6 pb-24 animate-in fade-in duration-700 px-4 lg:px-0`}>
       {/* HEADER SECTION */}
       <div className="bg-gradient-to-r from-slate-900 to-slate-800 rounded-2xl lg:rounded-[2rem] p-6 lg:p-10 text-white shadow-2xl shadow-slate-900/20 relative overflow-hidden">
          <div className="relative z-10">

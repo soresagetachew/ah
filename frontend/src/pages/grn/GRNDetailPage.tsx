@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import client from '../../api/client';
+import { TYPOGRAPHY, SPACING, RADIUS } from '../../components/shared/DesignTokens';
 import { 
   Printer, Calendar, User, FileText, CheckCircle, 
   XCircle, Clock, ArrowLeft, Building2, Wallet, 
@@ -81,9 +82,9 @@ export default function GRNDetailPage() {
   ];
 
   return (
-    <div className="max-w-5xl mx-auto space-y-4 lg:space-y-6 pb-24 animate-in fade-in duration-1000 px-4 lg:px-0">
+    <div className={`max-w-5xl mx-auto ${SPACING.cardGap} lg:space-y-6 pb-24 animate-in fade-in duration-1000 px-4 lg:px-0`}>
       {/* HEADER SECTION */}
-      <div className="bg-surface rounded-xl lg:rounded-2xl border border-border shadow-sm p-4 lg:p-6">
+      <div className={`bg-surface ${RADIUS.card} lg:rounded-2xl border border-border shadow-sm p-4 lg:p-6`}>
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">

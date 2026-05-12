@@ -13,6 +13,7 @@ import PageHeader from '../../components/layout/PageHeader';
 import { Skeleton, ErrorState } from '../../components/ui/Skeleton';
 import EmptyState from '../../components/ui/EmptyState';
 import { ThemedCard, ThemedButton, ThemedTableRow } from '../../components/ui/themed';
+import { SPACING } from '../../components/shared/DesignTokens';
 
 const REPORT_TYPES = [
   { key: 'spend_by_dept', label: 'Spend by Department', icon: BarChart2, subtitle: 'Analysis of expenditures across organizational units' },
@@ -261,7 +262,7 @@ export default function ReportsPage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8 pb-32 animate-in fade-in duration-700">
+    <div className={`max-w-7xl mx-auto ${SPACING.cardGap} pb-32 animate-in fade-in duration-700`}>
       <PageHeader 
         title="Business Intelligence"
         subtitle="Comprehensive data analytics and operational reporting for African Holding Group."

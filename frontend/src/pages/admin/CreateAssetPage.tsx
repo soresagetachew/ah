@@ -6,6 +6,7 @@ import type { Asset } from '../../types';
 import toast from 'react-hot-toast';
 import { Loader2 } from 'lucide-react';
 import PageHeader from '../../components/layout/PageHeader';
+import { SPACING } from '../../components/shared/DesignTokens';
 
 
 export default function CreateAssetPage() {
@@ -51,7 +52,7 @@ export default function CreateAssetPage() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8 pb-20 animate-in fade-in duration-700">
+    <div className={`max-w-4xl mx-auto ${SPACING.cardGap} pb-20 animate-in fade-in duration-700`}>
       <PageHeader 
         title="Register New Asset"
         subtitle="Initialize a new physical asset record for tracking and lifecycle management."

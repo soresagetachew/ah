@@ -112,6 +112,21 @@ export default function AppLayout() {
   
   const sections = ['PROCUREMENT', 'FINANCE', 'INVENTORY', 'ADMIN'];
 
+  // Bottom nav candidates (mobile) — RBAC filtered. Ordered by priority per role context.
+  const bottomNavCandidates: { href: string; icon: any; label: string; roles: string[] }[] = [
+    { href: '/', icon: LayoutDashboard, label: 'Home', roles: ['System Admin', 'GM', 'Finance', 'Storekeeper', 'Checker', 'Staff', 'Auditor', 'Authorized Signatory'] },
+    { href: '/approvals', icon: CheckSquare, label: 'Approvals', roles: ['System Admin', 'GM', 'Checker', 'Finance'] },
+    { href: '/purchase-requisitions', icon: FileText, label: 'PRs', roles: ['System Admin', 'GM', 'Checker', 'Staff', 'Finance'] },
+    { href: '/payment-requests', icon: FileBox, label: 'Payments', roles: ['System Admin', 'GM', 'Finance', 'Checker', 'Staff'] },
+    { href: '/goods-receiving-notes', icon: Package, label: 'GRN', roles: ['System Admin', 'GM', 'Storekeeper', 'Finance'] },
+    { href: '/store-issued-vouchers', icon: FileBox, label: 'SIV', roles: ['System Admin', 'GM', 'Storekeeper'] },
+    { href: '/inventory', icon: Package, label: 'Stock', roles: ['System Admin', 'Storekeeper', 'GM'] },
+    { href: '/reports', icon: BarChart2, label: 'Reports', roles: ['System Admin', 'GM', 'Finance', 'Auditor'] },
+  ];
+  const bottomNavItems = bottomNavCandidates
+    .filter(i => user && i.roles.includes(user.role))
+    .slice(0, 4);
+
   const getBreadcrumbs = () => {
     const paths = location.pathname.split('/').filter(p => p);
     if (paths.length === 0) return [{ name: 'Dashboard', path: '/' }];
@@ -122,27 +137,29 @@ export default function AppLayout() {
   };
 
   const SidebarNav = ({ mobile = false }) => {
+    const collapsed = !mobile && sidebarCollapsed;
     return (
-      <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-6 custom-scrollbar">
+      <nav className={`flex-1 overflow-y-auto py-4 ${mobile ? 'px-4' : 'px-3'} space-y-6 custom-scrollbar`}>
         {/* Dashboard Item (Top Level) */}
         <div className="space-y-1">
           {filteredNavItems.filter(i => !i.section).map(item => {
             const Icon = item.icon || FileText;
             const isActive = location.pathname === item.path;
-            const collapsed = !mobile && sidebarCollapsed;
             
             return (
               <Link
                 key={item.name}
                 to={item.path}
-                className={`group relative flex items-center h-12 md:h-10 px-3 rounded-xl transition-all duration-200 ease-in-out ${
-                  isActive ? 'bg-brand-primary/10 text-brand-primary' : 'text-sidebar-text hover:bg-white/5 hover:text-white'
+                className={`group relative flex items-center ${mobile ? 'h-12 px-3' : 'h-12 md:h-10 px-3'} rounded-xl transition-all duration-200 ease-in-out ${
+                  isActive 
+                    ? `${mobile ? 'bg-white/10 text-white' : 'bg-brand-primary/10 text-brand-primary'}` 
+                    : `${mobile ? 'text-slate-300 hover:bg-white/5 hover:text-white' : 'text-sidebar-text hover:bg-white/5 hover:text-white'}`
                 } ${collapsed ? 'justify-center' : ''}`}
                 title={collapsed ? item.name : ''}
               >
-                {isActive && <div className="absolute left-0 top-2 bottom-2 w-1 bg-brand-primary rounded-r-full" />}
+                {isActive && <div className={`absolute left-0 top-2 bottom-2 w-1 ${mobile ? 'bg-accent' : 'bg-brand-primary'} rounded-r-full`} />}
                 <Icon className={`h-5 w-5 min-w-[20px] transition-all duration-200 ${collapsed ? '' : 'mr-3'}`} />
-                {!collapsed && <span className="text-sm font-semibold whitespace-nowrap opacity-100 transition-opacity duration-200">{item.name}</span>}
+                {!collapsed && <span className={`${mobile ? 'text-[15px]' : 'text-sm'} font-semibold whitespace-nowrap opacity-100 transition-opacity duration-200`}>{item.name}</span>}
                 {collapsed && <span className="absolute left-full ml-2 px-2 py-1 bg-slate-800 text-white text-[10px] font-bold tracking-wider rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-[100] pointer-events-none shadow-lg">{item.name}</span>}
               </Link>
             );
@@ -155,25 +172,26 @@ export default function AppLayout() {
           if (items.length === 0) return null;
           return (
             <div key={section} className="space-y-1 pt-2">
-              {!(!mobile && sidebarCollapsed) && (
-                <h3 className="px-3 text-[10px] font-black text-sidebar-text/50 uppercase tracking-[0.2em] mb-3">{section}</h3>
+              {!collapsed && (
+                <h3 className={`px-3 text-[10px] font-black ${mobile ? 'text-slate-500' : 'text-sidebar-text/50'} uppercase tracking-[0.2em] mb-3`}>{section}</h3>
               )}
               {items.map(item => {
                 const Icon = item.icon || FileText;
                 const isActive = location.pathname === item.path || (item.path !== '/' && location.pathname.startsWith(item.path));
-                const collapsed = !mobile && sidebarCollapsed;
                 return (
                   <Link
                     key={item.name}
                     to={item.path}
-                    className={`group relative flex items-center h-12 md:h-10 px-3 rounded-xl transition-all duration-200 ease-in-out ${
-                      isActive ? 'bg-brand-primary/10 text-brand-primary' : 'text-sidebar-text hover:bg-white/5 hover:text-white'
+                    className={`group relative flex items-center ${mobile ? 'h-12 px-3' : 'h-12 md:h-10 px-3'} rounded-xl transition-all duration-200 ease-in-out ${
+                      isActive 
+                        ? `${mobile ? 'bg-white/10 text-white' : 'bg-brand-primary/10 text-brand-primary'}` 
+                        : `${mobile ? 'text-slate-300 hover:bg-white/5 hover:text-white' : 'text-sidebar-text hover:bg-white/5 hover:text-white'}`
                     } ${collapsed ? 'justify-center' : ''}`}
                     title={collapsed ? item.name : ''}
                   >
-                    {isActive && <div className="absolute left-0 top-2 bottom-2 w-1 bg-brand-primary rounded-r-full" />}
+                    {isActive && <div className={`absolute left-0 top-2 bottom-2 w-1 ${mobile ? 'bg-accent' : 'bg-brand-primary'} rounded-r-full`} />}
                     <Icon className={`h-5 w-5 min-w-[20px] transition-all duration-200 ${collapsed ? '' : 'mr-3'}`} />
-                    {!collapsed && <span className="text-sm font-semibold whitespace-nowrap opacity-100 transition-opacity duration-200">{item.name}</span>}
+                    {!collapsed && <span className={`${mobile ? 'text-[15px]' : 'text-sm'} font-semibold whitespace-nowrap opacity-100 transition-opacity duration-200`}>{item.name}</span>}
                     {collapsed && <span className="absolute left-full ml-2 px-2 py-1 bg-slate-800 text-white text-[10px] font-bold tracking-wider rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-[100] pointer-events-none shadow-lg">{item.name}</span>}
                   </Link>
                 );
@@ -261,42 +279,42 @@ export default function AppLayout() {
 
       {/* Mobile slide-out drawer */}
       <aside className={`
-        fixed top-0 left-0 h-full z-50 w-72
-        bg-sidebar-bg
+        fixed top-0 left-0 h-full z-50 w-[280px]
+        bg-[#0f172a] bg-sidebar-bg
         transform transition-transform duration-300 ease-out
         lg:hidden
         ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
         flex flex-col
-        shadow-2xl
+        shadow-2xl shadow-black/40
       `}>
-        <div className="flex items-center justify-between px-4 py-4 border-b border-sidebar-border">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-white/10">
           <CompanyLogo variant="full" size="md" />
           <button
             onClick={() => setMobileMenuOpen(false)}
-            className="p-2 rounded-xl text-sidebar-text hover:bg-white/10 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
+            className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-white/10 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        <div className="px-4 py-3 border-b border-sidebar-border">
+        <div className="px-5 py-4 border-b border-white/10">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-accent flex items-center justify-center text-white font-semibold text-sm">
+            <div className="w-10 h-10 rounded-full bg-accent flex items-center justify-center text-white font-semibold text-sm shadow-lg shadow-accent/20">
               {user?.full_name?.charAt(0)}
             </div>
             <div className="min-w-0">
-              <p className="text-sm font-medium text-white truncate">{user?.full_name}</p>
-              <p className="text-xs text-sidebar-text truncate font-black uppercase tracking-widest">{user?.role}</p>
+              <p className="text-sm font-semibold text-white truncate">{user?.full_name}</p>
+              <p className="text-[11px] text-slate-400 truncate font-bold uppercase tracking-widest">{user?.role}</p>
             </div>
           </div>
         </div>
 
         <SidebarNav mobile />
 
-        <div className="px-4 py-4 border-t border-sidebar-border">
+        <div className="px-5 py-4 border-t border-white/10">
           <button
             onClick={handleLogout}
-            className="flex items-center gap-2 text-sm text-sidebar-text hover:text-white transition-colors w-full min-h-[44px] px-3 rounded-xl hover:bg-white/10"
+            className="flex items-center gap-3 text-sm font-medium text-slate-400 hover:text-white transition-colors w-full min-h-[44px] px-3 rounded-xl hover:bg-white/10"
           >
             <LogOut className="w-4 h-4" />
             Sign Out
@@ -386,38 +404,43 @@ export default function AppLayout() {
             <Outlet />
           </div>
 
-          {/* Bottom nav — mobile only */}
+          {/* Bottom nav — mobile only (RBAC filtered + Menu overflow) */}
           <nav className="
             fixed bottom-0 left-0 right-0 z-20
             bg-surface border-t border-border
             lg:hidden
             safe-area-inset-bottom
           ">
-            <div className="flex items-center justify-around px-2 py-2">
-              {[
-                { href: '/', icon: LayoutDashboard, label: 'Home' },
-                { href: '/purchase-requisitions', icon: FileText, label: 'PRs' },
-                { href: '/approvals', icon: CheckSquare, label: 'Approvals' },
-                { href: '/inventory', icon: Package, label: 'Stock' },
-                { href: '/reports', icon: BarChart2, label: 'Reports' },
-              ]
-              .map(item => {
+            <div className="flex items-center justify-around px-1 py-1.5">
+              {bottomNavItems.map(item => {
                 const isActive = location.pathname === item.href || (item.href !== '/' && location.pathname.startsWith(item.href));
+                const Icon = item.icon;
                 return (
                   <Link
                     key={item.href}
                     to={item.href}
-                    className="flex flex-col items-center gap-0.5 px-3 py-1 min-w-[44px] min-h-[44px] justify-center relative"
+                    className="flex flex-col items-center gap-0.5 px-2 py-1 min-w-[44px] min-h-[52px] justify-center flex-1 relative"
                   >
                     <div className={`relative p-1.5 rounded-xl transition-colors ${isActive ? 'bg-accent/10' : ''}`}>
-                      <item.icon className={`w-5 h-5 transition-colors ${isActive ? 'text-accent' : 'text-text-muted'}`} />
+                      <Icon className={`w-5 h-5 transition-colors ${isActive ? 'text-accent' : 'text-text-muted'}`} />
                     </div>
-                    <span className={`text-[10px] font-medium transition-colors ${isActive ? 'text-accent' : 'text-text-muted'}`}>
+                    <span className={`text-[10px] font-bold tracking-wide transition-colors truncate max-w-full ${isActive ? 'text-accent' : 'text-text-muted'}`}>
                       {item.label}
                     </span>
                   </Link>
                 );
               })}
+              {/* Overflow Menu button — opens drawer for full nav */}
+              <button
+                onClick={() => setMobileMenuOpen(true)}
+                aria-label="Open menu"
+                className="flex flex-col items-center gap-0.5 px-2 py-1 min-w-[44px] min-h-[52px] justify-center flex-1 relative"
+              >
+                <div className="relative p-1.5 rounded-xl transition-colors">
+                  <Menu className="w-5 h-5 text-text-muted" />
+                </div>
+                <span className="text-[10px] font-bold tracking-wide text-text-muted">More</span>
+              </button>
             </div>
           </nav>
           {/* Bottom padding */}

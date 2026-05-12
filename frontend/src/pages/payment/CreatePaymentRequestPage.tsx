@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import PageHeader from '../../components/layout/PageHeader';
 import { ConfirmationModal } from '../../components/ui/Modal';
+import { SPACING } from '../../components/shared/DesignTokens';
 
 const businessUnits = [
   { id: 'HO', name: 'HO', icon: Building2 },
@@ -70,7 +71,7 @@ export default function CreatePaymentRequestPage() {
   };
 
   return (
-    <div className="max-w-[900px] mx-auto pb-32 animate-in fade-in duration-700">
+    <div className={`max-w-[900px] mx-auto pb-32 animate-in fade-in duration-700 ${SPACING.cardGap}`}>
       <PageHeader 
         title="New Payment Request"
         subtitle="Request funds or reimbursement for business expenses and services."

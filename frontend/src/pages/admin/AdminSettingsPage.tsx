@@ -11,6 +11,7 @@ import client from '../../api/client';
 import PageHeader from '../../components/layout/PageHeader';
 import { useAuthStore } from '../../store/authStore';
 import { Navigate } from 'react-router-dom';
+import { SPACING } from '../../components/shared/DesignTokens';
 
 type Section = 'organization' | 'procurement' | 'notifications' | 'security' | 'audit';
 
@@ -86,7 +87,7 @@ export default function AdminSettingsPage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8 pb-20 animate-in fade-in duration-700">
+    <div className={`max-w-7xl mx-auto ${SPACING.cardGap} pb-20 animate-in fade-in duration-700`}>
       <PageHeader 
         title="Admin Settings"
         subtitle="Global system configuration, procurement rules, and security policies."

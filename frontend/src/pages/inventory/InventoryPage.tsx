@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import client from '../../api/client';
+import { TYPOGRAPHY, SPACING, RADIUS, HEIGHTS, COLORS } from '../../components/shared/DesignTokens';
 import { 
   Package, AlertTriangle, TrendingUp, Search, Download, 
   ArrowDownCircle, ArrowUpCircle, History, Clock, User, 
@@ -84,13 +85,13 @@ export default function InventoryPage() {
   const isStorekeeper = user?.role === 'Storekeeper' || user?.role === 'System Admin';
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6 pb-20 animate-in fade-in duration-700">
+    <div className={`max-w-7xl mx-auto ${SPACING.cardGap} pb-20 animate-in fade-in duration-700`}>
       <PageHeader 
         title="Warehouse Inventory"
         subtitle="Real-time stock ledger and multi-unit warehouse movement tracking."
         breadcrumbs={[{ label: 'African Holding' }, { label: 'Store' }, { label: 'Inventory' }]}
         actions={
-          <button className="inline-flex items-center gap-2 px-5 py-2.5 bg-white border border-slate-200 text-[10px] font-black uppercase tracking-widest rounded-xl text-slate-700 hover:bg-slate-50 transition-all shadow-sm">
+          <button className={`inline-flex items-center gap-2 px-5 py-2.5 bg-white border border-slate-200 ${TYPOGRAPHY.badgeText} font-black uppercase tracking-widest ${RADIUS.card} text-slate-700 hover:bg-slate-50 transition-all shadow-sm`}>
             <Download className="h-4 w-4" /> Export Report
           </button>
         }
@@ -127,7 +128,7 @@ export default function InventoryPage() {
            <button
              key={tab.id}
              onClick={() => setActiveTab(tab.id as TabType)}
-             className={`flex items-center gap-2 py-4 text-xs font-semibold uppercase tracking-wide transition-all border-b-2 ${
+             className={`flex items-center gap-2 py-4 ${TYPOGRAPHY.badgeText} font-semibold uppercase tracking-wide transition-all border-b-2 ${
                activeTab === tab.id ? 'border-blue-500 text-blue-600' : 'border-transparent text-slate-400 hover:text-slate-600'
              }`}
            >
@@ -137,9 +138,9 @@ export default function InventoryPage() {
       </div>
 
       {activeTab === 'overview' && (
-        <div className="space-y-4">
-           <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-              <div className="p-4 border-b border-slate-50 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className={SPACING.cardGap}>
+           <div className={`bg-white ${RADIUS.card} border border-slate-100 shadow-sm overflow-hidden`}>
+              <div className={`${SPACING.cardPadding} border-b border-slate-50 flex flex-col sm:flex-row items-center justify-between gap-4`}>
                  <div className="relative w-full sm:flex-1 sm:max-w-sm">
                     <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                     <input 
@@ -147,11 +148,11 @@ export default function InventoryPage() {
                       placeholder="Search ledger..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="w-full pl-10 pr-4 py-3 lg:py-2.5 bg-slate-50 border-transparent rounded-xl text-sm font-medium focus:ring-2 focus:ring-blue-500/20 transition-all min-h-[44px]"
+                      className={`w-full pl-10 pr-4 py-3 lg:py-2.5 bg-slate-50 border-transparent ${RADIUS.card} ${TYPOGRAPHY.inputValue} font-medium focus:ring-2 focus:ring-blue-500/20 transition-all min-h-[44px]`}
                     />
                  </div>
                  <div className="flex items-center gap-2 w-full sm:w-auto overflow-x-auto pb-2 sm:pb-0 scrollbar-none">
-                    <button className="p-3 lg:p-2.5 bg-slate-50 text-slate-400 rounded-xl hover:text-blue-600 transition-colors flex-shrink-0 min-h-[44px]">
+                    <button className={`p-3 lg:p-2.5 bg-slate-50 text-slate-400 ${RADIUS.card} hover:text-blue-600 transition-colors flex-shrink-0 min-h-[44px]`}>
                        <Filter className="h-5 w-5" />
                     </button>
                  </div>
@@ -186,21 +187,21 @@ export default function InventoryPage() {
                         return (
                           <tr key={item.id} className="hover:bg-blue-50/30 transition-colors group">
                              <td className="px-4 sm:px-8 py-5">
-                                <p className="text-sm font-semibold text-slate-900">{item.item_name}</p>
-                                <p className="text-xs text-slate-500 mt-0.5 uppercase tracking-wide">{item.unit}</p>
+                                <p className={`${TYPOGRAPHY.inputValue} font-semibold text-slate-900`}>{item.item_name}</p>
+                                <p className={`${TYPOGRAPHY.badgeText} text-slate-500 mt-0.5 uppercase tracking-wide`}>{item.unit}</p>
                              </td>
                              <td className="px-4 sm:px-8 py-5">
-                                <span className="px-2 py-1 bg-slate-100 rounded text-[10px] font-semibold text-slate-500 uppercase tracking-wide">{item.cost_center || 'General'}</span>
+                                <span className={`px-2 py-1 bg-slate-100 ${RADIUS.badge} ${TYPOGRAPHY.badgeText} font-semibold text-slate-500 uppercase tracking-wide`}>{item.cost_center || 'General'}</span>
                              </td>
                              <td className="px-4 sm:px-8 py-5">
                                 <div className="flex items-center gap-4">
                                    <div className="flex-1 h-1.5 w-32 bg-slate-100 rounded-full overflow-hidden">
                                       <div 
-                                        className={`h-full rounded-full transition-all duration-1000 ${getStockColor(item.current_stock, item.minimum_stock)}`}
+                                        className={`h-full ${RADIUS.toggle} transition-all duration-1000 ${getStockColor(item.current_stock, item.minimum_stock)}`}
                                         style={{ width: `${Math.min(ratio * 100, 100)}%` }}
                                       />
                                    </div>
-                                   <span className="text-sm font-semibold text-slate-900 tabular-nums">{Math.round(item.current_stock)} <span className="text-xs text-slate-400">units</span></span>
+                                   <span className={`${TYPOGRAPHY.inputValue} font-semibold text-slate-900 tabular-nums`}>{Math.round(item.current_stock)} <span className={`${TYPOGRAPHY.badgeText} text-slate-400`}>units</span></span>
                                 </div>
                              </td>
                              <td className="px-4 sm:px-8 py-5 text-right">
@@ -208,7 +209,7 @@ export default function InventoryPage() {
                              </td>
                              {isStorekeeper && (
                                <td className="px-4 sm:px-8 py-5 text-right">
-                                  <button className="px-4 py-2 border border-slate-200 rounded-xl text-xs font-semibold text-blue-500 uppercase tracking-wide hover:bg-blue-50 transition-all opacity-0 group-hover:opacity-100 shadow-sm">
+                                  <button className={`px-4 py-2 border border-slate-200 ${RADIUS.card} ${TYPOGRAPHY.badgeText} font-semibold text-blue-500 uppercase tracking-wide hover:bg-blue-50 transition-all opacity-0 group-hover:opacity-100 shadow-sm`}>
                                      Reorder
                                   </button>
                                </td>
@@ -225,8 +226,8 @@ export default function InventoryPage() {
       )}
 
       {activeTab === 'history' && (
-        <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm p-4 sm:p-8">
-           <div className="space-y-8 relative before:absolute before:left-5 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-50">
+        <div className={`bg-white ${RADIUS.card} border border-slate-100 shadow-sm ${SPACING.cardPadding} sm:p-8`}>
+           <div className={`space-y-8 relative before:absolute before:left-5 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-50`}>
               {history.map((move, i) => {
                 const isFirstOfDay = i === 0 || new Date(move.date).toLocaleDateString() !== new Date(history[i-1].date).toLocaleDateString();
                 const isToday = new Date(move.date).toLocaleDateString() === new Date().toLocaleDateString();
@@ -238,28 +239,28 @@ export default function InventoryPage() {
                           {isToday ? 'Today' : new Date(move.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}
                        </div>
                      )}
-                     <div className={`absolute left-0 h-10 w-10 rounded-xl flex items-center justify-center shadow-lg ${
+                     <div className={`absolute left-0 h-10 w-10 ${RADIUS.card} flex items-center justify-center shadow-lg ${
                        move.type === 'IN' ? 'bg-emerald-500 text-white shadow-emerald-900/20' : 'bg-blue-500 text-white shadow-blue-900/20'
                      }`}>
                         {move.type === 'IN' ? <ArrowDownCircle className="h-5 w-5" /> : <ArrowUpCircle className="h-5 w-5" />}
                      </div>
                      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                         <div>
-                           <h4 className="text-sm font-semibold text-slate-900 uppercase tracking-wide">
+                           <h4 className={`${TYPOGRAPHY.inputValue} font-semibold text-slate-900 uppercase tracking-wide`}>
                               {move.type === 'IN' ? 'Stock Inflow' : 'Stock Issuance'} 
                               <span className="ml-2 font-mono text-xs text-slate-500 tracking-normal">{move.serial_no}</span>
                            </h4>
-                           <p className="text-xs text-slate-500 mt-1.5 flex items-center gap-4">
+                           <p className={`${TYPOGRAPHY.badgeText} text-slate-500 mt-1.5 flex items-center gap-4`}>
                               <span className="flex items-center gap-1.5"><User className="w-3 h-3 text-slate-400" /> {move.supplier_name || move.issued_to_name}</span>
                               <span className="flex items-center gap-1.5"><Hash className="w-3 h-3 text-slate-400" /> {move.invoice_no || move.project_name || 'General'}</span>
                            </p>
                         </div>
                         <div className="flex items-center gap-4">
                            <div className="text-right">
-                              <p className={`text-sm font-semibold tabular-nums ${move.type === 'IN' ? 'text-emerald-600' : 'text-blue-600'}`}>
+                              <p className={`${TYPOGRAPHY.inputValue} font-semibold tabular-nums ${move.type === 'IN' ? 'text-emerald-600' : 'text-blue-600'}`}>
                                  {move.type === 'IN' ? '+' : '-'}{move.items_count || 0} Items
                               </p>
-                              <p className="text-xs text-slate-400 mt-1 flex items-center justify-end gap-1.5">
+                              <p className={`${TYPOGRAPHY.badgeText} text-slate-400 mt-1 flex items-center justify-end gap-1.5`}>
                                  <Clock className="w-3 h-3" /> {new Date(move.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                               </p>
                            </div>
@@ -274,7 +275,7 @@ export default function InventoryPage() {
       )}
 
       {activeTab === 'alerts' && (
-        <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm p-20">
+        <div className={`bg-white ${RADIUS.card} border border-slate-100 shadow-sm p-20`}>
            <EmptyState 
              icon={Package}
              title="Stock levels look good"

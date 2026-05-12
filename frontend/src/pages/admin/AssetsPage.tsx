@@ -8,6 +8,7 @@ import { ConfirmationModal } from '../../components/ui/Modal';
 import PageHeader from '../../components/layout/PageHeader';
 import { SkeletonTable, ErrorState } from '../../components/ui/Skeleton';
 import EmptyState from '../../components/ui/EmptyState';
+import { SPACING } from '../../components/shared/DesignTokens';
 
 export default function AssetsPage() {
   const [assets, setAssets] = useState<Asset[]>([]);
@@ -48,7 +49,7 @@ export default function AssetsPage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8 pb-20 animate-in fade-in duration-700">
+    <div className={`max-w-7xl mx-auto ${SPACING.cardGap} pb-20 animate-in fade-in duration-700`}>
       <PageHeader 
         title="Asset Management"
         subtitle="Manage and track company assets, equipment lifecycle, and department allocations."

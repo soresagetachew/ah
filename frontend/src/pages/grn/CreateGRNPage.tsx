@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm, useFieldArray } from 'react-hook-form';
 import client from '../../api/client';
+import { TYPOGRAPHY, SPACING, RADIUS } from '../../components/shared/DesignTokens';
 import { 
   Plus, Trash2, AlertTriangle, Link as LinkIcon, 
   UploadCloud, CheckCircle, Truck, FileText, 
@@ -82,7 +83,7 @@ export default function CreateGRNPage() {
   });
 
   return (
-    <div className="max-w-[900px] mx-auto pb-32 animate-in fade-in duration-700">
+    <div className={`max-w-[900px] mx-auto pb-32 animate-in fade-in duration-700 ${SPACING.cardGap}`}>
       <PageHeader 
         title="Record Goods Receipt"
         subtitle="Log incoming inventory and link receipts to approved purchase requisitions."
