@@ -227,14 +227,14 @@ export default function CreatePRPage() {
                         <input
                           type="text"
                           {...register(`items.${index}.description`, { required: true })}
-                          className="w-full border-0 bg-transparent p-0 text-sm font-bold text-slate-900 focus:ring-0 placeholder:text-slate-300"
+                          className="w-full border-0 bg-transparent py-2 px-0 text-sm font-bold text-slate-900 focus:ring-0 placeholder:text-slate-300"
                           placeholder="Item name..."
                         />
                       </td>
                       <td className="px-6 py-4">
                         <select
                           {...register(`items.${index}.unit`)}
-                          className="w-full border-0 bg-transparent p-0 text-xs font-black text-slate-500 uppercase focus:ring-0"
+                          className="w-full border-0 bg-transparent py-2 px-0 text-xs font-black text-slate-500 uppercase focus:ring-0 cursor-pointer"
                         >
                           <option>Pcs</option><option>Box</option><option>Kg</option>
                           <option>Ltr</option><option>Set</option><option>Other</option>
@@ -245,7 +245,7 @@ export default function CreatePRPage() {
                           type="number"
                           min="1"
                           {...register(`items.${index}.quantity`, { required: true, min: 1 })}
-                          className="w-16 border-0 bg-transparent p-0 text-sm font-bold text-slate-900 focus:ring-0"
+                          className="w-16 border-0 bg-transparent py-2 px-0 text-sm font-bold text-slate-900 focus:ring-0"
                         />
                       </td>
                       <td className="px-6 py-4">
@@ -254,7 +254,7 @@ export default function CreatePRPage() {
                           min="0"
                           step="0.01"
                           {...register(`items.${index}.unit_price`, { required: true, min: 0 })}
-                          className="w-24 border-0 bg-transparent p-0 text-sm font-bold text-slate-900 focus:ring-0"
+                          className="w-24 border-0 bg-transparent py-2 px-0 text-sm font-bold text-slate-900 focus:ring-0"
                         />
                       </td>
                       <td className="px-6 py-4 text-right text-sm font-black text-slate-900">
@@ -274,7 +274,20 @@ export default function CreatePRPage() {
                   ))}
                 </tbody>
               </table>
+              
+              {/* Desktop Add Item Footer */}
+              <div className="bg-slate-50/30 p-4 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => append({ description: '', unit: 'Pcs', quantity: 1, unit_price: 0 })}
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-black text-blue-600 uppercase tracking-widest hover:bg-blue-50 transition-all active:scale-95"
+                >
+                  <Plus className="w-4 h-4" />
+                  Add Another Item
+                </button>
+              </div>
             </div>
+
 
             {/* ── MOBILE LINE ITEM CARDS ── */}
             <div className="lg:hidden space-y-3">

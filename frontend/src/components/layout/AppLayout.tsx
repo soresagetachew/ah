@@ -104,6 +104,7 @@ export default function AppLayout() {
 
     // ADMIN
     { name: t('nav.admin'), path: '/admin/users', icon: Users, roles: ['System Admin'], section: 'ADMIN' },
+    { name: 'Settings', path: '/settings', icon: Settings, roles: ['System Admin'], section: 'ADMIN' },
     { name: 'Audit Logs', path: '/reports', icon: FileText, roles: ['System Admin'], section: 'ADMIN' },
   ];
 
@@ -122,7 +123,7 @@ export default function AppLayout() {
 
   const SidebarNav = ({ mobile = false }) => {
     return (
-      <nav className={`flex-1 overflow-y-auto py-3 ${mobile ? 'px-2' : 'px-2 space-y-6'}`}>
+      <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-6 custom-scrollbar">
         {/* Dashboard Item (Top Level) */}
         <div className="space-y-1">
           {filteredNavItems.filter(i => !i.section).map(item => {
@@ -134,15 +135,15 @@ export default function AppLayout() {
               <Link
                 key={item.name}
                 to={item.path}
-                className={`group relative flex items-center h-12 md:h-10 px-3 rounded-lg transition-all duration-300 ease-in-out ${
-                  isActive ? 'bg-sidebar-active-bg text-sidebar-active-text' : 'text-sidebar-text hover:bg-white/10 hover:text-white'
+                className={`group relative flex items-center h-12 md:h-10 px-3 rounded-xl transition-all duration-200 ease-in-out ${
+                  isActive ? 'bg-brand-primary/10 text-brand-primary' : 'text-sidebar-text hover:bg-white/5 hover:text-white'
                 } ${collapsed ? 'justify-center' : ''}`}
                 title={collapsed ? item.name : ''}
               >
-                {isActive && <div className="absolute left-0 top-2 bottom-2 w-[3px] bg-brand-primary rounded-r-full" />}
-                <Icon className={`h-5 w-5 min-w-[20px] transition-all duration-300 ${collapsed ? '' : 'mr-3'}`} />
-                {!collapsed && <span className="text-sm font-medium whitespace-nowrap opacity-100 transition-opacity duration-300">{item.name}</span>}
-                {collapsed && <span className="absolute left-full ml-2 px-2 py-1 bg-slate-800 text-white text-[10px] rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-[100] pointer-events-none">{item.name}</span>}
+                {isActive && <div className="absolute left-0 top-2 bottom-2 w-1 bg-brand-primary rounded-r-full" />}
+                <Icon className={`h-5 w-5 min-w-[20px] transition-all duration-200 ${collapsed ? '' : 'mr-3'}`} />
+                {!collapsed && <span className="text-sm font-semibold whitespace-nowrap opacity-100 transition-opacity duration-200">{item.name}</span>}
+                {collapsed && <span className="absolute left-full ml-2 px-2 py-1 bg-slate-800 text-white text-[10px] font-bold tracking-wider rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-[100] pointer-events-none shadow-lg">{item.name}</span>}
               </Link>
             );
           })}
@@ -153,9 +154,9 @@ export default function AppLayout() {
           const items = filteredNavItems.filter(i => i.section === section);
           if (items.length === 0) return null;
           return (
-            <div key={section} className={`${mobile ? 'mt-4' : 'space-y-1'}`}>
+            <div key={section} className="space-y-1 pt-2">
               {!(!mobile && sidebarCollapsed) && (
-                <h3 className="px-3 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-2">{section}</h3>
+                <h3 className="px-3 text-[10px] font-black text-sidebar-text/50 uppercase tracking-[0.2em] mb-3">{section}</h3>
               )}
               {items.map(item => {
                 const Icon = item.icon || FileText;
@@ -165,15 +166,15 @@ export default function AppLayout() {
                   <Link
                     key={item.name}
                     to={item.path}
-                    className={`group relative flex items-center h-12 md:h-10 px-3 rounded-lg transition-all duration-300 ease-in-out ${
-                      isActive ? 'bg-sidebar-active-bg text-sidebar-active-text' : 'text-sidebar-text hover:bg-white/10 hover:text-white'
+                    className={`group relative flex items-center h-12 md:h-10 px-3 rounded-xl transition-all duration-200 ease-in-out ${
+                      isActive ? 'bg-brand-primary/10 text-brand-primary' : 'text-sidebar-text hover:bg-white/5 hover:text-white'
                     } ${collapsed ? 'justify-center' : ''}`}
                     title={collapsed ? item.name : ''}
                   >
-                    {isActive && <div className="absolute left-0 top-2 bottom-2 w-[3px] bg-brand-primary rounded-r-full" />}
-                    <Icon className={`h-5 w-5 min-w-[20px] transition-all duration-300 ${collapsed ? '' : 'mr-3'}`} />
-                    {!collapsed && <span className="text-sm font-medium whitespace-nowrap opacity-100 transition-opacity duration-300">{item.name}</span>}
-                    {collapsed && <span className="absolute left-full ml-2 px-2 py-1 bg-slate-800 text-white text-[10px] rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-[100] pointer-events-none">{item.name}</span>}
+                    {isActive && <div className="absolute left-0 top-2 bottom-2 w-1 bg-brand-primary rounded-r-full" />}
+                    <Icon className={`h-5 w-5 min-w-[20px] transition-all duration-200 ${collapsed ? '' : 'mr-3'}`} />
+                    {!collapsed && <span className="text-sm font-semibold whitespace-nowrap opacity-100 transition-opacity duration-200">{item.name}</span>}
+                    {collapsed && <span className="absolute left-full ml-2 px-2 py-1 bg-slate-800 text-white text-[10px] font-bold tracking-wider rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-[100] pointer-events-none shadow-lg">{item.name}</span>}
                   </Link>
                 );
               })}
@@ -304,7 +305,7 @@ export default function AppLayout() {
       </aside>
 
       {/* Main Content Area */}
-      <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
+      <div className="flex flex-col flex-1 min-w-0 overflow-y-auto">
         <header className={`
           fixed top-0 right-0 z-20
           h-14 bg-surface border-b border-border

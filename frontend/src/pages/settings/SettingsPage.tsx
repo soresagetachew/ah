@@ -99,12 +99,12 @@ export default function SettingsPage() {
   }, [activeSection, navGroups]);
 
   return (
-    <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-8 pb-20 animate-in fade-in duration-700 px-4 lg:px-0">
+    <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6 pb-20 animate-in fade-in duration-700 px-4 lg:px-0">
       {/* NAVIGATION: Sidebar on Desktop, Dropdown on Mobile */}
-      <aside className="w-full lg:w-[260px] shrink-0">
+      <aside className="w-full lg:w-[280px] shrink-0">
         {/* Desktop Sidebar */}
         <div className="hidden lg:block bg-white rounded-2xl border border-slate-100 shadow-sm sticky top-6 self-start overflow-hidden">
-          <div className="px-5 pt-6 pb-4">
+          <div className="px-6 pt-6 pb-4">
             <h2 className="text-lg font-bold text-slate-900 tracking-tight">Settings</h2>
           </div>
           
@@ -175,9 +175,9 @@ export default function SettingsPage() {
            <span className="text-slate-900 lg:text-slate-400">{activeLabel}</span>
         </div>
 
-        <div key={activeSection} className="bg-white rounded-2xl lg:rounded-[2.5rem] border border-slate-100 shadow-sm min-h-[500px] lg:min-h-[600px] overflow-hidden animate-in fade-in slide-in-from-right-4 duration-500">
+        <div key={activeSection} className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden animate-in fade-in slide-in-from-right-4 duration-500">
            {isLoading ? (
-             <div className="flex flex-col items-center justify-center h-[500px] lg:h-[600px] opacity-20">
+             <div className="flex flex-col items-center justify-center min-h-[400px] lg:min-h-[500px] opacity-20">
                 <Loader2 className="h-10 w-10 animate-spin mb-4" />
                 <p className="text-[10px] font-black uppercase tracking-widest">Syncing Config...</p>
              </div>

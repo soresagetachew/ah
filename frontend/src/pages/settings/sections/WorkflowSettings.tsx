@@ -1,13 +1,23 @@
-import { useState, useEffect, useMemo } from 'react';
-import { 
-  GitMerge, PiggyBank, History, Plus, 
-  Trash2, ChevronRight, GripVertical, 
-  AlertTriangle, Loader2, Save, FileText, 
-  Package, CreditCard, Box, User, Check
-} from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { GitMerge, PiggyBank, History, Plus, Trash2, GripVertical, AlertTriangle, Loader2, Save, FileText, Package, CreditCard, Box, User, Check } from 'lucide-react';
 import toast from 'react-hot-toast';
 import client from '../../../api/client';
 import { Modal, Drawer } from '../../../components/ui/Modal';
+import {
+  Card,
+  SectionTitle,
+  FieldLabel,
+  HelperText,
+  Input,
+  Select,
+  Button,
+  Badge,
+  Divider,
+  Toggle,
+  FormGroup,
+  SectionGroup,
+  FieldRow,
+} from '../../../components/settings/SettingsComponents';
 
 type Tab = 'chains' | 'thresholds' | 'escalation';
 type DocType = 'PR' | 'GRN' | 'SIV' | 'PRF';
@@ -16,25 +26,25 @@ export default function WorkflowSettings() {
   const [activeTab, setActiveTab] = useState<Tab>('chains');
 
   return (
-    <div className="space-y-10 animate-in fade-in duration-500">
-      <div className="flex gap-1 p-1 bg-slate-100 rounded-2xl w-fit mx-auto lg:mx-0">
-        <button 
+    <div className="p-5 space-y-4 animate-in fade-in duration-500">
+      <div className="flex gap-1 p-1 bg-slate-100 rounded-lg w-fit mx-auto lg:mx-0">
+        <button
           onClick={() => setActiveTab('chains')}
-          className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeTab === 'chains' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-900'}`}
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-medium uppercase tracking-widest transition-all ${activeTab === 'chains' ? 'bg-white text-blue-500 shadow-sm' : 'text-slate-500 hover:text-slate-900'}`}
         >
-          <GitMerge className="h-4 w-4" /> Approval Chains
+          <GitMerge className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Approval Chains</span><span className="sm:hidden">Chains</span>
         </button>
-        <button 
+        <button
           onClick={() => setActiveTab('thresholds')}
-          className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeTab === 'thresholds' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-900'}`}
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-medium uppercase tracking-widest transition-all ${activeTab === 'thresholds' ? 'bg-white text-blue-500 shadow-sm' : 'text-slate-500 hover:text-slate-900'}`}
         >
-          <PiggyBank className="h-4 w-4" /> Amount Thresholds
+          <PiggyBank className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Thresholds</span><span className="sm:hidden">Limits</span>
         </button>
-        <button 
+        <button
           onClick={() => setActiveTab('escalation')}
-          className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeTab === 'escalation' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-900'}`}
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-medium uppercase tracking-widest transition-all ${activeTab === 'escalation' ? 'bg-white text-blue-500 shadow-sm' : 'text-slate-500 hover:text-slate-900'}`}
         >
-          <History className="h-4 w-4" /> Escalation Rules
+          <History className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Escalation</span><span className="sm:hidden">Rules</span>
         </button>
       </div>
 
@@ -105,36 +115,36 @@ function ChainsTab() {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-4">
       {/* DOC SELECTOR */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {docTypes.map(t => (
-          <button 
+          <button
             key={t.id}
             onClick={() => setDocType(t.id)}
-            className={`p-6 rounded-[2rem] border-2 transition-all flex flex-col items-center text-center gap-4 ${docType === t.id ? 'border-blue-500 bg-blue-50/30' : 'border-slate-100 bg-white hover:border-slate-200'}`}
+            className={`p-4 rounded-lg border-2 transition-all flex flex-col items-center text-center gap-3 ${docType === t.id ? 'border-blue-500 bg-blue-50/30' : 'border-slate-200 bg-white hover:border-slate-300'}`}
           >
-            <div className={`h-12 w-12 rounded-2xl flex items-center justify-center ${docType === t.id ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-400'}`}>
-               <t.icon className="h-6 w-6" />
+            <div className={`h-10 w-10 rounded-lg flex items-center justify-center ${docType === t.id ? 'bg-blue-500 text-white' : 'bg-slate-100 text-slate-400'}`}>
+               <t.icon className="h-5 w-5" />
             </div>
             <div>
-               <p className="text-sm font-black text-slate-900 tracking-tight">{t.label}</p>
-               <span className="text-[10px] font-black uppercase tracking-widest text-blue-600 mt-1 block">Active Workflow</span>
+               <p className="text-sm font-semibold text-slate-900">{t.label}</p>
+               <span className="text-[10px] font-medium uppercase tracking-widest text-blue-500 mt-1 block">Active Workflow</span>
             </div>
           </button>
         ))}
       </div>
 
       {/* CHAIN BUILDER */}
-      <div className="bg-white rounded-[3rem] border border-slate-100 shadow-sm p-10 lg:p-14 space-y-10 relative">
-        <div className="flex items-center justify-between">
+      <Card className="relative">
+        <div className="flex items-center justify-between mb-6">
            <div>
-              <h3 className="text-xl font-black text-slate-900 tracking-tight">Sequence of Authorization</h3>
-              <p className="text-sm text-slate-500 mt-1">Configure the multi-step approval lifecycle for {docType} documents.</p>
+              <SectionTitle>Sequence of Authorization</SectionTitle>
+              <HelperText>Configure the multi-step approval lifecycle for {docType} documents.</HelperText>
            </div>
-           <button className="flex items-center gap-2 px-6 py-3 bg-blue-50 text-blue-700 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-100 transition-all">
+           <Button variant="secondary" className="bg-blue-50 text-blue-600">
               <Plus className="h-4 w-4" /> Add Approval Step
-           </button>
+           </Button>
         </div>
 
         {loading ? (
@@ -143,38 +153,38 @@ function ChainsTab() {
           <div className="space-y-4">
             {rules.map((rule, idx) => (
               <div key={rule.id} className="relative">
-                <div 
+                <div
                   draggable
                   onDragStart={() => onDragStart(rule.id)}
                   onDragOver={(e) => onDragOver(e, rule.id)}
                   onDrop={onDrop}
-                  className={`flex items-center gap-6 p-6 rounded-3xl border transition-all ${draggedId === rule.id ? 'opacity-40 scale-95 border-blue-500 shadow-inner' : 'bg-white border-slate-100 hover:border-blue-200 hover:shadow-lg'}`}
+                  className={`flex items-center gap-4 p-4 rounded-lg border transition-all ${draggedId === rule.id ? 'opacity-40 scale-95 border-blue-500 shadow-inner' : 'bg-white border-slate-200 hover:border-blue-300 hover:shadow-md'}`}
                 >
-                   <div className="flex items-center gap-4">
+                   <div className="flex items-center gap-3">
                       <GripVertical className="h-5 w-5 text-slate-300 cursor-grab active:cursor-grabbing" />
-                      <div className="h-10 w-10 rounded-2xl bg-slate-900 text-white flex items-center justify-center font-black text-xs">
+                      <div className="h-10 w-10 rounded-lg bg-slate-900 text-white flex items-center justify-center font-semibold text-xs">
                          {idx + 1}
                       </div>
                    </div>
-                   <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-6">
+                   <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div>
-                         <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Authorization Point</p>
-                         <p className="text-sm font-black text-slate-900">{rule.rule_name}</p>
+                         <p className="text-[10px] font-medium text-slate-400 uppercase tracking-widest mb-1">Authorization Point</p>
+                         <p className="text-sm font-semibold text-slate-900">{rule.rule_name}</p>
                       </div>
                       <div>
-                         <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Required Actor</p>
+                         <p className="text-[10px] font-medium text-slate-400 uppercase tracking-widest mb-1">Required Actor</p>
                          <div className="flex items-center gap-2">
                             <User className="h-3 w-3 text-blue-500" />
-                            <span className="text-xs font-bold text-slate-700">{rule.required_role} ({rule.scope})</span>
+                            <span className="text-xs font-medium text-slate-700">{rule.required_role} ({rule.scope})</span>
                          </div>
                       </div>
                       <div>
-                         <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Escalation Policy</p>
-                         <p className="text-xs text-slate-500 font-medium">After {rule.escalate_after_days} days → {rule.escalate_to_role || 'No escalation'}</p>
+                         <p className="text-[10px] font-medium text-slate-400 uppercase tracking-widest mb-1">Escalation Policy</p>
+                         <p className="text-xs text-slate-500 font-normal">After {rule.escalate_after_days} days → {rule.escalate_to_role || 'No escalation'}</p>
                       </div>
                    </div>
                    <div className="flex gap-2">
-                      <button className="p-2 text-slate-300 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"><Plus className="h-4 w-4" /></button>
+                      <button className="p-2 text-slate-300 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-all"><Plus className="h-4 w-4" /></button>
                       <button className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"><Trash2 className="h-4 w-4" /></button>
                    </div>
                 </div>
@@ -188,13 +198,13 @@ function ChainsTab() {
           </div>
         )}
 
-        <div className="bg-slate-50 rounded-2xl p-6 border border-slate-100 flex items-center gap-4">
-           <AlertTriangle className="h-5 w-5 text-slate-400 shrink-0" />
-           <p className="text-xs text-slate-500 font-medium leading-relaxed">
+        <div className="bg-slate-50 rounded-lg p-4 border border-slate-100 flex items-center gap-3 mt-4">
+           <AlertTriangle className="h-4 w-4 text-slate-400 shrink-0" />
+           <p className="text-xs text-slate-500 font-normal leading-relaxed">
               Drag and drop steps to reorder the approval sequence. Any changes to the chain will only affect new documents created after the update.
            </p>
         </div>
-      </div>
+      </Card>
     </div>
   );
 }
@@ -233,98 +243,98 @@ function ThresholdsTab() {
   };
 
   return (
-    <div className="space-y-10">
-      <div className="space-y-2">
-        <h3 className="text-xl font-black text-slate-900 tracking-tight">Financial Authorization Limits</h3>
-        <p className="text-sm text-slate-500">Define how approval requirements scale based on transaction value.</p>
+    <div className="space-y-4">
+      <div className="space-y-1">
+        <SectionTitle>Financial Authorization Limits</SectionTitle>
+        <HelperText>Define how approval requirements scale based on transaction value.</HelperText>
       </div>
 
-      <div className="flex gap-4 p-1 bg-slate-100 rounded-2xl w-fit">
+      <div className="flex gap-3 p-1 bg-slate-100 rounded-lg w-fit">
          {['PR', 'PRF'].map(t => (
-           <button 
+           <button
              key={t}
              onClick={() => setDocType(t as DocType)}
-             className={`px-8 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${docType === t ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-900'}`}
+             className={`px-4 py-2 rounded-lg text-xs font-medium uppercase tracking-widest transition-all ${docType === t ? 'bg-white text-blue-500 shadow-sm' : 'text-slate-500 hover:text-slate-900'}`}
            >
               {t === 'PR' ? 'Purchase Request' : 'Payment Request'}
            </button>
          ))}
       </div>
 
-      <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden p-10 lg:p-12 space-y-10">
+      <Card>
          {loading ? (
            <div className="py-20 text-center"><Loader2 className="h-10 w-10 animate-spin mx-auto opacity-10" /></div>
          ) : (
            <>
-             <div className="space-y-4">
+             <div className="space-y-3">
                 {thresholds.map(th => (
-                  <div key={th.id} className="group flex flex-col md:flex-row md:items-center gap-8 p-6 rounded-[2rem] border border-slate-100 hover:bg-slate-50/50 transition-all">
+                  <div key={th.id} className="group flex flex-col md:flex-row md:items-center gap-4 p-4 rounded-lg border border-slate-200 hover:bg-slate-50/50 transition-all">
                      <div className="flex-1 space-y-1">
-                        <input 
-                          defaultValue={th.label} 
+                        <Input
+                          defaultValue={th.label}
                           onBlur={(e) => handleUpdate(th.id, { label: e.target.value })}
-                          className="bg-transparent border-none p-0 text-sm font-black text-slate-900 focus:ring-0 w-full" 
+                          className="bg-transparent border-none p-0 text-sm font-semibold text-slate-900 focus:ring-0"
                         />
-                        <div className="flex items-center gap-2 text-xs font-medium text-slate-400">
+                        <div className="flex items-center gap-2 text-xs font-normal text-slate-400">
                            <span className="tabular-nums">{Number(th.min_amount).toLocaleString()}</span>
                            <span>→</span>
                            <span className="tabular-nums">{th.max_amount ? Number(th.max_amount).toLocaleString() : '∞'}</span>
-                           <span className="ml-1 uppercase tracking-widest text-[9px] font-black text-slate-300">ETB Range</span>
+                           <span className="ml-1 uppercase tracking-widest text-[9px] font-medium text-slate-300">ETB Range</span>
                         </div>
                      </div>
 
-                     <div className="grid grid-cols-2 gap-8 shrink-0">
-                        <div className="space-y-1.5">
-                           <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Min Steps</label>
-                           <select 
+                     <div className="grid grid-cols-2 gap-4 shrink-0">
+                        <FormGroup label="Min Steps">
+                           <Select
                              defaultValue={th.required_approvals}
                              onChange={(e) => handleUpdate(th.id, { required_approvals: parseInt(e.target.value) })}
-                             className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs font-black appearance-none"
                            >
                               {[1,2,3,4,5].map(v => <option key={v} value={v}>{v} Approvals</option>)}
-                           </select>
-                        </div>
-                        <div className="space-y-1.5">
-                           <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">GM Required</label>
-                           <button 
+                           </Select>
+                        </FormGroup>
+                        <FormGroup label="GM Required">
+                           <Button
                              onClick={() => handleUpdate(th.id, { requires_gm: !th.requires_gm })}
-                             className={`flex items-center justify-center h-8 w-full rounded-xl border transition-all ${th.requires_gm ? 'bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-500/20' : 'bg-white border-slate-200 text-slate-400 hover:border-slate-300'}`}
+                             variant={th.requires_gm ? "primary" : "secondary"}
+                             className="h-8 w-full"
                            >
                               {th.requires_gm ? <Check className="h-4 w-4" /> : <div className="h-1 w-4 bg-slate-200 rounded-full" />}
-                           </button>
-                        </div>
+                           </Button>
+                        </FormGroup>
                      </div>
                   </div>
                 ))}
              </div>
 
              {/* VISUAL CHART */}
-             <div className="pt-10 border-t border-slate-50">
-                <div className="flex items-center justify-between mb-4">
-                   <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Threshold Distribution</h4>
+             <Divider />
+
+             <div>
+                <div className="flex items-center justify-between mb-3">
+                   <FieldLabel>Threshold Distribution</FieldLabel>
                 </div>
                 <div className="flex h-3 w-full bg-slate-100 rounded-full overflow-hidden">
                    {thresholds.map((th, i) => (
-                     <div 
-                       key={th.id} 
+                     <div
+                       key={th.id}
                        className={`h-full transition-all border-r border-white/20 ${['bg-blue-500', 'bg-emerald-500', 'bg-indigo-500', 'bg-amber-500'][i % 4]}`}
                        style={{ flex: th.max_amount ? (th.max_amount - th.min_amount) : 1000000 }}
                        title={th.label}
                      />
                    ))}
                 </div>
-                <div className="flex justify-between mt-3 px-1">
+                <div className="flex justify-between mt-2 px-1">
                    {thresholds.map(th => (
-                     <span key={th.id} className="text-[9px] font-black text-slate-400 uppercase tabular-nums">
+                     <span key={th.id} className="text-[9px] font-medium text-slate-400 uppercase tabular-nums">
                         {th.min_amount >= 1000 ? `${(th.min_amount/1000).toFixed(0)}k` : th.min_amount}
                      </span>
                    ))}
-                   <span className="text-[9px] font-black text-slate-400 uppercase">∞</span>
+                   <span className="text-[9px] font-medium text-slate-400 uppercase">∞</span>
                 </div>
              </div>
            </>
          )}
-      </div>
+      </Card>
     </div>
   );
 }
@@ -333,61 +343,58 @@ function ThresholdsTab() {
 
 function EscalationTab() {
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
-       <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm p-10 lg:p-14 space-y-10">
-          <div className="flex items-start gap-6">
-             <div className="h-14 w-14 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0 border border-amber-100">
+    <div className="space-y-4 animate-in fade-in duration-500">
+       <Card>
+          <div className="flex items-start gap-4 mb-6">
+             <div className="h-14 w-14 rounded-lg bg-amber-50 text-amber-500 flex items-center justify-center shrink-0 border border-amber-100">
                 <AlertTriangle className="h-7 w-7" />
              </div>
              <div>
-                <h3 className="text-xl font-black text-slate-900 tracking-tight">Global Escalation Policies</h3>
-                <p className="text-sm text-slate-500 mt-1">Automatic actions taken when documents remain in pending status for extended periods.</p>
+                <SectionTitle>Global Escalation Policies</SectionTitle>
+                <HelperText>Automatic actions taken when documents remain in pending status for extended periods.</HelperText>
              </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
              {[
                { title: 'Purchase Requisition', key: 'PR' },
                { title: 'Payment Request', key: 'PRF' }
              ].map(type => (
-                <div key={type.key} className="p-8 rounded-[2rem] border border-slate-100 bg-slate-50/30 space-y-8">
-                   <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{type.title} Defaults</h4>
-                   
-                   <div className="space-y-4">
-                      <div className="space-y-1.5">
-                         <label className="text-xs font-bold text-slate-700 ml-1">Auto-escalate after</label>
+                <div key={type.key} className="p-6 rounded-lg border border-slate-200 bg-slate-50/30 space-y-4">
+                   <FieldLabel>{type.title} Defaults</FieldLabel>
+
+                   <SectionGroup>
+                      <FormGroup label="Auto-escalate after">
                          <div className="flex items-center gap-3">
-                            <input type="number" defaultValue={3} className="w-24 px-4 py-3 rounded-xl border border-slate-200 font-bold text-slate-900" />
-                            <span className="text-xs font-bold text-slate-400 uppercase tracking-wide">Days</span>
+                            <Input type="number" defaultValue={3} className="w-20" />
+                            <span className="text-xs font-medium text-slate-400 uppercase tracking-wide">Days</span>
                          </div>
-                      </div>
-                      <div className="space-y-1.5">
-                         <label className="text-xs font-bold text-slate-700 ml-1">Escalate to Role</label>
-                         <select className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white font-bold text-slate-900 appearance-none">
+                      </FormGroup>
+                      <FormGroup label="Escalate to Role">
+                         <Select>
                             <option>General Manager</option>
                             <option>Finance Director</option>
-                         </select>
-                      </div>
-                      <div className="pt-4 border-t border-slate-100">
-                         <label className="flex items-center justify-between cursor-pointer group">
-                            <div className="flex flex-col">
-                               <span className="text-xs font-bold text-slate-700 group-hover:text-slate-900">Spam Prevention Lock</span>
-                               <span className="text-[9px] text-slate-400">Block users with {'>'}3 pending PRs</span>
-                            </div>
-                            <div className="relative inline-flex h-6 w-11 items-center rounded-full bg-slate-200">
-                               <span className="inline-block h-4 w-4 transform rounded-full bg-white translate-x-1" />
-                            </div>
-                         </label>
-                      </div>
-                   </div>
-                   
-                   <button className="w-full py-3 bg-white border border-slate-200 text-[10px] font-black uppercase tracking-widest text-slate-900 rounded-2xl hover:bg-slate-50 transition-all shadow-sm">
+                         </Select>
+                      </FormGroup>
+                      <Divider />
+                      <label className="flex items-center justify-between cursor-pointer group">
+                         <div className="flex flex-col">
+                            <span className="text-xs font-medium text-slate-700 group-hover:text-slate-900">Spam Prevention Lock</span>
+                            <HelperText>Block users with &gt;3 pending PRs</HelperText>
+                         </div>
+                         <div className="relative inline-flex h-6 w-11 items-center rounded-full bg-slate-200">
+                            <span className="inline-block h-4 w-4 transform rounded-full bg-white translate-x-1" />
+                         </div>
+                      </label>
+                   </SectionGroup>
+
+                   <Button variant="secondary" className="w-full">
                       Save {type.key} Policy
-                   </button>
+                   </Button>
                 </div>
              ))}
           </div>
-       </div>
+       </Card>
     </div>
   );
 }

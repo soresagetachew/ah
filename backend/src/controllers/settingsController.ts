@@ -316,8 +316,9 @@ export const getAuditLogs = async (req: Request, res: Response) => {
 };
 export const uploadLogo = async (req: any, res: Response) => {
   const logoUrl = `/uploads/logos/${req.file.filename}`;
-  await pool.query('UPDATE system_settings SET value = ? WHERE `key` = ?', [logoUrl, 'company_logo']);
-  res.json({ success: true, logoUrl });
+  const logoType = req.body.logoType || 'brand_logo_url';
+  await pool.query('UPDATE system_settings SET value = ? WHERE `key` = ?', [logoUrl, logoType]);
+  res.json({ success: true, logoUrl, logoType });
 };
 export const getSettingByKey = async (req: Request, res: Response) => {
   const { rows } = await pool.query('SELECT * FROM system_settings WHERE `key` = ?', [req.params.key]);

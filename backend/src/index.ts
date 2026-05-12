@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import routes from './routes';
 import { enforceSettings } from './middleware/settingsEnforcement';
 import { enforceSessionTimeout } from './middleware/sessionTimeout';
+import path from 'path';
 
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
@@ -32,6 +33,9 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(enforceSettings);
 app.use(enforceSessionTimeout);
+
+// Serve static files from uploads directory
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 app.use('/api', routes);
 

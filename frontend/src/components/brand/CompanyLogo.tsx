@@ -1,5 +1,6 @@
 import React from 'react';
 import { useTheme } from '../../context/ThemeContext';
+import logo from '../../assets/logo.png';
 
 interface CompanyLogoProps {
   variant?: 'full' | 'icon' | 'dark';
@@ -30,9 +31,9 @@ export const CompanyLogo = ({
   const companyName = brand?.companyName || 'African Holding';
 
   const logoSrc = {
-    full: brand?.logoUrl,
-    icon: brand?.faviconUrl || brand?.logoUrl,
-    dark: brand?.logoDarkUrl || brand?.logoUrl,
+    full: brand?.logoUrl || logo,
+    icon: brand?.faviconUrl || brand?.logoUrl || logo,
+    dark: brand?.logoDarkUrl || brand?.logoUrl || logo,
   }[variant];
 
   if (logoSrc) {

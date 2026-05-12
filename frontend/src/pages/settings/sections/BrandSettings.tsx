@@ -1,36 +1,22 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { 
-  Palette, 
-  Type, 
-  Flag, 
-  Layout, 
-  Check, 
-  Plus, 
-  Trash2, 
-  Upload, 
-  Image as ImageIcon, 
-  Monitor, 
-  Smartphone, 
-  Globe, 
-  CheckCircle2, 
-  RotateCcw,
-  Save,
-  ArrowRight,
-  Maximize2,
-  X,
-  FileText,
-  Search,
-  Settings,
-  Bell,
-  Menu,
-  ChevronLeft,
-  ChevronRight,
-  Lock,
-  Sparkles
-} from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Palette, Type, Flag, Layout, Check, Plus, ImageIcon, CheckCircle2, Lock, Sparkles, Save, RotateCcw, Globe, X } from 'lucide-react';
 import client from '../../../api/client';
 import toast from 'react-hot-toast';
 import { useTheme } from '../../../context/ThemeContext';
+import {
+  Card,
+  SectionTitle,
+  FieldLabel,
+  HelperText,
+  Input,
+  Button,
+  Badge,
+  Divider,
+  Toggle,
+  FormGroup,
+  SectionGroup,
+  FieldRow,
+} from '../../../components/settings/SettingsComponents';
 
 // --- Types ---
 interface ThemePreset {
@@ -238,34 +224,35 @@ export default function BrandSettings() {
     setLocalSettings(prev => ({ ...prev, [key]: value }));
   };
 
-  if (loading && presets.length === 0) return <div className="p-8 text-center text-slate-400">Loading appearance engine...</div>;
+  if (loading && presets.length === 0) return <div className="p-5 text-center text-slate-400">Loading appearance engine...</div>;
 
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="p-5 space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-700">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
         <div>
-          <h2 className="text-3xl font-black text-slate-900 tracking-tight uppercase">Brand & Appearance</h2>
-          <p className="text-slate-500 font-medium mt-1">Customize the visual identity and user experience of the platform.</p>
+          <h2 className="text-xl font-semibold text-slate-900 tracking-tight uppercase">Brand & Appearance</h2>
+          <p className="text-slate-500 font-medium mt-1 text-sm">Customize the visual identity and user experience of the platform.</p>
         </div>
-        <div className="flex items-center gap-2 bg-slate-100 p-1 rounded-2xl border border-slate-200">
+        <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-lg border border-slate-200">
           {[
             { id: 'presets', icon: Palette, label: 'Presets' },
-            { id: 'colors', icon: Type, label: 'Colors & Fonts' },
+            { id: 'colors', icon: Type, label: 'Colors' },
             { id: 'brand', icon: Flag, label: 'Identity' },
-            { id: 'login', icon: Layout, label: 'Login Page' }
+            { id: 'login', icon: Layout, label: 'Login' }
           ].map(tab => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all ${
-                activeTab === tab.id 
-                ? 'bg-white text-slate-900 shadow-sm border border-slate-200' 
+              className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-all ${
+                activeTab === tab.id
+                ? 'bg-white text-slate-900 shadow-sm border border-slate-200'
                 : 'text-slate-500 hover:text-slate-900'
               }`}
             >
-              <tab.icon className={`h-4 w-4 ${activeTab === tab.id ? 'text-blue-600' : ''}`} />
-              {tab.label}
+              <tab.icon className={`h-3.5 w-3.5 ${activeTab === tab.id ? 'text-blue-500' : ''}`} />
+              <span className="hidden sm:inline">{tab.label}</span>
+              <span className="sm:hidden">{tab.label.split(' ')[0]}</span>
             </button>
           ))}
         </div>
@@ -273,39 +260,39 @@ export default function BrandSettings() {
 
       {/* Content Area */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        <div className="lg:col-span-8 space-y-8">
-          
+        <div className="lg:col-span-8 space-y-4">
+
           {/* TAB 1: PRESETS */}
           {activeTab === 'presets' && (
-            <div className="space-y-6">
-              <div className="bg-blue-600 rounded-[2.5rem] p-10 text-white shadow-2xl shadow-blue-500/20 relative overflow-hidden group">
+            <div className="space-y-4">
+              <div className="bg-blue-500 rounded-xl p-5 text-white shadow-lg shadow-blue-500/20 relative overflow-hidden group">
                  <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32 blur-3xl group-hover:scale-110 transition-transform duration-1000" />
-                 <h3 className="text-2xl font-black mb-2 flex items-center gap-3">
-                   <Sparkles className="h-6 w-6" /> Theme Presets
+                 <h3 className="text-xl font-semibold mb-2 flex items-center gap-3">
+                   <Sparkles className="h-5 w-5" /> Theme Presets
                  </h3>
                  <p className="text-blue-100 font-medium text-sm leading-relaxed max-w-md">
                    Apply a complete theme in one click. Presets update colors, fonts, and layout across the entire app instantly for all users.
                  </p>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
                 {presets.map(preset => {
                   const isActive = localSettings['theme_active_preset'] === preset.name;
                   const preview = typeof preset.preview_colors === 'string' ? JSON.parse(preset.preview_colors) : preset.preview_colors;
-                  
+
                   return (
-                    <div 
+                    <div
                       key={preset.id}
-                      className={`group relative bg-white p-5 rounded-[2rem] border-2 transition-all duration-300 hover:shadow-xl ${
-                        isActive ? 'border-blue-600 ring-4 ring-blue-500/5' : 'border-slate-100 hover:border-slate-200'
+                      className={`group relative bg-white p-5 rounded-xl border-2 transition-all duration-300 hover:shadow-lg ${
+                        isActive ? 'border-blue-500 ring-2 ring-blue-500/5' : 'border-slate-200 hover:border-slate-300'
                       }`}
                     >
                       {isActive && (
-                        <div className="absolute top-4 right-4 bg-blue-600 text-white p-1.5 rounded-xl shadow-lg shadow-blue-500/20 animate-in zoom-in">
-                          <Check className="h-4 w-4 stroke-[3]" />
+                        <div className="absolute top-3 right-3 bg-blue-500 text-white p-1 rounded-lg shadow-md shadow-blue-500/20 animate-in zoom-in">
+                          <Check className="h-3 w-3 stroke-[3]" />
                         </div>
                       )}
-                      
+
                       <div className="mb-4">
                         <MiniAppPreview colors={preview} />
                       </div>
@@ -316,37 +303,33 @@ export default function BrandSettings() {
                         ))}
                       </div>
 
-                      <div className="space-y-1 mb-6">
-                        <h4 className="font-black text-slate-900 tracking-tight">{preset.label}</h4>
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-tight line-clamp-1">{preset.description}</p>
+                      <div className="space-y-1 mb-4">
+                        <h4 className="font-semibold text-slate-900 tracking-tight text-sm">{preset.label}</h4>
+                        <p className="text-[10px] font-medium text-slate-400 uppercase tracking-widest leading-tight line-clamp-1">{preset.description}</p>
                       </div>
 
-                      <button
+                      <Button
                         onClick={() => handleApplyPreset(preset.name)}
                         disabled={isActive || loading}
-                        className={`w-full py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${
-                          isActive 
-                          ? 'bg-slate-50 text-slate-400 cursor-default' 
-                          : 'bg-slate-900 text-white hover:bg-blue-600 hover:shadow-lg hover:shadow-blue-500/20 active:scale-95'
-                        }`}
+                        className="w-full"
                       >
                         {loading ? 'Applying...' : isActive ? 'Currently Active' : 'Apply Preset'}
-                      </button>
+                      </Button>
                     </div>
                   );
                 })}
 
                 {/* Save Custom Theme Trigger */}
-                <button 
+                <button
                   onClick={() => setSaveModalOpen(true)}
-                  className="flex flex-col items-center justify-center p-8 rounded-[2rem] border-2 border-dashed border-slate-200 hover:border-blue-500 hover:bg-blue-50/30 transition-all group gap-4"
+                  className="flex flex-col items-center justify-center p-8 rounded-xl border-2 border-dashed border-slate-200 hover:border-blue-500 hover:bg-blue-50/30 transition-all group gap-4"
                 >
-                  <div className="h-12 w-12 rounded-2xl bg-slate-100 flex items-center justify-center group-hover:bg-blue-100 group-hover:scale-110 transition-all">
-                    <Plus className="h-6 w-6 text-slate-400 group-hover:text-blue-600" />
+                  <div className="h-12 w-12 rounded-lg bg-slate-100 flex items-center justify-center group-hover:bg-blue-100 group-hover:scale-110 transition-all">
+                    <Plus className="h-6 w-6 text-slate-400 group-hover:text-blue-500" />
                   </div>
                   <div className="text-center">
-                    <p className="text-sm font-black text-slate-900 uppercase tracking-tighter">Save Custom Theme</p>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Capture current adjustments</p>
+                    <p className="text-sm font-semibold text-slate-900 uppercase tracking-tighter">Save Custom Theme</p>
+                    <p className="text-[10px] font-medium text-slate-400 uppercase tracking-widest mt-1">Capture current adjustments</p>
                   </div>
                 </button>
               </div>
@@ -355,231 +338,255 @@ export default function BrandSettings() {
 
           {/* TAB 2: COLORS & FONTS */}
           {activeTab === 'colors' && (
-            <div className="space-y-8 pb-32">
+            <div className="space-y-4 pb-32">
               {/* Sidebar Section */}
-              <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm space-y-6">
-                <div className="flex items-center gap-4 mb-2">
-                  <div className="h-12 w-12 rounded-2xl bg-slate-900 flex items-center justify-center shadow-lg shadow-slate-900/20">
-                    <Layout className="h-6 w-6 text-blue-500" />
+              <Card>
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="h-10 w-10 rounded-lg bg-slate-900 flex items-center justify-center shadow-md shadow-slate-900/20">
+                    <Layout className="h-5 w-5 text-blue-500" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-black text-slate-900 uppercase tracking-tight">Navigation Sidebar</h3>
-                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Colors and layout for the main nav</p>
+                    <SectionTitle>Navigation Sidebar</SectionTitle>
+                    <HelperText>Colors and layout for the main nav</HelperText>
                   </div>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-2">
+                <FieldRow>
                   <ColorPicker label="Sidebar Background" value={localSettings['theme_color_sidebar_bg'] || '#0F172A'} onChange={c => updateSetting('theme_color_sidebar_bg', c)} />
                   <ColorPicker label="Default Text" value={localSettings['theme_color_sidebar_text'] || '#94A3B8'} onChange={c => updateSetting('theme_color_sidebar_text', c)} />
                   <ColorPicker label="Active Item Background" value={localSettings['theme_color_sidebar_active_bg'] || 'rgba(59, 130, 246, 0.1)'} onChange={c => updateSetting('theme_color_sidebar_active_bg', c)} />
                   <ColorPicker label="Active Item Text" value={localSettings['theme_color_sidebar_active_text'] || '#3B82F6'} onChange={c => updateSetting('theme_color_sidebar_active_text', c)} />
-                </div>
-              </div>
+                </FieldRow>
+              </Card>
 
               {/* Brand Colors */}
-              <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm space-y-6">
-                <div className="flex items-center gap-4 mb-2">
-                  <div className="h-12 w-12 rounded-2xl bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
-                    <Palette className="h-6 w-6 text-white" />
+              <Card>
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="h-10 w-10 rounded-lg bg-blue-500 flex items-center justify-center shadow-md shadow-blue-500/20">
+                    <Palette className="h-5 w-5 text-white" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-black text-slate-900 uppercase tracking-tight">Core Brand Palette</h3>
-                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Global primary and accent colors</p>
+                    <SectionTitle>Core Brand Palette</SectionTitle>
+                    <HelperText>Global primary and accent colors</HelperText>
                   </div>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-2">
+                <FieldRow>
                   <ColorPicker label="Primary Color" value={localSettings['theme_color_primary'] || '#0F172A'} onChange={c => updateSetting('theme_color_primary', c)} />
                   <ColorPicker label="Primary Hover" value={localSettings['theme_color_primary_hover'] || '#1E293B'} onChange={c => updateSetting('theme_color_primary_hover', c)} />
                   <ColorPicker label="Accent Color" value={localSettings['theme_color_accent'] || '#3B82F6'} onChange={c => updateSetting('theme_color_accent', c)} />
                   <ColorPicker label="Accent Hover" value={localSettings['theme_color_accent_hover'] || '#2563EB'} onChange={c => updateSetting('theme_color_accent_hover', c)} />
-                </div>
-              </div>
+                </FieldRow>
+              </Card>
 
               {/* Status Colors */}
-              <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm space-y-6">
-                 <div className="flex items-center gap-4 mb-2">
-                  <div className="h-12 w-12 rounded-2xl bg-emerald-500 flex items-center justify-center shadow-lg shadow-emerald-500/20">
-                    <CheckCircle2 className="h-6 w-6 text-white" />
+              <Card>
+                 <div className="flex items-center gap-3 mb-4">
+                  <div className="h-10 w-10 rounded-lg bg-emerald-500 flex items-center justify-center shadow-md shadow-emerald-500/20">
+                    <CheckCircle2 className="h-5 w-5 text-white" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-black text-slate-900 uppercase tracking-tight">System Statuses</h3>
-                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Colors for workflow states</p>
+                    <SectionTitle>System Statuses</SectionTitle>
+                    <HelperText>Colors for workflow states</HelperText>
                   </div>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                   <ColorPicker label="Success" value={localSettings['theme_color_success'] || '#10B981'} onChange={c => updateSetting('theme_color_success', c)} />
                   <ColorPicker label="Warning" value={localSettings['theme_color_warning'] || '#F59E0B'} onChange={c => updateSetting('theme_color_warning', c)} />
                   <ColorPicker label="Danger" value={localSettings['theme_color_danger'] || '#EF4444'} onChange={c => updateSetting('theme_color_danger', c)} />
                 </div>
-              </div>
+              </Card>
 
                {/* Background & Text */}
-               <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm space-y-6">
-                <div className="flex items-center gap-4 mb-2">
-                  <div className="h-12 w-12 rounded-2xl bg-slate-100 flex items-center justify-center">
-                    <Layout className="h-6 w-6 text-slate-600" />
+               <Card>
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="h-10 w-10 rounded-lg bg-slate-100 flex items-center justify-center">
+                    <Layout className="h-5 w-5 text-slate-600" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-black text-slate-900 uppercase tracking-tight">Canvas & Typography</h3>
-                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Base colors for pages and text</p>
+                    <SectionTitle>Canvas & Typography</SectionTitle>
+                    <HelperText>Base colors for pages and text</HelperText>
                   </div>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-2">
+                <FieldRow>
                   <ColorPicker label="Page Background" value={localSettings['theme_color_page_bg'] || '#F8FAFC'} onChange={c => updateSetting('theme_color_page_bg', c)} />
                   <ColorPicker label="Card Background" value={localSettings['theme_color_card_bg'] || '#FFFFFF'} onChange={c => updateSetting('theme_color_card_bg', c)} />
                   <ColorPicker label="Primary Text" value={localSettings['theme_color_text_primary'] || '#0F172A'} onChange={c => updateSetting('theme_color_text_primary', c)} />
                   <ColorPicker label="Secondary Text" value={localSettings['theme_color_text_secondary'] || '#64748B'} onChange={c => updateSetting('theme_color_text_secondary', c)} />
-                </div>
-              </div>
+                </FieldRow>
+              </Card>
 
               {/* Typography Section */}
-              <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm space-y-6">
-                <div className="flex items-center gap-4 mb-2">
-                  <div className="h-12 w-12 rounded-2xl bg-indigo-500 flex items-center justify-center shadow-lg shadow-indigo-500/20">
-                    <Type className="h-6 w-6 text-white" />
+              <Card>
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="h-10 w-10 rounded-lg bg-indigo-500 flex items-center justify-center shadow-md shadow-indigo-500/20">
+                    <Type className="h-5 w-5 text-white" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-black text-slate-900 uppercase tracking-tight">Typography</h3>
-                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Font families and sizing</p>
+                    <SectionTitle>Typography</SectionTitle>
+                    <HelperText>Font families and sizing</HelperText>
                   </div>
                 </div>
-                
-                <div className="space-y-4">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Font Family</label>
+
+                <SectionGroup title="Font Family">
                   <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
                     {['Inter', 'Roboto', 'Poppins', 'Nunito', 'DM Sans'].map(font => (
                       <button
                         key={font}
                         onClick={() => updateSetting('theme_font_family', font)}
-                        className={`p-4 rounded-2xl border-2 transition-all text-left ${
-                          localSettings['theme_font_family'] === font 
-                          ? 'border-blue-600 bg-blue-50/50' 
-                          : 'border-slate-100 hover:border-slate-200'
+                        className={`p-4 rounded-lg border-2 transition-all text-left ${
+                          localSettings['theme_font_family'] === font
+                          ? 'border-blue-500 bg-blue-50'
+                          : 'border-slate-200 hover:border-slate-300'
                         }`}
                         style={{ fontFamily: font }}
                       >
-                        <p className="text-xs font-black text-slate-900">{font}</p>
+                        <p className="text-xs font-semibold text-slate-900">{font}</p>
                         <p className="text-lg mt-1">Aa</p>
                       </button>
                     ))}
                   </div>
-                </div>
-              </div>
+                </SectionGroup>
+              </Card>
             </div>
           )}
 
           {/* TAB 3: BRAND IDENTITY */}
           {activeTab === 'brand' && (
-            <div className="space-y-8">
-              <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm space-y-8">
-                <div className="flex items-center gap-4">
-                  <div className="h-12 w-12 rounded-2xl bg-slate-900 flex items-center justify-center">
-                    <Flag className="h-6 w-6 text-blue-500" />
+            <div className="space-y-4">
+              <Card>
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="h-10 w-10 rounded-lg bg-slate-900 flex items-center justify-center">
+                    <Flag className="h-5 w-5 text-blue-500" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-black text-slate-900 uppercase tracking-tight">Corporate Identity</h3>
-                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Logo management and company info</p>
+                    <SectionTitle>Corporate Identity</SectionTitle>
+                    <HelperText>Logo management and company info</HelperText>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  <div className="space-y-4">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Company Name</label>
-                    <input 
-                      type="text" 
+                <FieldRow>
+                  <FormGroup label="Company Name">
+                    <Input
+                      type="text"
                       value={localSettings['brand_company_name'] || ''}
                       onChange={e => updateSetting('brand_company_name', e.target.value)}
-                      className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl font-bold text-slate-900 focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all"
                     />
-                  </div>
-                  <div className="space-y-4">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Tagline</label>
-                    <input 
-                      type="text" 
+                  </FormGroup>
+                  <FormGroup label="Tagline">
+                    <Input
+                      type="text"
                       value={localSettings['brand_company_tagline'] || ''}
                       onChange={e => updateSetting('brand_company_tagline', e.target.value)}
-                      className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl font-bold text-slate-900 focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all"
                     />
-                  </div>
-                </div>
+                  </FormGroup>
+                </FieldRow>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                  {/* Logo Uploaders - (Simplified for MVP) */}
-                  {[
-                    { label: 'Primary Logo', key: 'brand_logo_url', desc: 'For light backgrounds' },
-                    { label: 'Dark Logo', key: 'brand_logo_dark_url', desc: 'For dark sidebars' },
-                    { label: 'Favicon', key: 'brand_favicon_url', desc: 'Browser tab icon' }
-                  ].map(logo => (
-                    <div key={logo.key} className="space-y-4">
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{logo.label}</label>
-                      <div className="aspect-square rounded-[2rem] border-2 border-dashed border-slate-200 bg-slate-50 flex flex-col items-center justify-center p-6 text-center group hover:border-blue-500 hover:bg-blue-50/30 transition-all cursor-pointer">
-                         {localSettings[logo.key] ? (
-                           <img src={localSettings[logo.key]} alt={logo.label} className="max-h-full max-w-full object-contain mb-4" />
-                         ) : (
-                           <ImageIcon className="h-8 w-8 text-slate-300 group-hover:text-blue-400 transition-colors mb-2" />
-                         )}
-                         <p className="text-[10px] font-black text-slate-500 uppercase tracking-tighter">{logo.desc}</p>
-                         <button className="mt-4 px-4 py-2 bg-white rounded-xl shadow-sm border border-slate-200 text-[10px] font-black uppercase tracking-widest hover:bg-slate-50 transition-colors">Change</button>
+                <Divider />
+
+                <SectionGroup title="Logo Uploaders">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {[
+                      { label: 'Primary Logo', key: 'brand_logo_url', desc: 'For light backgrounds' },
+                      { label: 'Dark Logo', key: 'brand_logo_dark_url', desc: 'For dark sidebars' },
+                      { label: 'Favicon', key: 'brand_favicon_url', desc: 'Browser tab icon' }
+                    ].map(logo => (
+                      <div key={logo.key} className="space-y-2">
+                        <FieldLabel>{logo.label}</FieldLabel>
+                        <input
+                          type="file"
+                          id={`logo-${logo.key}`}
+                          accept="image/*"
+                          className="hidden"
+                          onChange={async (e) => {
+                            const file = e.target.files?.[0];
+                            if (!file) return;
+                            try {
+                              const formData = new FormData();
+                              formData.append('logo', file);
+                              formData.append('logoType', logo.key);
+                              const res = await client.post('/settings/logo', formData, {
+                                headers: { 'Content-Type': 'multipart/form-data' }
+                              });
+                              updateSetting(logo.key, res.data.logoUrl);
+                              toast.success(`${logo.label} uploaded successfully`);
+                              refreshTheme();
+                            } catch (error) {
+                              toast.error(`Failed to upload ${logo.label}`);
+                            }
+                          }}
+                        />
+                        <div
+                          className="aspect-square rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 flex flex-col items-center justify-center p-6 text-center group hover:border-blue-500 hover:bg-blue-50/30 transition-all cursor-pointer"
+                          onClick={() => document.getElementById(`logo-${logo.key}`)?.click()}
+                        >
+                           {localSettings[logo.key] ? (
+                             <img src={localSettings[logo.key]} alt={logo.label} className="max-h-full max-w-full object-contain mb-4" />
+                           ) : (
+                             <ImageIcon className="h-8 w-8 text-slate-300 group-hover:text-blue-400 transition-colors mb-2" />
+                           )}
+                           <p className="text-[10px] font-medium text-slate-500 uppercase tracking-tighter">{logo.desc}</p>
+                           <Button variant="secondary" className="mt-4 text-xs">
+                             {localSettings[logo.key] ? 'Change' : 'Upload'}
+                           </Button>
+                        </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
+                    ))}
+                  </div>
+                </SectionGroup>
+              </Card>
             </div>
           )}
 
           {/* TAB 4: LOGIN PAGE */}
           {activeTab === 'login' && (
-            <div className="space-y-8">
-              <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm space-y-8">
-                <div className="flex items-center gap-4">
-                  <div className="h-12 w-12 rounded-2xl bg-slate-900 flex items-center justify-center">
-                    <Lock className="h-6 w-6 text-blue-500" />
+            <div className="space-y-4">
+              <Card>
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="h-10 w-10 rounded-lg bg-slate-900 flex items-center justify-center">
+                    <Lock className="h-5 w-5 text-blue-500" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-black text-slate-900 uppercase tracking-tight">Login Portal Design</h3>
-                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Customize the entry experience</p>
+                    <SectionTitle>Login Portal Design</SectionTitle>
+                    <HelperText>Customize the entry experience</HelperText>
                   </div>
                 </div>
 
-                <div className="space-y-6">
-                  <div className="space-y-4">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Background Type</label>
-                    <div className="grid grid-cols-3 gap-4">
+                <div className="space-y-5">
+                  <SectionGroup title="Background Type">
+                    <div className="grid grid-cols-3 gap-3">
                       {['solid', 'gradient', 'image'].map(type => (
                         <button
                           key={type}
                           onClick={() => updateSetting('brand_login_bg_type', type)}
-                          className={`flex flex-col items-center gap-3 p-6 rounded-2xl border-2 transition-all ${
-                            localSettings['brand_login_bg_type'] === type 
-                            ? 'border-blue-600 bg-blue-50/50' 
-                            : 'border-slate-100 hover:border-slate-200'
+                          className={`flex flex-col items-center gap-3 p-4 rounded-lg border-2 transition-all ${
+                            localSettings['brand_login_bg_type'] === type
+                            ? 'border-blue-500 bg-blue-50'
+                            : 'border-slate-200 hover:border-slate-300'
                           }`}
                         >
-                          {type === 'solid' && <div className="h-8 w-8 rounded-lg bg-blue-600" />}
-                          {type === 'gradient' && <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-blue-600 to-indigo-900" />}
+                          {type === 'solid' && <div className="h-8 w-8 rounded-lg bg-blue-500" />}
+                          {type === 'gradient' && <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-900" />}
                           {type === 'image' && <ImageIcon className="h-8 w-8 text-slate-400" />}
-                          <span className="text-[10px] font-black uppercase tracking-widest">{type}</span>
+                          <span className="text-[10px] font-medium uppercase tracking-widest">{type}</span>
                         </button>
                       ))}
                     </div>
-                  </div>
+                  </SectionGroup>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-4">
+                  <FieldRow>
                     <ColorPicker label="Background Color / Start" value={localSettings['brand_login_bg_color'] || '#0F172A'} onChange={c => updateSetting('brand_login_bg_color', c)} />
                     {localSettings['brand_login_bg_type'] === 'gradient' && (
                       <ColorPicker label="Gradient End Color" value={localSettings['brand_login_bg_color_end'] || '#1E3A5F'} onChange={c => updateSetting('brand_login_bg_color_end', c)} />
                     )}
-                  </div>
-                  
-                  <div className="pt-4 space-y-4">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Card Position</label>
-                    <div className="grid grid-cols-3 gap-4">
+                  </FieldRow>
+
+                  <SectionGroup title="Card Position">
+                    <div className="grid grid-cols-3 gap-3">
                        {['left', 'center', 'right'].map(pos => (
-                         <button 
+                         <button
                            key={pos}
                            onClick={() => updateSetting('brand_login_card_position', pos)}
-                           className={`h-24 rounded-2xl border-2 transition-all relative overflow-hidden ${
-                             localSettings['brand_login_card_position'] === pos ? 'border-blue-600' : 'border-slate-100 hover:border-slate-200'
+                           className={`h-24 rounded-lg border-2 transition-all relative overflow-hidden ${
+                             localSettings['brand_login_card_position'] === pos ? 'border-blue-500' : 'border-slate-200 hover:border-slate-300'
                            }`}
                          >
                             <div className="absolute inset-0 bg-slate-50" />
@@ -589,18 +596,18 @@ export default function BrandSettings() {
                          </button>
                        ))}
                     </div>
-                  </div>
+                  </SectionGroup>
                 </div>
-              </div>
+              </Card>
             </div>
           )}
         </div>
 
         {/* --- STICKY LIVE PREVIEW PANEL --- */}
-        <div className="lg:col-span-4 space-y-6 sticky top-24">
-          <div className="bg-white p-6 rounded-[2.5rem] border border-slate-200 shadow-2xl shadow-slate-900/10 overflow-hidden">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xs font-black text-slate-900 uppercase tracking-widest">Live Preview</h3>
+        <div className="lg:col-span-4 space-y-4 sticky top-24">
+          <Card>
+            <div className="flex items-center justify-between mb-4">
+              <SectionTitle>Live Preview</SectionTitle>
               <div className="flex gap-1">
                 <div className="h-2 w-2 rounded-full bg-red-400" />
                 <div className="h-2 w-2 rounded-full bg-amber-400" />
@@ -687,9 +694,9 @@ export default function BrandSettings() {
                 <RotateCcw className="h-3 w-3" /> Revert Adjustments
               </button>
             </div>
-          </div>
-          
-          <div className="bg-slate-900 p-6 rounded-[2.5rem] text-white">
+          </Card>
+
+          <div className="bg-slate-900 p-5 rounded-xl text-white">
              <div className="flex items-center gap-3 mb-4">
                 <Globe className="h-5 w-5 text-blue-500" />
                 <h4 className="text-xs font-black uppercase tracking-widest">Global Reach</h4>
